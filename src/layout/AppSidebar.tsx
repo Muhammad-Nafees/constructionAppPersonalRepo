@@ -4,14 +4,11 @@ import { Link, useLocation } from "react-router";
 // Assume these icons are imported from an icon library
 import {
   BoxCubeIcon,
-  CalenderIcon,
   ChevronDownIcon,
   GridIcon,
   HorizontaLDots,
-  ListIcon,
   PieChartIcon,
   PlugInIcon,
-  TableIcon,
   UserCircleIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
@@ -29,28 +26,53 @@ const navItems: NavItem[] = [
   {
     icon: <GridIcon />,
     name: "Dashboard",
-    subItems: [{ name: "Ecommerce", path: "/", pro: false }],
+    path: "/"
   },
   {
-    icon: <CalenderIcon />,
-    name: "Calendar",
-    path: "/calendar",
+    icon: <GridIcon />,
+    name: "Incentives",
+    path: "/incentives"
+  },
+  {
+    icon: <GridIcon />,
+    name: "Media Gallery",
+    path: "/media-gallery"
+  },
+  {
+    icon: <GridIcon />,
+    name: "Music",
+    path: "/music"
+  },
+  {
+    icon: <GridIcon />,
+    name: "Users",
+    path: "/users"
+  },
+  {
+    icon: <GridIcon />,
+    name: "Accounts",
+    path: "/accounts"
+  },
+  {
+    icon: <GridIcon />,
+    name: "Finances",
+    path: "/finances"
   },
   {
     icon: <UserCircleIcon />,
     name: "User Profile",
     path: "/profile",
   },
-  {
-    name: "Forms",
-    icon: <ListIcon />,
-    subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
-  },
-  {
-    name: "Tables",
-    icon: <TableIcon />,
-    subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
-  },
+  // {
+  //   name: "Forms",
+  //   icon: <ListIcon />,
+  //   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
+  // },
+  // {
+  //   name: "Tables",
+  //   icon: <TableIcon />,
+  //   subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
+  // },
 
 ];
 

@@ -12,12 +12,16 @@ import Buttons from "./pages/UiElements/Buttons";
 import LineChart from "./pages/Charts/LineChart";
 import BarChart from "./pages/Charts/BarChart";
 import Calendar from "./pages/Calendar";
-import BasicTables from "./pages/Tables/BasicTables";
-import FormElements from "./pages/Forms/FormElements";
+import Incentives from "./pages/Incentives/Incentives";
 import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
+import MediaGallery from "./pages/MediaGallery/MediaGallery";
+import Music from "./pages/Music/Music";
+import Users from "./pages/Users/Users";
+import Accounts from "./pages/Accounts/Accounts";
+import Finances from "./pages/Finances/Finances";
 
 export default function App() {
   return (
@@ -30,15 +34,20 @@ export default function App() {
             <Route index path="/" element={<Home />} />
 
             {/* Others Page */}
-            <Route path="/profile" element={<UserProfiles />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/blank" element={<Blank />} />
 
             {/* Forms */}
-            <Route path="/form-elements" element={<FormElements />} />
+            <Route path="/incentives" element={<Incentives />} />
+            <Route path="/media-gallery" element={<MediaGallery />} />
+            <Route path="/music" element={<Music />} />
+            <Route path="/users" element={<Users />} />
+            <Route path="/accounts" element={<Accounts />} />
+            <Route path="/finances" element={<Finances />} />
+            <Route path="/profile" element={<UserProfiles />} />
 
             {/* Tables */}
-            <Route path="/basic-tables" element={<BasicTables />} />
+            {/* <Route path="/basic-tables" element={<BasicTables />} /> */}
 
             {/* Ui Elements */}
             <Route path="/alerts" element={<Alerts />} />
