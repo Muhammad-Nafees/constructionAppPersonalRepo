@@ -48,20 +48,21 @@ const navItems: NavItem[] = [
     name: "Users",
     path: "/users"
   },
-  {
-    icon: <GridIcon />,
-    name: "Accounts",
-    path: "/accounts"
-  },
-  {
-    icon: <GridIcon />,
-    name: "Finances",
-    path: "/finances"
-  },
+  // {
+  //   icon: <GridIcon />,
+  //   name: "Accounts",
+  //   path: "/accounts"
+  // },
+ 
   {
     icon: <UserCircleIcon />,
     name: "User Profile",
     path: "/profile",
+  },
+  {
+    icon: <UserCircleIcon />,
+    name: "Manage Sub Admins",
+    path: "/manage-sub-admins",
   },
   // {
   //   name: "Forms",

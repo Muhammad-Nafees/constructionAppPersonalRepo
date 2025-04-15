@@ -22,7 +22,7 @@ import Music from "./pages/Music/Music";
 import Users from "./pages/Users/Users";
 import Accounts from "./pages/Accounts/Accounts";
 import Finances from "./pages/Finances/Finances";
-
+import ManageSubAdmins from "./pages/ManageSubAdmins/ManageSubAdmins"
 
 
 
@@ -48,6 +48,7 @@ export default function App() {
             <Route path="/accounts" element={<Accounts />} />
             <Route path="/finances" element={<Finances />} />
             <Route path="/profile" element={<UserProfiles />} />
+            <Route path="/manage-sub-admins" element={<ManageSubAdmins />} />
 
             {/* Tables */}
             {/* <Route path="/basic-tables" element={<BasicTables />} /> */}
