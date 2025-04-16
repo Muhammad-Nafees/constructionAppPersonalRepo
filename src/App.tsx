@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router";
 import SignIn from "./pages/AuthPages/SignIn";
-import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
 import UserProfiles from "./pages/UserProfiles";
 import Videos from "./pages/UiElements/Videos";
@@ -23,18 +22,26 @@ import Users from "./pages/Users/Users";
 import Accounts from "./pages/Accounts/Accounts";
 import Finances from "./pages/Finances/Finances";
 import ManageSubAdmins from "./pages/ManageSubAdmins/ManageSubAdmins"
+import PrivateRoute from "./routes/ProtectedRoutes";
+import PublicRoute from "./routes/PublicRoutes";
+import { ToastContainer } from "react-toastify";
 
 
 
 export default function App() {
   return (
     <>
+    <ToastContainer />
       <Router>
         <ScrollToTop />
         <Routes>
           {/* Dashboard Layout */}
-          <Route element={<AppLayout />}>
-            <Route index path="/" element={<Home />} />
+          <Route element={
+            <PrivateRoute>
+              <AppLayout />
+            </PrivateRoute>
+          }>
+            <Route path="/" element={<Home />} />
 
             {/* Others Page */}
             <Route path="/calendar" element={<Calendar />} />
@@ -52,7 +59,6 @@ export default function App() {
 
             {/* Tables */}
             {/* <Route path="/basic-tables" element={<BasicTables />} /> */}
-
             {/* Ui Elements */}
             <Route path="/alerts" element={<Alerts />} />
             <Route path="/avatars" element={<Avatars />} />
@@ -66,9 +72,17 @@ export default function App() {
             <Route path="/bar-chart" element={<BarChart />} />
           </Route>
 
+          <Route
+            path="/signin"
+            element={
+              <PublicRoute>
+                <SignIn />
+              </PublicRoute>
+            }
+          />
+
           {/* Auth Layout */}
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
+          {/* <Route path="/signup" element={<SignUp />} /> */}
 
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />
@@ -76,4 +90,4 @@ export default function App() {
       </Router>
     </>
   );
-}
+};

@@ -61,7 +61,7 @@ const navItems: NavItem[] = [
   },
   {
     icon: <UserCircleIcon />,
-    name: "Manage Sub Admins",
+    name: "Manage Admins",
     path: "/manage-sub-admins",
   },
   // {
@@ -103,7 +103,7 @@ const othersItems: NavItem[] = [
     name: "Authentication",
     subItems: [
       { name: "Sign In", path: "/signin", pro: false },
-      { name: "Sign Up", path: "/signup", pro: false },
+      // { name: "Sign Up", path: "/signup", pro: false },
     ],
   },
 ];
@@ -312,7 +312,11 @@ const AppSidebar: React.FC = () => {
         <Link to="/">
           {isExpanded || isHovered || isMobileOpen ? (
             <>
-              <span className="text-[24px] flex items-center justify-center">fame O flame</span>
+              <div className="flex space-x-4">
+                <img src="./favicon.png" className="w-10 h-10" alt="FameOflame" />
+                <p className="text-center text-[24px]   dark:text-white/60">Fame O Flame</p>
+              </div>
+
               {/* <img
                 className="dark:hidden"
                 src="/images/logo/logo.svg"
