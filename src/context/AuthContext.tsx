@@ -1,44 +1,70 @@
-import { createContext, useContext, useState, ReactNode } from "react";
-import { SignInValues } from "../interface";
-import { toast } from "react-toastify";
+import { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { IUserData, SignInValues } from "../interface";
+// import { toast } from "react-toastify";
+// import { useNavigate } from "react-router";
+
 
 
 type AuthContextType = {
-    user: SignInValues | null;
-    setUser: SignInValues | any;
+    user: IUserData | null;
+    setUser: IUserData | any;
     login: (userData: SignInValues) => void;
     logout: () => void;
+    adminRegisterFormData: any
+    setAdminRegisterFormData: any
 };
 
+
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// const navigate = useNavigate();
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [user, setUser] = useState<SignInValues | null>(null);
-    console.log("🚀 ~ AuthProvider ~ user:", user);
+    const [user, setUser] = useState<IUserData | null>(null);
+    const [adminRegisterFormData, setAdminRegisterFormData] = useState<IUserData | null>(null);
 
-    const login = (userData: any) => {
-        setUser(userData)
-        localStorage.setItem("token", userData?.data?.token)
-        localStorage.setItem("userData", JSON.stringify(userData.data));
-        localStorage.setItem("loggedIn", "true")
+
+    const login = (data: any) => {
+        if (data?.token && data?.user) {
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("userData", JSON.stringify(data.user));
+            setUser(data.user);
+            console.log("🚀 ~ login successful:", data.user);
+        } else {
+            console.error("Invalid login response", data);
+        }
     };
 
 
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem("userData");
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
+    }, []);
+
+
+
+    console.log("🚀 ~ AuthProvider ~ user:", user);
 
     const logout = () => {
         setUser(null);
         localStorage.removeItem("token");
         localStorage.removeItem("userData");
-        localStorage.removeItem("loggedIn");
+        // navigate("/signin");
     };
 
 
+
     return (
-        <AuthContext.Provider value={{ user, login, logout, setUser }}>
+        <AuthContext.Provider value={{ user, login, logout, setUser, setAdminRegisterFormData, adminRegisterFormData }}>
             {children}
         </AuthContext.Provider>
     );
 };
+
+
 
 export const useAuth = (): AuthContextType => {
     const context = useContext(AuthContext);

@@ -1,9 +1,12 @@
+// import BasicTableOne from "../../components/tables/BasicTables/BasicTableOne";
 
+import BasicTables from "../Tables/BasicTables";
+
+ 
 const ManageSubAdmins = () => {
     return (
-        <div>
-            <p>Manage Sub Admins</p>
-        </div>
+      <BasicTables/>
+
     )
 }
 

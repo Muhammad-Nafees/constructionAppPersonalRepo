@@ -1,9 +1,9 @@
  
 const Incentives = () => {
   return (
-    <div>
-       <p>Incentives</p>
-    </div>
+    <div className="flex justify-center items-center  h-screen w-full">
+    <p className="text-[80px] text-center">Incentives Coming Soon</p>
+  </div>
   )
 }
 

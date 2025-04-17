@@ -10,10 +10,14 @@ export default function Home() {
   return (
     <>
       <PageMeta
-        title="React.js Ecommerce Dashboard | TailAdmin - React.js Admin Dashboard Template"
-        description="This is React.js Ecommerce Dashboard page for TailAdmin - React.js Tailwind CSS Admin Dashboard Template"
+        title="FameOflame"
+        description="This is FameOflame admin panel where admin can make CRUD operations to sub admins and incentives and Images gallery as well"
       />
-      <div className="grid grid-cols-12 gap-4 md:gap-6">
+      <div className="flex justify-center items-center  h-screen w-full">
+        <p className="text-[80px] text-center">Dashboard Coming Soon</p>
+      </div>
+
+      {/* <div className="grid grid-cols-12 gap-4 md:gap-6">
         <div className="col-span-12 space-y-6 xl:col-span-7">
           <EcommerceMetrics />
 
@@ -35,7 +39,7 @@ export default function Home() {
         <div className="col-span-12 xl:col-span-7">
           <RecentOrders />
         </div>
-      </div>
+      </div> */}
     </>
   );
 }

@@ -1,9 +1,9 @@
  
 const MediaGallery = () => {
   return (
-    <div>
-        <p>Media Gallery</p>
-    </div>
+    <div className="flex justify-center items-center  h-screen w-full">
+    <p className="text-[80px] text-center">Media Gallery Coming Soon</p>
+  </div>
   )
 }
 

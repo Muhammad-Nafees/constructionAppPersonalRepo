@@ -34,11 +34,11 @@ export default function SignInForm() {
 
     try {
       const response = await loginAdmin(values);
-      console.log("🚀 ~ SignInForm ~ response:", response);
+      console.log("🚀 ~ SignInForm ~ response:", response.data);
       if (response.status === 200) {
         toast("Login SuccessFully");
         setLoading(false);
-        login(values);
+        login(response.data);
         navigate("/")
       };
 

@@ -1,10 +1,15 @@
 import axios, { AxiosResponse } from "axios";
 import { localBaseUrl } from "../../src/constant/index";
-import { SignInValues } from "../../src/interface";
+import { ICreateAdminValues, SignInValues } from "../../src/interface";
 
-export const createAdmin = () => {
+export const createAdmin = (values: ICreateAdminValues) => {
     try {
-        const response: Promise<AxiosResponse<any, any>> = axios.post(localBaseUrl + "admin/create-admin",)
+        const token = localStorage.getItem("token");
+        const response: Promise<AxiosResponse<any, any>> = axios.post(localBaseUrl + "admin/create-admin", values, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        })
         console.log("🚀 ~ createAdmin ~ response:", response)
         return response
     } catch (error) {
@@ -12,17 +17,41 @@ export const createAdmin = () => {
         throw error;
     }
 };
+
+
 
 export const getAdmins = () => {
     try {
-        const response: Promise<AxiosResponse<any, any>> = axios.get(localBaseUrl + "admin/all-admins")
-        console.log("🚀 ~ createAdmin ~ response:", response)
-        return response
+        const token = localStorage.getItem("token");
+        const response = axios.get(localBaseUrl + "admin/all-admins", {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log("🚀 ~ getAdmins ~ response:", response);
+        return response;
     } catch (error) {
-        console.log("🚀 ~ createAdmin ~ error:", error)
+        console.log("🚀 ~ getAdmins ~ error:", error);
         throw error;
     }
 };
+
+export const deleteAdmin = (id: string) => {
+    try {
+        const token = localStorage.getItem("token");
+        const response = axios.delete(localBaseUrl + `admin/delete-admin/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log("🚀 ~ getAdmins ~ response:", response);
+        return response;
+    } catch (error) {
+        console.log("🚀 ~ getAdmins ~ error:", error);
+        throw error;
+    }
+};
+
 
 export const loginAdmin = (values: SignInValues) => {
     try {

@@ -1,9 +1,9 @@
- 
+import BasicTables from "../Tables/BasicTables";
+
+
 const Users = () => {
   return (
-    <div>
-       <p>Users</p>
-    </div>
+    <BasicTables />
   )
 }
 

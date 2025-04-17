@@ -9,6 +9,7 @@ import {
   HorizontaLDots,
   PieChartIcon,
   PlugInIcon,
+  TableIcon,
   UserCircleIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
@@ -40,7 +41,7 @@ const navItems: NavItem[] = [
   },
   {
     icon: <GridIcon />,
-    name: "Music",
+    name: "Background Music",
     path: "/music"
   },
   {
@@ -59,11 +60,11 @@ const navItems: NavItem[] = [
     name: "User Profile",
     path: "/profile",
   },
-  {
-    icon: <UserCircleIcon />,
-    name: "Manage Admins",
-    path: "/manage-sub-admins",
-  },
+  // {
+  //   icon: <UserCircleIcon />,
+  //   name: "Manage Admins",
+  //   path: "/manage-sub-admins",
+  // },
   // {
   //   name: "Forms",
   //   icon: <ListIcon />,
@@ -131,7 +132,6 @@ const AppSidebar: React.FC = () => {
     let submenuMatched = false;
     ["main", "others"].forEach((menuType) => {
       const items = menuType === "main" ? navItems : othersItems;
-      console.log("🚀 ~  main,others.forEach ~ items:", items);
       items.forEach((nav, index) => {
         if (nav.subItems) {
           nav.subItems.forEach((subItem) => {

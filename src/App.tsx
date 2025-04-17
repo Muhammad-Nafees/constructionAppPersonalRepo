@@ -25,13 +25,14 @@ import ManageSubAdmins from "./pages/ManageSubAdmins/ManageSubAdmins"
 import PrivateRoute from "./routes/ProtectedRoutes";
 import PublicRoute from "./routes/PublicRoutes";
 import { ToastContainer } from "react-toastify";
+import BasicTables from "./pages/Tables/BasicTables";
 
 
 
 export default function App() {
   return (
     <>
-    <ToastContainer />
+      <ToastContainer />
       <Router>
         <ScrollToTop />
         <Routes>
@@ -55,10 +56,10 @@ export default function App() {
             <Route path="/accounts" element={<Accounts />} />
             <Route path="/finances" element={<Finances />} />
             <Route path="/profile" element={<UserProfiles />} />
-            <Route path="/manage-sub-admins" element={<ManageSubAdmins />} />
+            {/* <Route path="/manage-sub-admins" element={<ManageSubAdmins />} /> */}
 
             {/* Tables */}
-            {/* <Route path="/basic-tables" element={<BasicTables />} /> */}
+            <Route path="/basic-tables" element={<BasicTables />} />
             {/* Ui Elements */}
             <Route path="/alerts" element={<Alerts />} />
             <Route path="/avatars" element={<Avatars />} />

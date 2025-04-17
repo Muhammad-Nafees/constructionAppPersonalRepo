@@ -3,7 +3,7 @@ import { Outlet } from "react-router";
 import AppHeader from "./AppHeader";
 import Backdrop from "./Backdrop";
 import AppSidebar from "./AppSidebar";
-import ProtectedRoutes from "../routes/ProtectedRoutes";
+// import ProtectedRoutes from "../routes/ProtectedRoutes";
 
 const LayoutContent: React.FC = () => {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
@@ -29,9 +29,9 @@ const LayoutContent: React.FC = () => {
 
 const AppLayout: React.FC = () => {
   return (
-      <SidebarProvider>
-        <LayoutContent />
-      </SidebarProvider>
+    <SidebarProvider>
+      <LayoutContent />
+    </SidebarProvider>
   );
 };
 

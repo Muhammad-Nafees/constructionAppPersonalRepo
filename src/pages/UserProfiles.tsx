@@ -8,8 +8,8 @@ export default function UserProfiles() {
   return (
     <>
       <PageMeta
-        title="React.js Profile Dashboard | TailAdmin - Next.js Admin Dashboard Template"
-        description="This is React.js Profile Dashboard page for TailAdmin - React.js Tailwind CSS Admin Dashboard Template"
+        title="FameOflame"
+        description="This is FameOflame admin panel where admin can make CRUD operations to sub admins and incentives and Images gallery as well"
       />
       <PageBreadcrumb pageTitle="Profile" />
       <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
@@ -18,7 +18,7 @@ export default function UserProfiles() {
         </h3> */}
         <div className="space-y-6">
           <UserMetaCard />
-          <UserInfoCard />
+          {/* <UserInfoCard /> */}
           {/* <UserAddressCard /> */}
         </div>
       </div>
