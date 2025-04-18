@@ -14,7 +14,6 @@ export const addIncentivesApi = (values: AddIncentivesPayload) => {
             },
         })
         console.log("🚀 ~ addIncentives ~ response:", response)
-
         return response
     } catch (error) {
         console.log("🚀 ~ addIncentives ~ error:", error)
