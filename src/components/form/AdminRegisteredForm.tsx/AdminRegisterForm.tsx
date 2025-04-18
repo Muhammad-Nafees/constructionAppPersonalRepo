@@ -1,4 +1,4 @@
-import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { Formik, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import ComponentCard from '../../common/ComponentCard';
 import Label from '../Label';
@@ -10,6 +10,8 @@ import { useState } from 'react';
 import { createAdmin } from '../../../../services/admin';
 import { ICreateAdminValues } from '../../../interface';
 import { useAuth } from '../../../context/AuthContext';
+import { AxiosError } from 'axios';
+import { toast } from 'react-toastify';
 
 const SubAdminSchema = Yup.object().shape({
     name: Yup.string().required('Name is required'),
@@ -26,27 +28,26 @@ const AdminRegisterForm = () => {
 
 
     const handleSubmit = async (values: ICreateAdminValues) => {
-        console.log("🚀 ~ handleSubmit ~ values:", values)
-        // setLoading(true)
+        setLoading(true)
         try {
             const response = await createAdmin(values);
             setAdminRegisterFormData(response.data);
-            // setLoading(false);
+            setLoading(false);
             console.log("🚀 ~ create ~ response:", response);
             return response;
 
-        } catch (error) {
-            // setLoading(false);
-            alert(error?.response?.data?.message)
-            console.log("🚀 ~ handleSubmit ~ error:", error)
-            throw error;
+        } catch (error: unknown) {
+            setLoading(false);
+            const axiosError = error as AxiosError<{ message: string }>;
+            toast(axiosError.response?.data.message || "Something went wrong")
+            console.log("🚀 ~ handleSubmit ~ error:", axiosError);
+            throw axiosError;
         }
     };
 
-
-
     return (
         <Formik
+            key={Date.now()}
             initialValues={{
                 name: '',
                 email: '',
@@ -62,9 +63,14 @@ const AdminRegisterForm = () => {
                             {/* Name */}
                             <div className="w-[33.5%]">
                                 <Label htmlFor="name">Name</Label>
-                                <Field name="name">
+                                {/* <Field name="name" >
                                     {({ field }: any) => <Input type="text" id="name" {...field} />}
-                                </Field>
+                                </Field> */}
+                                <Input
+                                    type="text" id="name"
+                                    placeholder='Sub admin name'
+                                    value={values.name}
+                                    onChange={(e) => setFieldValue('name', e.target.value)} />
                                 <ErrorMessage name="name">
                                     {(msg) => <p className="text-red-500 text-sm mt-1">{msg}</p>}
                                 </ErrorMessage>
@@ -73,16 +79,21 @@ const AdminRegisterForm = () => {
                             {/* Email */}
                             <div className="w-[33.5%]">
                                 <Label htmlFor="email">Email</Label>
-                                <Field name="email">
+                                {/* <Field name="email">
                                     {({ field }: any) => (
                                         <Input
                                             type="text"
                                             id="email"
                                             placeholder="info@gmail.com"
                                             {...field}
+                                            autoComplete="off"
                                         />
                                     )}
-                                </Field>
+                                </Field> */}
+                                <Input
+                                    type="text" id="email" placeholder='info@gmail.com'
+                                    value={values.email}
+                                    onChange={(e) => setFieldValue('email', e.target.value)} />
                                 <ErrorMessage name="email">
                                     {(msg) => <p className="text-red-500 text-sm mt-1">{msg}</p>}
                                 </ErrorMessage>
@@ -109,10 +120,10 @@ const AdminRegisterForm = () => {
                                             <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
                                         )}
                                     </button>
-                                    <ErrorMessage name="password">
-                                        {(msg) => <p className="text-red-500 text-sm mt-1">{msg}</p>}
-                                    </ErrorMessage>
                                 </div>
+                                <ErrorMessage name="password">
+                                    {(msg) => <p className="text-red-500 text-sm mt-1">{msg}</p>}
+                                </ErrorMessage>
                             </div>
                         </div>
 

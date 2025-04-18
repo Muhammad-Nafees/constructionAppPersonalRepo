@@ -12,11 +12,13 @@ import { SignInValues } from "../../interface";
 import { useAuth } from "../../context/AuthContext";
 import Spinner from "../ui/spinner/Spinner";
 import { ToastContainer, toast } from 'react-toastify';
+import { AxiosError } from "axios";
 
 const initialValues: SignInValues = {
   email: "",
   password: "",
 };
+
 
 
 export default function SignInForm() {
@@ -41,19 +43,20 @@ export default function SignInForm() {
         login(response.data);
         navigate("/")
       };
-
       // actions.setSubmitting(false);
     } catch (error) {
-      console.log("🚀 ~ SignInForm ~ error:", error);
-      alert("incorrect password")
       setLoading(false);
-      throw error;
+      const axiosError = error as AxiosError<{ message: string }>;
+      toast(axiosError.response?.data.message)
+      // alert(axiosError.response?.data?.message || "Something went wrong");
+      throw axiosError;
     }
   };
 
+
+
   return (
     <div className="flex flex-col flex-1">
-
 
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
         <div className="mb-5 sm:mb-8">

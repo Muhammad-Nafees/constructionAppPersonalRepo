@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { IUserData, SignInValues } from "../interface";
+import { AddIncentivesPayload, IUserData, SignInValues } from "../interface";
 // import { toast } from "react-toastify";
 // import { useNavigate } from "react-router";
 
@@ -10,8 +10,10 @@ type AuthContextType = {
     setUser: IUserData | any;
     login: (userData: SignInValues) => void;
     logout: () => void;
-    adminRegisterFormData: any
-    setAdminRegisterFormData: any
+    adminRegisterFormData: IUserData | null;
+    setAdminRegisterFormData: any | null;
+    addIncentivesFormData: AddIncentivesPayload | null | any;
+    setAddIncentivesFormData: AddIncentivesPayload | any;
 };
 
 
@@ -22,6 +24,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<IUserData | null>(null);
     const [adminRegisterFormData, setAdminRegisterFormData] = useState<IUserData | null>(null);
+    const [addIncentivesFormData, setAddIncentivesFormData] = useState<AddIncentivesPayload | null>(null);
 
 
     const login = (data: any) => {
@@ -58,7 +61,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, setUser, setAdminRegisterFormData, adminRegisterFormData }}>
+        <AuthContext.Provider value={{ user, login, logout, setUser, setAdminRegisterFormData, adminRegisterFormData, addIncentivesFormData, setAddIncentivesFormData }}>
             {children}
         </AuthContext.Provider>
     );
