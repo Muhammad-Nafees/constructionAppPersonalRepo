@@ -9,8 +9,7 @@ import {
   HorizontaLDots,
   PieChartIcon,
   PlugInIcon,
-  TableIcon,
-  UserCircleIcon,
+   UserCircleIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 

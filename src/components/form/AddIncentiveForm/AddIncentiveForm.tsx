@@ -11,8 +11,6 @@ import { AddIncentivesPayload } from '../../../interface';
 import { useAuth } from '../../../context/AuthContext';
 import { AxiosError } from 'axios';
 import { toast } from 'react-toastify';
-import { Dropdown } from '../../ui/dropdown/Dropdown';
-import { DropdownItem } from '../../ui/dropdown/DropdownItem';
 import CustomDropDown from '../../reusableComponents/CustomDropdown';
 
 const SubAdminSchema = Yup.object().shape({

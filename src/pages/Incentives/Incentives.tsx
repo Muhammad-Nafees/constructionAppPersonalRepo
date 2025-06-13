@@ -1,33 +1,27 @@
-import moment from "moment";
 import PageMeta from "../../components/common/PageMeta";
-import AdminRegisterForm from "../../components/form/AdminRegisteredForm.tsx/AdminRegisterForm";
-import { useState } from "react";
-import { AddIncentivesPayload } from "../../interface";
-import Spinner from "../../components/ui/spinner/Spinner";
-import Button from "../../components/ui/button/Button";
-import ComponentCard from "../../components/common/ComponentCard";
+// import { useState } from "react";
+// import { AddIncentivesPayload } from "../../interface";
 import AddIncentiveForm from "../../components/form/AddIncentiveForm/AddIncentiveForm";
 
 
 
 
-type Incentive = {
-  text: string;
-};
+// type Incentive = {
+//   text: string;
+// };
 
 
 const Incentives = () => {
-  const [loading, setLoading] = useState<boolean>(false);
 
-  const [incentives, setIncentives] = useState<Incentive[]>([
-    { text: "" }
-  ]);
+  // const [incentives, setIncentives] = useState<Incentive[]>([
+  //   { text: "" }
+  // ]);
 
-  const handleInputChange = (index: number, value: string) => {
-    const updated = [...incentives];
-    updated[index].text = value;
-    setIncentives(updated);
-  };
+  // const handleInputChange = (index: number, value: string) => {
+  //   const updated = [...incentives];
+  //   updated[index].text = value;
+  //   setIncentives(updated);
+  // };
 
 
 
@@ -53,32 +47,32 @@ const Incentives = () => {
   // }, [deleteAdminData, adminRegisterFormData])
 
 
-  const addIncentivesData = async (values: AddIncentivesPayload) => {
-    console.log("🚀 ~ addIncentivesData ~ values:", values);
-    try {
+  // const addIncentivesData = async (values: AddIncentivesPayload) => {
+  //   console.log("🚀 ~ addIncentivesData ~ values:", values);
+  //   try {
 
-    } catch (error) {
-      console.log("🚀 ~ addIncentivesData ~ error:", error)
-    }
-  }
-
-
-  const addIncentiveField = () => {
-    setIncentives([...incentives, { text: "" }]);
-  };
+  //   } catch (error) {
+  //     console.log("🚀 ~ addIncentivesData ~ error:", error)
+  //   }
+  // }
 
 
-  const deleteIncentive = async (id: string) => {
-    try {
-      // const response = await deleteAdmin(id);
-      // setDeleteAdminData(response.data);
-      // console.log("🚀 ~ deletAdmin ~ response:", response);
-      // return response;
-    } catch (error) {
-      console.log("🚀 ~ deleteIncentive ~ error:", error)
-      throw error;
-    }
-  };
+  // const addIncentiveField = () => {
+  //   setIncentives([...incentives, { text: "" }]);
+  // };
+
+
+  // const deleteIncentive = async (id: string) => {
+  //   try {
+  //     // const response = await deleteAdmin(id);
+  //     // setDeleteAdminData(response.data);
+  //     // console.log("🚀 ~ deletAdmin ~ response:", response);
+  //     // return response;
+  //   } catch (error) {
+  //     console.log("🚀 ~ deleteIncentive ~ error:", error)
+  //     throw error;
+  //   }
+  // };
 
 
 
@@ -97,7 +91,7 @@ const Incentives = () => {
       {/* <FormElements /> */}
       <div className="grid grid-cols-1 gap-6 py-4">
         <div className="space-y-6">
-          <AddIncentiveForm/>
+          <AddIncentiveForm />
 
         </div>
       </div>

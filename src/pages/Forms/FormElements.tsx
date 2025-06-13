@@ -1,8 +1,6 @@
-import PageBreadcrumb from "../../components/common/PageBreadCrumb";
-import DefaultInputs from "../../components/form/form-elements/DefaultInputs";
+ import DefaultInputs from "../../components/form/form-elements/DefaultInputs";
 import PageMeta from "../../components/common/PageMeta";
-import Button from "../../components/ui/button/Button";
-
+ 
 export default function FormElements() {
   return (
     <div>

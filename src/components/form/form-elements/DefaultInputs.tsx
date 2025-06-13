@@ -2,19 +2,17 @@ import { useState } from "react";
 import ComponentCard from "../../common/ComponentCard";
 import Label from "../Label";
 import Input from "../input/InputField";
-import Select from "../Select";
-import { EyeCloseIcon, EyeIcon, TimeIcon } from "../../../icons";
-import DatePicker from "../date-picker.tsx";
+import { EyeCloseIcon, EyeIcon, } from "../../../icons";
 import Button from "../../ui/button/Button.tsx";
-import Spinner from "../../ui/spinner/Spinner.tsx";
+// import Spinner from "../../ui/spinner/Spinner.tsx";
 
 export default function DefaultInputs() {
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false)
+  // const [loading, setLoading] = useState(false);
 
-  const handleSelectChange = (value: string) => {
-    console.log("Selected value:", value);
-  };
+  // const handleSelectChange = (value: string) => {
+  //   console.log("Selected value:", value);
+  // };
 
   return (
     <ComponentCard className="w-[100%]" title="Create Sub admin">
@@ -52,15 +50,15 @@ export default function DefaultInputs() {
 
       {/* <Button className="flex justify-center w-[8%] items-center">Save</Button> */}
       <div className="flex justify-end">
-        <Button className="w-[8%] flex items-center justify-center " size="sm" disabled={loading}>
-          {loading ? (
+        <Button className="w-[8%] flex items-center justify-center " size="sm"  >
+          {/* {loading ? (
             <>
               <Spinner />
               saving...
-            </>
-          ) : (
-            "Save"
-          )}
+            </> */}
+          {/* ) : ( */}
+          {/* )} */}
+            Save
         </Button>
       </div>
 
