@@ -1,7 +1,7 @@
 import PageMeta from "../../components/common/PageMeta";
 // import { useState } from "react";
 // import { AddIncentivesPayload } from "../../interface";
-import AddIncentiveForm from "../../components/form/AddIncentiveForm/AddIncentiveForm";
+// import AddIncentiveForm from "../../components/form/AddIncentiveForm/AddIncentiveForm";
 
 
 
@@ -88,25 +88,27 @@ const Incentives = () => {
         description="This is FameOflame admin panel where admin can make CRUD operations to sub admins and incentives and Images gallery as well"
       />
 
+<div className="flex justify-center items-center  h-screen w-full">
+        <p className="text-[80px] text-center">Incentives Coming Soon</p>
+      </div>
+
       {/* <FormElements /> */}
-      <div className="grid grid-cols-1 gap-6 py-4">
+      {/* <div className="grid grid-cols-1 gap-6 py-4">
         <div className="space-y-6">
           <AddIncentiveForm />
 
         </div>
-      </div>
+      </div> */}
 
 
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white pt-4 dark:border-white/[0.05] dark:bg-white/[0.03]">
-        {/* Header */}
-        <div className="flex flex-col gap-4 px-6 mb-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white pt-4 dark:border-white/[0.05] dark:bg-white/[0.03]">
+         <div className="flex flex-col gap-4 px-6 mb-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">All Incentives</h3>
           </div>
         </div>
 
-        {/* Table */}
-        <div className="max-w-full overflow-x-auto">
+         <div className="max-w-full overflow-x-auto">
           <table className="min-w-full">
             <thead className="px-6 py-3.5 border-y border-gray-100 bg-gray-50 dark:border-white/[0.05] dark:bg-gray-900">
               <tr>
@@ -117,6 +119,18 @@ const Incentives = () => {
               </tr>
             </thead>
 
+
+          </table>
+        </div>
+      </div> */}
+
+    </>
+
+
+)
+}
+
+export default Incentives;
 
             {/* <tbody>
               {
@@ -187,15 +201,3 @@ const Incentives = () => {
                 )
               }
             </tbody> */}
-
-          </table>
-        </div>
-      </div>
-
-    </>
-
-
-  )
-}
-
-export default Incentives;

@@ -66,7 +66,7 @@ export default function App() {
             <Route path="/incentives" element={<Incentives />} />
             <Route path="/media-gallery" element={<MediaGallery />} />
             <Route path="/music" element={<Music />} />
-            <Route path="/users" element={<Users />} />
+            <Route path="/setting" element={<Users />} />
             <Route path="/profile" element={<UserProfiles />} />
             {/* Tables */}
             <Route path="/basic-tables" element={<BasicTables />} />

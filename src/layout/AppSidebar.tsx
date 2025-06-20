@@ -4,12 +4,11 @@ import { Link, useLocation } from "react-router";
 // Assume these icons are imported from an icon library
 import {
   BoxCubeIcon,
-  ChevronDownIcon,
+  // ChevronDownIcon,
   GridIcon,
   HorizontaLDots,
   PieChartIcon,
   PlugInIcon,
-  UserCircleIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 
@@ -35,30 +34,31 @@ const navItems: NavItem[] = [
   },
   {
     icon: <GridIcon />,
-    name: "Media Gallery",
+    name: "Celebrities",
     path: "/media-gallery"
   },
   {
     icon: <GridIcon />,
-    name: "Background Music",
+    name: "Music",
     path: "/music"
   },
   {
     icon: <GridIcon />,
-    name: "Users",
-    path: "/users"
+    name: "Settings",
+    path: "/setting"
   },
+
   // {
   //   icon: <GridIcon />,
   //   name: "Accounts",
   //   path: "/accounts"
   // },
 
-  {
-    icon: <UserCircleIcon />,
-    name: "User Profile",
-    path: "/profile",
-  },
+  // {
+  //   icon: <UserCircleIcon />,
+  //   name: "User Profile",
+  //   path: "/profile",
+  // },
   // {
   //   icon: <UserCircleIcon />,
   //   name: "Manage Admins",
@@ -163,55 +163,56 @@ const AppSidebar: React.FC = () => {
     }
   }, [openSubmenu]);
 
-  const handleSubmenuToggle = (index: number, menuType: "main" | "others") => {
-    setOpenSubmenu((prevOpenSubmenu) => {
-      if (
-        prevOpenSubmenu &&
-        prevOpenSubmenu.type === menuType &&
-        prevOpenSubmenu.index === index
-      ) {
-        return null;
-      }
-      return { type: menuType, index };
-    });
-  };
+  // const handleSubmenuToggle = (index: number, menuType: "main" | "others") => {
+  //   setOpenSubmenu((prevOpenSubmenu) => {
+  //     if (
+  //       prevOpenSubmenu &&
+  //       prevOpenSubmenu.type === menuType &&
+  //       prevOpenSubmenu.index === index
+  //     ) {
+  //       return null;
+  //     }
+  //     return { type: menuType, index };
+  //   });
+  // };
 
   const renderMenuItems = (items: NavItem[], menuType: "main" | "others") => (
     <ul className="flex flex-col gap-4">
       {items.map((nav, index) => (
         <li key={nav.name}>
           {nav.subItems ? (
-            <button
-              onClick={() => handleSubmenuToggle(index, menuType)}
-              className={`menu-item group ${openSubmenu?.type === menuType && openSubmenu?.index === index
-                ? "menu-item-active"
-                : "menu-item-inactive"
-                } cursor-pointer ${!isExpanded && !isHovered
-                  ? "lg:justify-center"
-                  : "lg:justify-start"
-                }`}
-            >
-              <span
-                className={`menu-item-icon-size  ${openSubmenu?.type === menuType && openSubmenu?.index === index
-                  ? "menu-item-icon-active"
-                  : "menu-item-icon-inactive"
-                  }`}
-              >
-                {nav.icon}
-              </span>
-              {(isExpanded || isHovered || isMobileOpen) && (
-                <span className="menu-item-text">{nav.name}</span>
-              )}
-              {(isExpanded || isHovered || isMobileOpen) && (
-                <ChevronDownIcon
-                  className={`ml-auto w-5 h-5 transition-transform duration-200 ${openSubmenu?.type === menuType &&
-                    openSubmenu?.index === index
-                    ? "rotate-180 text-brand-500"
-                    : ""
-                    }`}
-                />
-              )}
-            </button>
+            <></>
+            // <button
+            //   onClick={() => handleSubmenuToggle(index, menuType)}
+            //   className={`menu-item group ${openSubmenu?.type === menuType && openSubmenu?.index === index
+            //     ? "menu-item-active"
+            //     : "menu-item-inactive"
+            //     } cursor-pointer ${!isExpanded && !isHovered
+            //       ? "lg:justify-center"
+            //       : "lg:justify-start"
+            //     }`}
+            // >
+            //   <span
+            //     className={`menu-item-icon-size  ${openSubmenu?.type === menuType && openSubmenu?.index === index
+            //       ? "menu-item-icon-active"
+            //       : "menu-item-icon-inactive"
+            //       }`}
+            //   >
+            //     {nav.icon}
+            //   </span>
+            //   {(isExpanded || isHovered || isMobileOpen) && (
+            //     <span className="menu-item-text">{nav.name}</span>
+            //   )}
+            //   {(isExpanded || isHovered || isMobileOpen) && (
+            //     <ChevronDownIcon
+            //       className={`ml-auto w-5 h-5 transition-transform duration-200 ${openSubmenu?.type === menuType &&
+            //         openSubmenu?.index === index
+            //         ? "rotate-180 text-brand-500"
+            //         : ""
+            //         }`}
+            //     />
+            //   )}
+            // </button>
           ) : (
             nav.path && (
               <Link
