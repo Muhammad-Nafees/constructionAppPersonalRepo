@@ -27,48 +27,52 @@ const AdminRegisterForm = () => {
     const { setAdminRegisterFormData } = useAuth()
 
 
-    const handleSubmit = async (values: ICreateAdminValues) => {
+
+    const handleSubmit = async (values: ICreateAdminValues, { resetForm }: { resetForm: () => void }) => {
         setLoading(true)
         try {
             const response = await createAdmin(values);
             setAdminRegisterFormData(response.data);
             setLoading(false);
+            resetForm();
+            toast.success("Sub admin created successfully");
             console.log("🚀 ~ create ~ response:", response);
             return response;
-
         } catch (error: unknown) {
             setLoading(false);
             const axiosError = error as AxiosError<{ message: string }>;
-            toast(axiosError.response?.data.message || "Something went wrong")
+            toast.error(axiosError.response?.data.message || "Something went wrong");
             console.log("🚀 ~ handleSubmit ~ error:", axiosError);
             throw axiosError;
         }
     };
 
+
+
     return (
         <Formik
-            key={Date.now()}
+            // key={Date.now()}
             initialValues={{
                 name: '',
                 email: '',
                 password: '',
             }}
             validationSchema={SubAdminSchema}
+            enableReinitialize={false}
             onSubmit={handleSubmit}
         >
             {({ handleSubmit, isSubmitting, values, setFieldValue, submitForm }) => (
+                console.log("🚀 ~adminregisration ~ values:", values),
                 <Form onSubmit={handleSubmit}>
                     <ComponentCard className="w-[100%]" title="Create Sub admin">
                         <div className="space-y-6 flex space-x-4 item-center">
                             {/* Name */}
                             <div className="w-[33.5%]">
                                 <Label htmlFor="name">Name</Label>
-                                {/* <Field name="name" >
-                                    {({ field }: any) => <Input type="text" id="name" {...field} />}
-                                </Field> */}
                                 <Input
                                     type="text" id="name"
                                     placeholder='Sub admin name'
+                                    className=''
                                     value={values.name}
                                     onChange={(e) => setFieldValue('name', e.target.value)} />
                                 <ErrorMessage name="name">
@@ -79,17 +83,6 @@ const AdminRegisterForm = () => {
                             {/* Email */}
                             <div className="w-[33.5%]">
                                 <Label htmlFor="email">Email</Label>
-                                {/* <Field name="email">
-                                    {({ field }: any) => (
-                                        <Input
-                                            type="text"
-                                            id="email"
-                                            placeholder="info@gmail.com"
-                                            {...field}
-                                            autoComplete="off"
-                                        />
-                                    )}
-                                </Field> */}
                                 <Input
                                     type="text" id="email" placeholder='info@gmail.com'
                                     value={values.email}

@@ -5,6 +5,7 @@ import { ICreateAdminValues, SignInValues } from "../../src/interface";
 export const createAdmin = (values: ICreateAdminValues) => {
     try {
         const token = localStorage.getItem("token");
+        console.log("🚀 ~ createAdmin ~ token:", token)
         const response: Promise<AxiosResponse<any, any>> = axios.post(base_url + "admin/create-admin", values, {
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -23,6 +24,7 @@ export const createAdmin = (values: ICreateAdminValues) => {
 export const getAdmins = () => {
     try {
         const token = localStorage.getItem("token");
+        console.log("🚀 ~ getAdmins ~ token:", token)
         const response = axios.get(base_url + "admin/all-admins", {
             headers: {
                 Authorization: `Bearer ${token}`,

@@ -11,6 +11,7 @@ import {
   PlugInIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
+import { useAuth } from "../context/AuthContext";
 
 type NavItem = {
   name: string;
@@ -21,61 +22,7 @@ type NavItem = {
 
 
 
-const navItems: NavItem[] = [
-  {
-    icon: <GridIcon />,
-    name: "Dashboard",
-    path: "/"
-  },
-  {
-    icon: <GridIcon />,
-    name: "Incentives",
-    path: "/incentives"
-  },
-  {
-    icon: <GridIcon />,
-    name: "Celebrities",
-    path: "/media-gallery"
-  },
-  {
-    icon: <GridIcon />,
-    name: "Music",
-    path: "/music"
-  },
-  {
-    icon: <GridIcon />,
-    name: "Settings",
-    path: "/setting"
-  },
-
-  // {
-  //   icon: <GridIcon />,
-  //   name: "Accounts",
-  //   path: "/accounts"
-  // },
-
-  // {
-  //   icon: <UserCircleIcon />,
-  //   name: "User Profile",
-  //   path: "/profile",
-  // },
-  // {
-  //   icon: <UserCircleIcon />,
-  //   name: "Manage Admins",
-  //   path: "/manage-sub-admins",
-  // },
-  // {
-  //   name: "Forms",
-  //   icon: <ListIcon />,
-  //   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
-  // },
-  // {
-  //   name: "Tables",
-  //   icon: <TableIcon />,
-  //   subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
-  // },
-
-];
+ 
 
 const othersItems: NavItem[] = [
   {
@@ -111,7 +58,39 @@ const othersItems: NavItem[] = [
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
+  const { user } = useAuth();
 
+  const navItems: NavItem[] = [
+    {
+      icon: <GridIcon />,
+      name: "Dashboard",
+      path: "/"
+    },
+    {
+      icon: <GridIcon />,
+      name: "Incentives",
+      path: "/incentives"
+    },
+    {
+      icon: <GridIcon />,
+      name: "Celebrities",
+      path: "/media-gallery"
+    },
+    {
+      icon: <GridIcon />,
+      name: "Music",
+      path: "/music"
+    },
+    // Show Settings only for super-admin
+    ...(user?.role === "super-admin"
+      ? [{
+          icon: <GridIcon />,
+          name: "Settings",
+          path: "/setting"
+        }]
+      : [])
+  ];
+  
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
     index: number;
@@ -269,7 +248,7 @@ const AppSidebar: React.FC = () => {
                             new
                           </span>
                         )}
-                        {subItem.pro && (
+                        {/* {subItem.pro && (
                           <span
                             className={`ml-auto ${isActive(subItem.path)
                               ? "menu-dropdown-badge-active"
@@ -278,7 +257,7 @@ const AppSidebar: React.FC = () => {
                           >
                             pro
                           </span>
-                        )}
+                        )} */}
                       </span>
                     </Link>
                   </li>
@@ -314,7 +293,7 @@ const AppSidebar: React.FC = () => {
             <>
               <div className="flex space-x-4">
                 <img src="./favicon.png" className="w-10 h-10" alt="FameOflame" />
-                <p className="text-center text-[24px]   dark:text-white/60">Fame O Flame</p>
+                <p className="text-center text-[24px]   dark:text-white/60">FameOFlame</p>
               </div>
 
               {/* <img
@@ -361,18 +340,18 @@ const AppSidebar: React.FC = () => {
               {renderMenuItems(navItems, "main")}
             </div>
             <div className="">
-              <h2
+              {/* <h2
                 className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${!isExpanded && !isHovered
                   ? "lg:justify-center"
                   : "justify-start"
                   }`}
               >
                 {isExpanded || isHovered || isMobileOpen ? (
-                  "Others"
+                  ""
                 ) : (
                   <HorizontaLDots />
                 )}
-              </h2>
+              </h2> */}
               {renderMenuItems(othersItems, "others")}
             </div>
           </div>
@@ -384,3 +363,33 @@ const AppSidebar: React.FC = () => {
 };
 
 export default AppSidebar;
+
+
+
+
+// {
+//   icon: <GridIcon />,
+//   name: "Accounts",
+//   path: "/accounts"
+// },
+
+// {
+//   icon: <UserCircleIcon />,
+//   name: "User Profile",
+//   path: "/profile",
+// },
+// {
+//   icon: <UserCircleIcon />,
+//   name: "Manage Admins",
+//   path: "/manage-sub-admins",
+// },
+// {
+//   name: "Forms",
+//   icon: <ListIcon />,
+//   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
+// },
+// {
+//   name: "Tables",
+//   icon: <TableIcon />,
+//   subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
+// },

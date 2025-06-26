@@ -19,6 +19,9 @@ export interface ICreateAdminValues {
 
 export type AddIncentivesPayload = {
   incentives: string;
-  category: string;
-  badnessLevel: string;
+  gender: string,
+  incentivesMood: string,
+  incentivesNature: string
+  // category: string;
+  // badnessLevel: string;
 };

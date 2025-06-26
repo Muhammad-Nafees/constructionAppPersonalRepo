@@ -1,57 +1,84 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from 'react';
+// import { ChevronDown } from 'lucide-react';
+
+// Reusable Dropdown Component
+const CustomDropdown = ({
+    label,
+    options,
+    selectedValue,
+    onSelect,
+    placeholder = "Select an option",
+    className = ""
+}) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: any) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
 
-interface ICustomDropDownProps {
-    isOpen: boolean;
-    setIsOpen: React.Dispatch<boolean>
-};
+
+    const handleToggle = () => {
+        setIsOpen(!isOpen);
+    };
+
+    const handleSelect = (option: any) => {
+        onSelect(option);
+        setIsOpen(false);
+    };
 
 
-const CustomDropDown: React.FC<ICustomDropDownProps> = ({ isOpen, setIsOpen }) => {
-
+    
     return (
-        <div className="relative inline-block text-left">
+        <div className={`relative  w-full ${className}`} ref={dropdownRef}>
+            {label && (
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {label}
+                </label>
+            )}
+
             <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center"
+                type="button"
+                onClick={handleToggle}
+                className="w-full px-4 py-2 text-left bg-white border border-gray-300 rounded-lg shadow-sm hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
             >
-                Dropdown button
-                <svg
-                    className="w-2.5 h-2.5 ml-2"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 10 6"
-                >
-                    <path
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="m1 1 4 4 4-4"
-                    />
-                </svg>
+                <div className="flex justify-between items-center">
+                    <span className={selectedValue ? "text-gray-900" : "text-gray-500"}>
+                        {selectedValue || placeholder}
+                    </span>
+                    {/* <ChevronDown
+                        className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isOpen ? 'transform rotate-180' : ''
+                            }`}
+                    /> */}
+                </div>
             </button>
 
             {isOpen && (
-                <div className="absolute z-10 mt-2 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
-                    <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
-                        <li>
-                            <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Dashboard</a>
-                        </li>
-                        <li>
-                            <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Settings</a>
-                        </li>
-                        <li>
-                            <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Earnings</a>
-                        </li>
-                        <li>
-                            <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Sign out</a>
-                        </li>
-                    </ul>
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
+                    {options.map((option: any, index: any) => (
+                        <button
+                            key={index}
+                            type="button"
+                            onClick={() => handleSelect(option)}
+                            className="w-full px-4 py-3 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none transition-colors duration-150 first:rounded-t-lg last:rounded-b-lg"
+                        >
+                            <span className="text-gray-900">{option}</span>
+                        </button>
+                    ))}
                 </div>
             )}
         </div>
     );
 };
 
-export default CustomDropDown;
+
+export default CustomDropdown;

@@ -27,8 +27,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [addIncentivesFormData, setAddIncentivesFormData] = useState<AddIncentivesPayload | null>(null);
 
 
+
     const login = (data: any) => {
         if (data?.token && data?.user) {
+            console.log("🚀 ~ login ~ data:", data)
             localStorage.setItem("token", data.token);
             localStorage.setItem("userData", JSON.stringify(data.user));
             setUser(data.user);
@@ -49,8 +51,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 
 
-    console.log("🚀 ~ AuthProvider ~ user:", user);
-
+ 
     const logout = () => {
         setUser(null);
         localStorage.removeItem("token");

@@ -9,7 +9,7 @@ export default function BasicTables() {
   const [adminsData, setAdminsData] = useState([]);
   const [deleteAdminData, setDeleteAdminData] = useState({})
   const [loading, setLoading] = useState(false);
-  const {adminRegisterFormData} = useAuth();
+  const { adminRegisterFormData } = useAuth();
 
   useEffect(() => {
     const getAllAdmins = async () => {
@@ -30,7 +30,7 @@ export default function BasicTables() {
       }
     };
     getAllAdmins()
-  }, [deleteAdminData,adminRegisterFormData])
+  }, [deleteAdminData, adminRegisterFormData])
 
 
   const deleteSubAdmin = async (id: string) => {
@@ -56,9 +56,9 @@ export default function BasicTables() {
       {/* <FormElements /> */}
       <div className="grid grid-cols-1 gap-6 py-4">
         <div className="space-y-6">
-            
-             <AdminRegisterForm/>
-             
+
+          <AdminRegisterForm />
+
           {/* <ComponentCard className="w-[100%]" title="Create Sub admin">
             <div className="space-y-6 flex space-x-4  item-center ">
               <div className="w-[33.5%]">

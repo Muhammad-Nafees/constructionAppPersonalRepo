@@ -23,4 +23,4 @@ export default function Blank() {
       </div>
     </div>
   );
-}
+};

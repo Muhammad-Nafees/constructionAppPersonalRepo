@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { deleteAdmin, getAdmins } from "../../../services/admin";
-import PageMeta from "../../components/common/PageMeta";
+import { deleteAdmin, getAdmins } from "../../../services/admin/index.ts";
+import PageMeta from "../../components/common/PageMeta.tsx";
 import moment from 'moment';
 import AdminRegisterForm from "../../components/form/AdminRegisteredForm.tsx/AdminRegisterForm.tsx";
 import { useAuth } from "../../context/AuthContext.tsx";
 
-const Users = () => {
+const Settings = () => {
 
   const [adminsData, setAdminsData] = useState([]);
   const [deleteAdminData, setDeleteAdminData] = useState({})
@@ -164,4 +164,4 @@ const Users = () => {
 
 }
 
-export default Users;
+export default Settings;
