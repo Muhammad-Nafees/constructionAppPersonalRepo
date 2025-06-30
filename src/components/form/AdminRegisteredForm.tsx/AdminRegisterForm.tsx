@@ -145,4 +145,4 @@ const AdminRegisterForm = () => {
     )
 }
 
-export default AdminRegisterForm
+export default AdminRegisterForm;

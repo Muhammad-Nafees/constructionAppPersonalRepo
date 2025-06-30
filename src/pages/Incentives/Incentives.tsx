@@ -1,6 +1,11 @@
+import { useEffect, useState } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import AddIncentiveForm from "../../components/form/AddIncentiveForm/AddIncentiveForm";
-import FormElements from "../Forms/FormElements";
+// import FormElements from "../Forms/FormElements";
+import { AddIncentivesValues } from "../../interface";
+import { getIncentivesApi } from "../../../services/incentives";
+import { AxiosError } from "axios";
+import { useAuth } from "../../context/AuthContext";
 // import { useState } from "react";
 // import { AddIncentivesPayload } from "../../interface";
 // import AddIncentiveForm from "../../components/form/AddIncentiveForm/AddIncentiveForm";
@@ -14,69 +19,36 @@ import FormElements from "../Forms/FormElements";
 
 
 const Incentives = () => {
+  const [loading, setLoading] = useState(false);
+  const [incentivesData, setAddIncentivesData] = useState<AddIncentivesValues[]>([]);
+  console.log("🚀 ~ Incentives ~ incentivesData:", incentivesData)
+  const { addIncentivesFormData } = useAuth();
 
-  // const [incentives, setIncentives] = useState<Incentive[]>([
-  //   { text: "" }
-  // ]);
+  const getIncentivesData = async () => {
+    setLoading(true);
+    try {
+      const response = await getIncentivesApi();
 
-  // const handleInputChange = (index: number, value: string) => {
-  //   const updated = [...incentives];
-  //   updated[index].text = value;
-  //   setIncentives(updated);
-  // };
+      const sortedData = [...(response?.incentivesData || [])].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
 
-
-
-  // useEffect(() => {
-  //   const getAllAdmins = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const response = await getAdmins();
-  //       setLoading(false);
-  //       if (response) {
-  //         setAdminsData(response.data?.admins)
-  //       };
-
-  //       console.log("🚀 ~ getAllAdmins ~ response:", response.data);
-  //       return response;
-  //     } catch (error) {
-  //       setLoading(false);
-  //       console.log("🚀 ~ getAdminsList ~ error:", error)
-  //       throw error;
-  //     }
-  //   };
-  //   getAllAdmins()
-  // }, [deleteAdminData, adminRegisterFormData])
+      setAddIncentivesData(sortedData);
+      setLoading(false);
+      return response;
+    } catch (error: unknown) {
+      setLoading(false);
+      const axiosError = error as AxiosError<{ message: string }>;
+      console.log("🚀 ~ handleSubmit ~ error:", axiosError);
+      throw axiosError;
+    }
+  };
 
 
-  // const addIncentivesData = async (values: AddIncentivesPayload) => {
-  //   console.log("🚀 ~ addIncentivesData ~ values:", values);
-  //   try {
 
-  //   } catch (error) {
-  //     console.log("🚀 ~ addIncentivesData ~ error:", error)
-  //   }
-  // }
-
-
-  // const addIncentiveField = () => {
-  //   setIncentives([...incentives, { text: "" }]);
-  // };
-
-
-  // const deleteIncentive = async (id: string) => {
-  //   try {
-  //     // const response = await deleteAdmin(id);
-  //     // setDeleteAdminData(response.data);
-  //     // console.log("🚀 ~ deletAdmin ~ response:", response);
-  //     // return response;
-  //   } catch (error) {
-  //     console.log("🚀 ~ deleteIncentive ~ error:", error)
-  //     throw error;
-  //   }
-  // };
-
-
+  useEffect(() => {
+    getIncentivesData()
+  }, [addIncentivesFormData])
 
 
 
@@ -97,6 +69,7 @@ const Incentives = () => {
       </div>
 
 
+
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white pt-4 dark:border-white/[0.05] dark:bg-white/[0.03]">
         <div className="flex flex-col gap-4 px-6 mb-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -109,15 +82,97 @@ const Incentives = () => {
             <thead className="px-6 py-3.5 border-y border-gray-100 bg-gray-50 dark:border-white/[0.05] dark:bg-gray-900">
               <tr>
                 <td className="px-6 py-3 font-medium text-gray-500 text-theme-xs dark:text-gray-400 text-start">Incentives</td>
-                <td className="px-6 py-3 font-medium text-gray-500 text-theme-xs dark:text-gray-400 text-start">Category</td>
-                <td className="px-6 py-3 font-medium text-gray-500 text-theme-xs dark:text-gray-400 text-start">Created At</td>
-                <td className="px-6 py-3 font-medium text-gray-500 text-theme-xs dark:text-gray-400 text-start">Badness level</td>
+                <td className="px-6 py-3 font-medium text-gray-500 text-theme-xs dark:text-gray-400 text-start">Gender</td>
+                <td className="px-6 py-3 font-medium text-gray-500 text-theme-xs dark:text-gray-400 text-start">Incentives Mood</td>
+                <td className="px-6 py-3 font-medium text-gray-500 text-theme-xs dark:text-gray-400 text-start">Incentives Nature</td>
               </tr>
             </thead>
 
 
+            <tbody>
+              {
+                loading ? (
+                  <tr>
+                    <td colSpan={4}>
+                      <div className="w-10 h-10 mx-auto my-4 rounded-full bg-red-300 flex justify-center items-center">
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  incentivesData?.length === 0 ?
+                    <tr>
+                      <td colSpan={4}>
+                        <div className="flex justify-center py-10">
+                          <p className="text-center text-[24px]">No Incentives Created Yet</p>
+                        </div>
+                      </td>
+                    </tr>
+                    :
+                    incentivesData?.map((item: any, index: number) => (
+                      console.log("item...incentives", item),
+                      <tr key={index}>
+                        <td className="px-4 sm:px-6 py-3.5">
+                          <div className="flex items-center gap-3">
+                            <div className="flex w-80">
+                              <span className="text-sm font-medium">{item?.incentives}</span>
+                            </div>
+                            <div>
+                              {/* <span className="block font-medium text-theme-sm text-gray-700 dark:text-gray-400">{item?.name}</span>
+                                 <span className="text-theme-sm text-gray-500 dark:text-gray-400">{item?.email}</span> */}
+                            </div>
+                          </div>
+                        </td>
+
+                        <td className="px-4 sm:px-6 py-3.5">
+                          <p className="text-theme-sm text-gray-700 dark:text-gray-400">
+                            {/* {moment(item?.createdAt).format('YYYY-MM-DD')} */}
+                            {item?.gender}
+                          </p>
+                        </td>
+
+                        <td className="px-4 sm:px-6 py-3.5">
+                          <p className="text-theme-sm text-gray-700 dark:text-gray-400">{item?.incentivesMood}</p>
+                        </td>
+
+
+                        <td className="px-4 sm:px-6 py-3.5">
+                          <p className="text-theme-sm text-gray-700 dark:text-gray-400">{item?.incentivesNature}</p>
+                        </td>
+
+
+                        {/* <td className="px-4 sm:px-6 py-3.5">
+                          <button
+                          //  onClick={() => deleteSubAdmin(item._id)}
+                          >
+                            <svg
+                              width="1em"
+                              height="1em"
+                              viewBox="0 0 20 20"
+                              fill="none"
+                              className="text-gray-700 cursor-pointer size-5 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                clipRule="evenodd"
+                                d="M6.541 3.792c0-1.243 1.007-2.25 2.25-2.25h2.417c1.243 0 2.25 1.007 2.25 2.25V4.042h2.167h1.041a.75.75 0 010 1.5h-.291v10.667c0 1.243-1.008 2.25-2.25 2.25H5.875a2.25 2.25 0 01-2.25-2.25V5.542h-.291a.75.75 0 010-1.5h1.042h2.166V3.792z"
+                                fill="currentColor"
+                              />
+                            </svg>
+                          </button>
+                        </td> */}
+                      </tr>
+                    ))
+                )
+              }
+            </tbody>
+
           </table>
         </div>
+
+
+
+
       </div>
 
     </>

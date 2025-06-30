@@ -25,3 +25,9 @@ export type AddIncentivesPayload = {
   // category: string;
   // badnessLevel: string;
 };
+
+export type AddIncentivesValues = {
+  incentives: string;
+  // category: string;
+  // badnessLevel: string;
+};
