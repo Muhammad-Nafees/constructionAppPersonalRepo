@@ -1,7 +1,5 @@
 import { Formik, Form } from 'formik';
 import ComponentCard from '../../common/ComponentCard';
-import Label from '../Label';
-import Input from '../input/InputField';
 import Button from '../../ui/button/Button';
 import Spinner from '../../ui/spinner/Spinner';
 import { useState } from 'react';
@@ -21,7 +19,6 @@ const AddIncentiveForm = () => {
     const [selectedNature, setSelectedNature] = useState('');
 
     const [loading, setLoading] = useState(false);
-    //    const {} useAuth()
     const { setAddIncentivesFormData } = useAuth();
 
 
@@ -43,7 +40,7 @@ const AddIncentiveForm = () => {
         } catch (error: unknown) {
             setLoading(false);
             const axiosError = error as AxiosError<{ message: string }>;
-            toast(axiosError.response?.data.message || "Something went wrong")
+            // toast(axiosError.response?.data.message || "Something went wrong")
             console.log("🚀 ~ handleSubmit ~ error:", axiosError);
             throw axiosError;
         }

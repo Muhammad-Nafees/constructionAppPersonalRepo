@@ -9,7 +9,6 @@ type AuthContextType = {
     user: IUserData | null;
     setUser: IUserData | any;
     login: (userData: SignInValues) => void;
-    logout: () => void;
     adminRegisterFormData: IUserData | null;
     setAdminRegisterFormData: any | null;
     addIncentivesFormData: AddIncentivesPayload | null | any;
@@ -29,9 +28,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 
     const login = (data: any) => {
-        if (data?.token && data?.user) {
+        console.log("🚀 ~ login ~ data:", data)
+
+        if (data?.userAccessToken && data?.user) {
             console.log("🚀 ~ login ~ data:", data)
-            localStorage.setItem("token", data.token);
+            localStorage.setItem("token", data.userAccessToken);
             localStorage.setItem("userData", JSON.stringify(data.user));
             setUser(data.user);
             console.log("🚀 ~ login successful:", data.user);
@@ -51,18 +52,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 
 
- 
-    const logout = () => {
-        setUser(null);
-        localStorage.removeItem("token");
-        localStorage.removeItem("userData");
-        // navigate("/signin");
-    };
 
 
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, setUser, setAdminRegisterFormData, adminRegisterFormData, addIncentivesFormData, setAddIncentivesFormData }}>
+        <AuthContext.Provider value={{ user, login, setUser, setAdminRegisterFormData, adminRegisterFormData, addIncentivesFormData, setAddIncentivesFormData }}>
             {children}
         </AuthContext.Provider>
     );

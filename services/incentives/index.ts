@@ -1,6 +1,5 @@
-import axios from "axios";
-import { localBaseUrl } from "../../src/constant/index";
 import { AddIncentivesPayload } from "../../src/interface";
+import api from "../../src/interceptors/axiosinterceptors";
 
 // ✅ POST Incentives
 export const addIncentivesApi = async (values: AddIncentivesPayload) => {
@@ -9,8 +8,7 @@ export const addIncentivesApi = async (values: AddIncentivesPayload) => {
 
     if (!token) throw new Error("Authorization token not found");
 
-    const response = await axios.post(
-      `${localBaseUrl}incentives/addincentives`,
+    const response = await api.post("incentives/addincentives",
       values,
       {
         headers: {
@@ -27,14 +25,14 @@ export const addIncentivesApi = async (values: AddIncentivesPayload) => {
   }
 };
 
-// ✅ GET Incentives
 export const getIncentivesApi = async () => {
   try {
-    const token = localStorage.getItem("token");
+    const token =await localStorage.getItem("token");
 
     if (!token) throw new Error("Authorization token not found");
+    console.log("🚀 ~ getIncentivesApi ~ token:", token)
 
-    const response = await axios.get(`${localBaseUrl}incentives/getIncentives`, {
+    const response = await api.get("incentives/getIncentives", {
       headers: {
         Authorization: `Bearer ${token}`,
       },

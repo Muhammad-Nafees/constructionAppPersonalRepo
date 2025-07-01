@@ -1,21 +1,12 @@
 import { useEffect, useState } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import AddIncentiveForm from "../../components/form/AddIncentiveForm/AddIncentiveForm";
-// import FormElements from "../Forms/FormElements";
 import { AddIncentivesValues } from "../../interface";
 import { getIncentivesApi } from "../../../services/incentives";
 import { AxiosError } from "axios";
 import { useAuth } from "../../context/AuthContext";
-// import { useState } from "react";
-// import { AddIncentivesPayload } from "../../interface";
-// import AddIncentiveForm from "../../components/form/AddIncentiveForm/AddIncentiveForm";
+ 
 
-
-
-
-// type Incentive = {
-//   text: string;
-// };
 
 
 const Incentives = () => {
@@ -28,6 +19,7 @@ const Incentives = () => {
     setLoading(true);
     try {
       const response = await getIncentivesApi();
+      console.log("🚀 ~ getIncentivesData ~ response:", response)
 
       const sortedData = [...(response?.incentivesData || [])].sort(
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -53,9 +45,6 @@ const Incentives = () => {
 
 
   return (
-    // <div className="flex justify-center items-center  h-screen w-full">
-    //   <p className="text-[80px] text-center">Incentives Coming Soon</p>
-    // </div>
     <>
       <PageMeta
         title="FameOflame"

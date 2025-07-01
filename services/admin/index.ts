@@ -1,12 +1,11 @@
-import axios, { AxiosResponse } from "axios";
-import { base_url, localBaseUrl } from "../../src/constant/index";
 import { ICreateAdminValues, SignInValues } from "../../src/interface";
+import api from "../../src/interceptors/axiosinterceptors";
 
-export const createAdmin = (values: ICreateAdminValues) => {
+export const createAdmin = async (values: ICreateAdminValues) => {
     try {
-        const token = localStorage.getItem("token");
+        const token = await localStorage.getItem("token");
         console.log("🚀 ~ createAdmin ~ token:", token)
-        const response: Promise<AxiosResponse<any, any>> = axios.post(localBaseUrl + "admin/create-admin", values, {
+        const response = await api.post("admin/create-admin", values, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -21,11 +20,11 @@ export const createAdmin = (values: ICreateAdminValues) => {
 
 
 
-export const getAdmins = () => {
+export const getAdmins = async () => {
     try {
-        const token = localStorage.getItem("token");
+        const token = await localStorage.getItem("token");
         console.log("🚀 ~ getAdmins ~ token:", token)
-        const response = axios.get(base_url + "admin/all-admins", {
+        const response = await api.get("admin/all-admins", {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -38,10 +37,10 @@ export const getAdmins = () => {
     }
 };
 
-export const deleteAdmin = (id: string) => {
+export const deleteAdmin = async (id: string) => {
     try {
-        const token = localStorage.getItem("token");
-        const response = axios.delete(base_url + `admin/delete-admin/${id}`, {
+        const token = await localStorage.getItem("token");
+        const response = await api.delete(`admin/delete-admin/${id}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -56,9 +55,9 @@ export const deleteAdmin = (id: string) => {
 
 
 
-export const loginAdmin = (values: SignInValues) => {
+export const loginAdmin = async (values: SignInValues) => {
     try {
-        const response: Promise<AxiosResponse<any, any>> = axios.post(localBaseUrl + "auth/loginAdmin", values)
+        const response = await api.post("auth/loginAdmin", values)
         console.log("🚀 ~ createAdmin ~ response:", response)
         return response
     } catch (error) {
@@ -66,3 +65,18 @@ export const loginAdmin = (values: SignInValues) => {
         throw error;
     }
 };
+
+export const logoutApi = async () => {
+    await localStorage.removeItem("token");
+    await localStorage.removeItem("userData");
+    try {
+        const response = await api.post("auth/logout",)
+        console.log("🚀 ~ delete ~ response:", response.data)
+        return response;
+    } catch (error) {
+        console.log("🚀 ~ createAdmin ~ error:", error)
+        throw error;
+    }
+};
+
+// navigate("/signin");

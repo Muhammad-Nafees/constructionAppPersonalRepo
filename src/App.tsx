@@ -34,7 +34,7 @@ export default function App() {
       <Router>
         <ScrollToTop />
 
-        <ToastContainer
+        {/* <ToastContainer
           position="top-right"
           autoClose={3000}
           hideProgressBar={false}
@@ -46,7 +46,7 @@ export default function App() {
           draggable
           pauseOnHover
           theme="dark"
-        />
+        /> */}
 
         <Routes>
 

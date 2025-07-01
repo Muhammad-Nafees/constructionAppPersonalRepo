@@ -51,7 +51,6 @@ const AdminRegisterForm = () => {
 
     return (
         <Formik
-            // key={Date.now()}
             initialValues={{
                 name: '',
                 email: '',
