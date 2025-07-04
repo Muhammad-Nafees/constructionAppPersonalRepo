@@ -12,27 +12,31 @@ const Settings = () => {
   const [loading, setLoading] = useState(false);
   const { adminRegisterFormData } = useAuth();
 
-  useEffect(() => {
-    const getAllAdmins = async () => {
-      setLoading(true);
-      try {
-        const response = await getAdmins();
-        setLoading(false);
-        if (response) {
-          setAdminsData(response.data?.admins)
-        };
+  // useEffect(() => {
+  const getAllAdmins = async () => {
+    setLoading(true);
+    try {
+      const response = await getAdmins();
+      setLoading(false);
+      if (response) {
+        setAdminsData(response.data?.admins)
+      };
 
-        console.log("🚀 ~ getAllAdmins ~ response:", response.data);
-        return response;
-      } catch (error) {
-        setLoading(false);
-        console.log("🚀 ~ getAdminsList ~ error:", error)
-        throw error;
-      }
-    };
+      console.log("🚀 ~ getAllAdmins ~ response:", response.data);
+      return response;
+    } catch (error) {
+      setLoading(false);
+      console.log("🚀 ~ getAdminsList ~ error:", error)
+      throw error;
+    }
+  };
+  //   getAllAdmins()
+  // }, [deleteAdminData, adminRegisterFormData])
+
+
+  useEffect(() => {
     getAllAdmins()
   }, [deleteAdminData, adminRegisterFormData])
-
 
   const deleteSubAdmin = async (id: string) => {
     try {

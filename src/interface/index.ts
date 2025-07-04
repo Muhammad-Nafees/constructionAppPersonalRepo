@@ -28,6 +28,8 @@ export type AddIncentivesPayload = {
 
 export type AddIncentivesValues = {
   incentives: string;
-  // category: string;
-  // badnessLevel: string;
+  gender: string,
+  incentivesMood: string,
+  incentivesNature: string;
+  _id?: any
 };

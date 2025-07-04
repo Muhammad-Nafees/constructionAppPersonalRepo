@@ -1,5 +1,5 @@
 import { ICreateAdminValues, SignInValues } from "../../src/interface";
-import api from "../../src/interceptors/axiosinterceptors";
+import api from "../../src/interceptors/axiosInterceptors.ts";
 
 export const createAdmin = async (values: ICreateAdminValues) => {
     try {

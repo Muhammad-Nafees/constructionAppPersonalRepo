@@ -1,14 +1,15 @@
 import axios from "axios";
 import { localBaseUrl } from "../constant";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router";
-import { logoutHandler } from "../utils/logouthandler";
+import { logoutHandler } from "../../src/utils/logoutHandler";
 // const navigate = useNavigate();
 
 const api = axios.create({
     baseURL: localBaseUrl,
     withCredentials: true // So cookies are sent
 });
+
+
 
 api.interceptors.response.use(
     (response) => {
@@ -30,14 +31,15 @@ api.interceptors.response.use(
                 error.config.headers["Authorization"] = `Bearer ${newAccessToken}`;
                 return api(error.config);
             } catch (refreshError) {
-                console.log("🔁 Refresh token failed", refreshError);
-                logoutHandler()
+                console.log("Refresh token failed", refreshError);
+                logoutHandler();
                 toast.error("Session expired. Please login again.");
-             }
+                return Promise.reject(refreshError);
+            }
         };
-        console.log("🚀 ~ error:", error)
         const message = error.response?.data?.message || "Something went wrong";
         toast.error(message);
+
         return Promise.reject(error);
     }
 );

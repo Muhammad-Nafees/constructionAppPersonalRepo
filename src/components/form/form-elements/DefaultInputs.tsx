@@ -50,7 +50,7 @@ export default function DefaultInputs() {
 
       {/* <Button className="flex justify-center w-[8%] items-center">Save</Button> */}
       <div className="flex justify-end">
-        <Button className="w-[8%] flex items-center justify-center " size="sm"  >
+        <Button type="button" className="w-[8%] flex items-center justify-center " size="sm"  >
           {/* {loading ? (
             <>
               <Spinner />
@@ -58,7 +58,7 @@ export default function DefaultInputs() {
             </> */}
           {/* ) : ( */}
           {/* )} */}
-            Save
+          Save
         </Button>
       </div>
 

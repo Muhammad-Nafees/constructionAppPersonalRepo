@@ -1,243 +1,235 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import AddIncentiveForm from "../../components/form/AddIncentiveForm/AddIncentiveForm";
 import { AddIncentivesValues } from "../../interface";
-import { getIncentivesApi } from "../../../services/incentives";
+import { deleteIncentivesApi, getIncentivesApi, updateIncentiveApi } from "../../../services/incentives";
 import { AxiosError } from "axios";
 import { useAuth } from "../../context/AuthContext";
- 
-
-
+import AccendingArrow from "../../components/svg/AccendingArrow";
+import DescendingArrow from "../../components/svg/DescendingArrow";
+import EditIcon from "../../components/svg/EditIcon";
+import { toast } from "react-toastify";
+import SearchBarIcon from "../../components/svg/SearchBarIcon";
+import FilterIcon from "../../components/svg/FilterIcon";
+import debounce from "lodash/debounce";
 
 const Incentives = () => {
   const [loading, setLoading] = useState(false);
   const [incentivesData, setAddIncentivesData] = useState<AddIncentivesValues[]>([]);
-  console.log("🚀 ~ Incentives ~ incentivesData:", incentivesData)
   const { addIncentivesFormData } = useAuth();
+  const [deletenIncentivesIdsData, setDeletenIncentivesIdsData] = useState<number[]>([]);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [filterValue, setFilterValue] = useState("");
+  const [debouncedFilter, setDebouncedFilter] = useState("");
+  const [editData, setEditData] = useState<AddIncentivesValues | null>(null);
+  const [editLoading, setEditLoading] = useState(false);
+  console.log("🚀 ~ Incentives ~ editData:", editData)
+  const formRef = useRef<HTMLDivElement | null>(null);
 
-  const getIncentivesData = async () => {
-    setLoading(true);
+  const debouncedSearch = useMemo(
+    () => debounce((value: string) => setDebouncedFilter(value), 300),
+    []
+  );
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFilterValue(value);
+    debouncedSearch(value);
+  };
+
+  const handleCheckboxChange = (index: number) => {
+    setDeletenIncentivesIdsData((prev) =>
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+    );
+  };
+
+  const handleSort = (order: "asc" | "desc") => {
+    setSortOrder(order);
+  };
+
+  const handleEditClick = (item: AddIncentivesValues) => {
+    setEditData(item);
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
+
+  const handlerDeleteIncentives = async () => {
     try {
-      const response = await getIncentivesApi();
-      console.log("🚀 ~ getIncentivesData ~ response:", response)
-
-      const sortedData = [...(response?.incentivesData || [])].sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-
-      setAddIncentivesData(sortedData);
-      setLoading(false);
+      const response = await deleteIncentivesApi(deletenIncentivesIdsData);
+      getIncentivesData();
+      toast.success("Deleted successfully!");
+      setDeletenIncentivesIdsData([]);
       return response;
-    } catch (error: unknown) {
-      setLoading(false);
-      const axiosError = error as AxiosError<{ message: string }>;
-      console.log("🚀 ~ handleSubmit ~ error:", axiosError);
-      throw axiosError;
+    } catch (err) {
+      console.log("Error deleting incentives:", err);
+      toast.error("Error deleting incentives");
+    }
+  };
+
+
+  const handlerUpdateIncentives = async (id: string, values: AddIncentivesValues) => {
+    setEditLoading(true);
+    try {
+      const response = await updateIncentiveApi(id, values);
+      toast.success("Incentive updated successfully!");
+      setEditData(null);
+      setEditLoading(false);
+      getIncentivesData();
+      return response;
+    } catch (err) {
+      console.log("Error updating incentive:", err);
+      toast.error("Error updating incentive");
+      setEditLoading(false);
     }
   };
 
 
 
+  const getIncentivesData = async () => {
+    setLoading(true);
+    try {
+      const response = await getIncentivesApi();
+      let sortedData = [...(response?.incentivesData || [])];
+      sortedData.sort((a, b) => {
+        const timeA = new Date(a.createdAt).getTime();
+        const timeB = new Date(b.createdAt).getTime();
+        return sortOrder === "asc" ? timeA - timeB : timeB - timeA;
+      });
+      setAddIncentivesData(sortedData);
+    } catch (error: unknown) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      console.log("Error fetching incentives:", axiosError);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    getIncentivesData()
-  }, [addIncentivesFormData])
+    getIncentivesData();
+  }, [addIncentivesFormData, sortOrder]);
 
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, []);
 
+  const filteredIncentives = incentivesData.filter((item) =>
+    item.incentives.toLowerCase().includes(debouncedFilter.toLowerCase())
+  );
 
   return (
     <>
-      <PageMeta
-        title="FameOflame"
-        description="This is FameOflame admin panel where admin can make CRUD operations to sub admins and incentives and Images gallery as well"
-      />
+      <PageMeta title="FameOflame" description="FameOflame admin panel" />
 
-      <div className="grid grid-cols-1 gap-6 py-4">
-        <div className="space-y-6">
-          <AddIncentiveForm />
+      <div className="w-[90%] mx-auto space-y-6">
+        <div ref={formRef}>
+          <AddIncentiveForm
+            editingData={editData}
+            onEditSubmit={(data) => editData && handlerUpdateIncentives(editData._id, data)}
+            editLoading={editLoading}
+            setEditLoading={setEditLoading}
+          />
         </div>
-      </div>
 
+        <div className="bg-[#FFF6EB] px-6 flex items-center justify-between py-4">
+          <div className="flex space-x-2">
+            <button type="button">
+              <FilterIcon />
+            </button>
+            <p className="text-black text-lg">Filter</p>
+          </div>
 
-
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white pt-4 dark:border-white/[0.05] dark:bg-white/[0.03]">
-        <div className="flex flex-col gap-4 px-6 mb-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">All Incentives</h3>
+          <div className="flex w-7/12 items-center justify-center space-x-4">
+            <div className="flex-shrink-0 w-1/4 p-[2px] bg-gradient-to-r from-orange-600 to-orange-400">
+              <div className="flex items-center bg-white overflow-hidden">
+                <input
+                  value={filterValue}
+                  onChange={handleInputChange}
+                  type="text"
+                  placeholder="Search"
+                  className="w-full px-4 py-2 focus:outline-none"
+                />
+                <button type="button" className="px-3 flex items-center justify-center">
+                  <SearchBarIcon />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="max-w-full overflow-x-auto">
-          <table className="min-w-full">
-            <thead className="px-6 py-3.5 border-y border-gray-100 bg-gray-50 dark:border-white/[0.05] dark:bg-gray-900">
-              <tr>
-                <td className="px-6 py-3 font-medium text-gray-500 text-theme-xs dark:text-gray-400 text-start">Incentives</td>
-                <td className="px-6 py-3 font-medium text-gray-500 text-theme-xs dark:text-gray-400 text-start">Gender</td>
-                <td className="px-6 py-3 font-medium text-gray-500 text-theme-xs dark:text-gray-400 text-start">Incentives Mood</td>
-                <td className="px-6 py-3 font-medium text-gray-500 text-theme-xs dark:text-gray-400 text-start">Incentives Nature</td>
-              </tr>
-            </thead>
-
-
-            <tbody>
-              {
-                loading ? (
-                  <tr>
-                    <td colSpan={4}>
-                      <div className="w-10 h-10 mx-auto my-4 rounded-full bg-red-300 flex justify-center items-center">
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  incentivesData?.length === 0 ?
-                    <tr>
-                      <td colSpan={4}>
-                        <div className="flex justify-center py-10">
-                          <p className="text-center text-[24px]">No Incentives Created Yet</p>
-                        </div>
-                      </td>
-                    </tr>
-                    :
-                    incentivesData?.map((item: any, index: number) => (
-                      console.log("item...incentives", item),
-                      <tr key={index}>
-                        <td className="px-4 sm:px-6 py-3.5">
-                          <div className="flex items-center gap-3">
-                            <div className="flex w-80">
-                              <span className="text-sm font-medium">{item?.incentives}</span>
-                            </div>
-                            <div>
-                              {/* <span className="block font-medium text-theme-sm text-gray-700 dark:text-gray-400">{item?.name}</span>
-                                 <span className="text-theme-sm text-gray-500 dark:text-gray-400">{item?.email}</span> */}
-                            </div>
-                          </div>
-                        </td>
-
-                        <td className="px-4 sm:px-6 py-3.5">
-                          <p className="text-theme-sm text-gray-700 dark:text-gray-400">
-                            {/* {moment(item?.createdAt).format('YYYY-MM-DD')} */}
-                            {item?.gender}
-                          </p>
-                        </td>
-
-                        <td className="px-4 sm:px-6 py-3.5">
-                          <p className="text-theme-sm text-gray-700 dark:text-gray-400">{item?.incentivesMood}</p>
-                        </td>
-
-
-                        <td className="px-4 sm:px-6 py-3.5">
-                          <p className="text-theme-sm text-gray-700 dark:text-gray-400">{item?.incentivesNature}</p>
-                        </td>
-
-
-                        {/* <td className="px-4 sm:px-6 py-3.5">
-                          <button
-                          //  onClick={() => deleteSubAdmin(item._id)}
-                          >
-                            <svg
-                              width="1em"
-                              height="1em"
-                              viewBox="0 0 20 20"
-                              fill="none"
-                              className="text-gray-700 cursor-pointer size-5 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                clipRule="evenodd"
-                                d="M6.541 3.792c0-1.243 1.007-2.25 2.25-2.25h2.417c1.243 0 2.25 1.007 2.25 2.25V4.042h2.167h1.041a.75.75 0 010 1.5h-.291v10.667c0 1.243-1.008 2.25-2.25 2.25H5.875a2.25 2.25 0 01-2.25-2.25V5.542h-.291a.75.75 0 010-1.5h1.042h2.166V3.792z"
-                                fill="currentColor"
-                              />
-                            </svg>
-                          </button>
-                        </td> */}
-                      </tr>
-                    ))
-                )
-              }
-            </tbody>
-
-          </table>
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-800">All Incentives</h3>
+          {deletenIncentivesIdsData.length > 0 && (
+            <div className="flex justify-end">
+              <button
+                onClick={handlerDeleteIncentives}
+                className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          )}
         </div>
 
-
-
-
-      </div>
-
-    </>
-
-
-  )
-}
-
-export default Incentives;
-
-{/* <tbody>
-              {
-                loading ? (
-                  <tr>
-                    <td colSpan={4}>
-                      <div className="w-10 h-10 mx-auto my-4 rounded-full bg-red-300 flex justify-center items-center">
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        <div className="relative border border-[#E0D4C4] overflow-x-auto min-h-[200px] max-h-[400px] overflow-y-auto">
+          <table className="w-full text-left border-collapse">
+            <thead className="bg-[#FDF6EE] border-b border-[#E0D4C4]">
+              <tr className="text-[#BB501C] text-sm font-semibold">
+                <th className="px-4 py-3 w-12">Actions</th>
+                <th className="px-4 py-3 w-64">
+                  <div className="flex items-center space-x-4">
+                    <span>Incentive</span>
+                    <div className="flex leading-none">
+                      <button type="button" onClick={() => handleSort("asc")}><AccendingArrow /></button>
+                      <button type="button" onClick={() => handleSort("desc")}><DescendingArrow /></button>
+                    </div>
+                  </div>
+                </th>
+                <th className="px-4 py-3 w-40">Gender</th>
+                <th className="px-4 py-3 w-60">Incentives Mood</th>
+                <th className="px-4 py-3 w-40">Incentives Nature</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={5}><div className="flex justify-center py-6"><div className="w-10 h-10 bg-red-300 rounded-full flex justify-center items-center"><div className="w-5 h-5 border-2 border-white border-t-transparent animate-spin rounded-full" /></div></div></td>
+                </tr>
+              ) : filteredIncentives.length === 0 ? (
+                <tr>
+                  <td colSpan={5}><div className="flex justify-center py-10"><p className="text-[20px]">No Incentives Created Yet</p></div></td>
+                </tr>
+              ) : (
+                filteredIncentives.map((item, index) => (
+                  <tr key={index} className="border-b border-[#E0D4C4] text-sm text-gray-700">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-4">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4"
+                          checked={deletenIncentivesIdsData.includes(item._id)}
+                          onChange={() => handleCheckboxChange(item._id)}
+                        />
+                        <button onClick={() => handleEditClick(item)}><EditIcon /></button>
                       </div>
                     </td>
+                    <td className="px-4 py-3">
+                      <p className="w-[250px] break-words">{item?.incentives}</p>
+                    </td>
+                    <td className="px-4 py-3">{item?.gender}</td>
+                    <td className="px-4 py-3">{item?.incentivesMood}</td>
+                    <td className="px-4 py-3">{item?.incentivesNature}</td>
                   </tr>
-                ) : (
-                  adminsData.length === 0 ?
-                    <tr>
-                      <td colSpan={4}>
-                        <div className="flex justify-center py-10">
-                          <p className="text-center text-[24px]">No sub admins created yet</p>
-                        </div>
-                      </td>
-                    </tr>
-                    :
-                    adminsData?.map((item: any, index: number) => (
-                      <tr key={index}>
-                        <td className="px-4 sm:px-6 py-3.5">
-                          <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-error-100 text-error-600">
-                              <span className="text-sm font-medium">{item?.name[0].toUpperCase()}</span>
-                            </div>
-                            <div>
-                              <span className="block font-medium text-theme-sm text-gray-700 dark:text-gray-400">{item?.name}</span>
-                              <span className="text-theme-sm text-gray-500 dark:text-gray-400">{item?.email}</span>
-                            </div>
-                          </div>
-                        </td>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </>
+  );
+};
 
-                        <td className="px-4 sm:px-6 py-3.5">
-                          <p className="text-theme-sm text-gray-700 dark:text-gray-400">
-                            {moment(item?.createdAt).format('YYYY-MM-DD')}
-                          </p>
-                        </td>
-
-                        <td className="px-4 sm:px-6 py-3.5">
-                          <p className="text-theme-sm text-gray-700 dark:text-gray-400">{item?.role}</p>
-                        </td>
-
-                        <td className="px-4 sm:px-6 py-3.5">
-                          <button
-                            onClick={() => deleteSubAdmin(item._id)}
-                          >
-                            <svg
-                              width="1em"
-                              height="1em"
-                              viewBox="0 0 20 20"
-                              fill="none"
-                              className="text-gray-700 cursor-pointer size-5 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                clipRule="evenodd"
-                                d="M6.541 3.792c0-1.243 1.007-2.25 2.25-2.25h2.417c1.243 0 2.25 1.007 2.25 2.25V4.042h2.167h1.041a.75.75 0 010 1.5h-.291v10.667c0 1.243-1.008 2.25-2.25 2.25H5.875a2.25 2.25 0 01-2.25-2.25V5.542h-.291a.75.75 0 010-1.5h1.042h2.166V3.792z"
-                                fill="currentColor"
-                              />
-                            </svg>
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                )
-              }
-            </tbody> */}
+export default Incentives;

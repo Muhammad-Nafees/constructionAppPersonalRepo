@@ -135,7 +135,7 @@ export default function SignInForm() {
 
               {/* Submit */}
               <div>
-                <Button className="w-full flex items-center justify-center gap-2" size="sm" disabled={loading}>
+                <Button type={"submit"} className=" bg-[#3642F5] text-white w-full flex items-center justify-center gap-2" size="sm" disabled={loading}>
                   {loading ? (
                     <>
                       <Spinner />

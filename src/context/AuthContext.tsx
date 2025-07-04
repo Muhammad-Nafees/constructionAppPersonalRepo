@@ -28,8 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 
     const login = (data: any) => {
-        console.log("🚀 ~ login ~ data:", data)
-
+        // console.log("🚀 ~ login ~ data:", data)
         if (data?.userAccessToken && data?.user) {
             console.log("🚀 ~ login ~ data:", data)
             localStorage.setItem("token", data.userAccessToken);
@@ -49,9 +48,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setUser(JSON.parse(storedUser));
         }
     }, []);
-
-
-
 
 
 
