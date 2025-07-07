@@ -77,7 +77,7 @@ const AppSidebar: React.FC = () => {
     {
       icon: <CelebritiesIcon />,
       name: "Celebrities",
-      path: "/media-gallery"
+      path: "/celebrity"
     },
     {
       icon: <MusicIcon />,
@@ -158,7 +158,7 @@ const AppSidebar: React.FC = () => {
                 to={nav.path}
                 className={`relative flex justify-between items-center w-full gap-3 px-3 py-3 font-medium  text-theme-sm group my-1 ${isActive(nav.path)
                   ? "bg-[#7e3a14] text-white"
-                  : "menu-item-inactive"
+                  : "hover:bg-[#7e3a14]"
                   }`}
               >
                 <div className="flex gap-4">
@@ -304,7 +304,6 @@ const AppSidebar: React.FC = () => {
               width={32}
               height={32}
             />
-
           )}
         </Link>
       </div>
@@ -350,33 +349,3 @@ const AppSidebar: React.FC = () => {
 };
 
 export default AppSidebar;
-
-
-
-
-// {
-//   icon: <GridIcon />,
-//   name: "Accounts",
-//   path: "/accounts"
-// },
-
-// {
-//   icon: <UserCircleIcon />,
-//   name: "User Profile",
-//   path: "/profile",
-// },
-// {
-//   icon: <UserCircleIcon />,
-//   name: "Manage Admins",
-//   path: "/manage-sub-admins",
-// },
-// {
-//   name: "Forms",
-//   icon: <ListIcon />,
-//   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
-// },
-// {
-//   name: "Tables",
-//   icon: <TableIcon />,
-//   subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
-// },

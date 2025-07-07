@@ -16,7 +16,7 @@ import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
-import MediaGallery from "./pages/MediaGallery/MediaGallery";
+import MediaGallery from "./pages/MediaGallery/CelebrityPage";
 import Music from "./pages/Music/Music";
 // import Accounts from "./pages/Accounts/Accounts";
 // import Finances from "./pages/Finances/Finances";
@@ -25,6 +25,7 @@ import PublicRoute from "./routes/PublicRoutes";
 import { ToastContainer } from "react-toastify";
 import BasicTables from "./pages/Tables/BasicTables";
 import Settings from "./pages/Users/Settings";
+import CelebrityPage from "./pages/MediaGallery/CelebrityPage";
 
 
 
@@ -64,7 +65,7 @@ export default function App() {
 
             {/* Forms */}
             <Route path="/incentives" element={<Incentives />} />
-            <Route path="/media-gallery" element={<MediaGallery />} />
+            <Route path="/celebrity" element={<CelebrityPage />} />
             <Route path="/music" element={<Music />} />
             <Route path="/setting" element={<Settings />} />
             <Route path="/profile" element={<UserProfiles />} />

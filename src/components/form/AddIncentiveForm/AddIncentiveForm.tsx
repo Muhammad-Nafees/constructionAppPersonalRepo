@@ -124,13 +124,14 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
                             <ReactQuill
                                 theme="snow"
                                 value={values.incentives}
-                                onChange={(content, editor: any) => {
+                                onChange={(content, delta, source, editor) => {
                                     const plainText = editor.getText().trim();
                                     const charCount = plainText.length;
 
                                     if (charCount <= MAX_CHAR_LIMIT) {
                                         setFieldValue('incentives', content);
                                     } else {
+                                        // Block new characters being typed
                                         const currentText = values.incentives;
                                         setFieldValue('incentives', currentText);
                                     }
