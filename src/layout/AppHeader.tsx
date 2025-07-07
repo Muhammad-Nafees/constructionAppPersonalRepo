@@ -5,7 +5,7 @@ import { useSidebar } from "../context/SidebarContext";
 import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 import NotificationDropdown from "../components/header/NotificationDropdown";
 import UserDropdown from "../components/header/UserDropdown";
- 
+
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
 
@@ -39,6 +39,8 @@ const AppHeader: React.FC = () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
+
+
 
   return (
     <>
@@ -117,9 +119,9 @@ const AppHeader: React.FC = () => {
               </svg>
             </button>
 
-            <div className="hidden lg:block">
-              <form>
-                <div className="relative">
+            {/* <div className="hidden lg:block"> */}
+            {/* <form> */}
+            {/* <div className="relative">
                   <span className="absolute -translate-y-1/2 pointer-events-none left-4 top-1/2">
                     <svg
                       className="fill-gray-500 dark:fill-gray-400"
@@ -140,7 +142,7 @@ const AppHeader: React.FC = () => {
                   <input
                     ref={inputRef}
                     type="text"
-                    placeholder="Search or type command..."
+                    placeholder="Searchs or type command..."
                     className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pl-12 pr-14 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-800 dark:bg-gray-900 dark:bg-white/[0.03] dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[430px]"
                   />
 
@@ -148,9 +150,9 @@ const AppHeader: React.FC = () => {
                     <span> ⌘ </span>
                     <span> K </span>
                   </button>
-                </div>
-              </form>
-            </div>
+                </div> */}
+            {/* </form> */}
+            {/* </div> */}
           </div>
           <div
             className={`${isApplicationMenuOpen ? "flex" : "hidden"

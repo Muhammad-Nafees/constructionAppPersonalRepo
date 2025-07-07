@@ -115,9 +115,23 @@ const Incentives = () => {
     };
   }, []);
 
-  const filteredIncentives = incentivesData.filter((item) =>
-    item.incentives.toLowerCase().includes(debouncedFilter.toLowerCase())
-  );
+
+
+  const filteredIncentives = incentivesData.filter((item) => {
+    const searchText = debouncedFilter.toLowerCase().replace(/\s+/g, '');
+    const fields = [
+      item.incentives,
+      item.gender,
+      item.incentivesMood,
+      item.incentivesNature,
+    ];
+
+    return fields.some(field =>
+      field.toLowerCase().replace(/\s+/g, '').includes(searchText)
+    );
+  });
+
+
 
   return (
     <>
@@ -129,11 +143,10 @@ const Incentives = () => {
             editingData={editData}
             onEditSubmit={(data) => editData && handlerUpdateIncentives(editData._id, data)}
             editLoading={editLoading}
-            setEditLoading={setEditLoading}
           />
         </div>
 
-        <div className="bg-[#FFF6EB] px-6 flex items-center justify-between py-4">
+        <div className="bg-[#FFF6EB] px-6 flex items-center justify-between py-4 ">
           <div className="flex space-x-2">
             <button type="button">
               <FilterIcon />
@@ -141,8 +154,8 @@ const Incentives = () => {
             <p className="text-black text-lg">Filter</p>
           </div>
 
-          <div className="flex w-7/12 items-center justify-center space-x-4">
-            <div className="flex-shrink-0 w-1/4 p-[2px] bg-gradient-to-r from-orange-600 to-orange-400">
+          <div className="flex bg-red-300 items-center justify-center space-x-4">
+            <div className="flex-shrink-0 w-4/4 p-[2px] bg-gradient-to-r from-orange-600 to-orange-400">
               <div className="flex items-center bg-white overflow-hidden">
                 <input
                   value={filterValue}
@@ -160,7 +173,7 @@ const Incentives = () => {
         </div>
 
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-800">All Incentives</h3>
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">All Incentives</h3>
           {deletenIncentivesIdsData.length > 0 && (
             <div className="flex justify-end">
               <button
@@ -195,15 +208,35 @@ const Incentives = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={5}><div className="flex justify-center py-6"><div className="w-10 h-10 bg-red-300 rounded-full flex justify-center items-center"><div className="w-5 h-5 border-2 border-white border-t-transparent animate-spin rounded-full" /></div></div></td>
+                  <td colSpan={5}>
+                    <div className="flex justify-center py-6">
+                      <div className="w-10 h-10 bg-gradient-to-r from-orange-600 to-orange-400 rounded-full flex justify-center items-center">
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent animate-spin rounded-full" />
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              ) : incentivesData.length === 0 ? (
+                // No data created yet 
+                <tr>
+                  <td colSpan={5}>
+                    <div className="flex justify-center py-10">
+                      <p className="text-[20px]">No Incentives Created Yet</p>
+                    </div>
+                  </td>
                 </tr>
               ) : filteredIncentives.length === 0 ? (
+                // Data exists but no match found
                 <tr>
-                  <td colSpan={5}><div className="flex justify-center py-10"><p className="text-[20px]">No Incentives Created Yet</p></div></td>
+                  <td colSpan={5}>
+                    <div className="flex justify-center py-10">
+                      <p className="text-[20px]">No Incentives Found</p>
+                    </div>
+                  </td>
                 </tr>
               ) : (
                 filteredIncentives.map((item, index) => (
-                  <tr key={index} className="border-b border-[#E0D4C4] text-sm text-gray-700">
+                  <tr key={index} className="border-b border-[#E0D4C4] text-sm text-gray-700 ">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-4">
                         <input
@@ -212,7 +245,9 @@ const Incentives = () => {
                           checked={deletenIncentivesIdsData.includes(item._id)}
                           onChange={() => handleCheckboxChange(item._id)}
                         />
-                        <button onClick={() => handleEditClick(item)}><EditIcon /></button>
+                        <button onClick={() => handleEditClick(item)}>
+                          <EditIcon />
+                        </button>
                       </div>
                     </td>
                     <td className="px-4 py-3">
@@ -225,6 +260,7 @@ const Incentives = () => {
                 ))
               )}
             </tbody>
+
           </table>
         </div>
       </div>

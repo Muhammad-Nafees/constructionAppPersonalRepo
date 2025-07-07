@@ -14,8 +14,6 @@ import { addIncentivesApi } from '../../../../services/incentives';
 import { AddIncentivesValues } from '../../../interface';
 import { inceltivesValitionSchema } from '../../../validations';
 import './AddIncentives.css';
-import FilterIcon from '../../svg/FilterIcon';
-import SearchBarIcon from '../../svg/SearchBarIcon';
 
 const MAX_CHAR_LIMIT = 350;
 
@@ -44,7 +42,6 @@ interface AddIncentiveFormProps {
     editingData?: AddIncentivesValues | null;
     onEditSubmit?: (data: AddIncentivesValues) => void;
     editLoading: boolean;
-    // setEditLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 
@@ -121,18 +118,28 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
 
                 return (
                     <Form>
-                        <h1 className="text-xl font-medium">Write Incentives</h1>
+                        <h1 className="text-xl font-medium mb-4">Write Incentives</h1>
 
                         <div className="quill-wrapper">
                             <ReactQuill
                                 theme="snow"
                                 value={values.incentives}
-                                onChange={(content) => {
-                                    setFieldValue('incentives', content);
+                                onChange={(content, editor: any) => {
+                                    const plainText = editor.getText().trim();
+                                    const charCount = plainText.length;
+
+                                    if (charCount <= MAX_CHAR_LIMIT) {
+                                        setFieldValue('incentives', content);
+                                    } else {
+                                        const currentText = values.incentives;
+                                        setFieldValue('incentives', currentText);
+                                    }
                                 }}
                                 className="custom-quill"
-                                placeholder="Start typing here..."
+                                placeholder="Start typing here (max 350 characters)"
                             />
+
+
                             <div className="flex items-center">
                                 {errors.incentives && touched.incentives ? (
                                     <ErrorMessage
@@ -205,7 +212,7 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
                                 size="sm"
                                 disabled={isSubmitting || loading}
                             >
-                                {loading || editLoading? (
+                                {loading || editLoading ? (
                                     <>
                                         <Spinner />
                                         {editingData ? 'Updating...' : 'Saving...'}
@@ -218,16 +225,18 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
 
                         <div className="w-full bg-[#9D968D] h-0.5 my-10" />
 
-                        <div className="bg-[#FFF6EB] px-6 flex items-center justify-between py-4">
-                            <div className="flex space-x-2">
+
+
+                        {/* <div className="bg-[#FFF6EB] px-6 flex items-center justify-between py-4"> */}
+                        {/* <div className="flex space-x-2">
                                 <button type="button">
                                     <FilterIcon />
                                 </button>
                                 <p className="text-black text-lg">Filter</p>
-                            </div>
+                            </div> */}
 
-                            <div className="flex w-7/12 items-center justify-center space-x-4">
-                                <div className="flex-shrink-0 w-1/4 p-[2px] bg-gradient-to-r from-orange-600 to-orange-400">
+                        {/* <div className="flex w-7/12 items-center justify-center space-x-4"> */}
+                        {/* <div className="flex-shrink-0 w-1/4 p-[2px] bg-gradient-to-r from-orange-600 to-orange-400">
                                     <div className="flex items-center bg-white overflow-hidden">
                                         <input
                                             type="text"
@@ -238,9 +247,9 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
                                             <SearchBarIcon />
                                         </button>
                                     </div>
-                                </div>
+                                </div> */}
 
-                                {[1, 2, 3].map((i) => (
+                        {/* {[1, 2, 3].map((i) => (
                                     <CustomDropdown
                                         key={i}
                                         options={incentivesNatureOptions}
@@ -253,9 +262,12 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
                                         className="flex-1"
                                         errorClassName="h-0"
                                     />
-                                ))}
-                            </div>
-                        </div>
+                                ))} */}
+
+                        {/* </div> */}
+                        {/* </div> */}
+
+
                     </Form>
                 );
             }}

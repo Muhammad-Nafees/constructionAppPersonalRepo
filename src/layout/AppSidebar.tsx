@@ -4,14 +4,17 @@ import { Link, useLocation } from "react-router";
 // Assume these icons are imported from an icon library
 import {
   BoxCubeIcon,
-  // ChevronDownIcon,
-  GridIcon,
   HorizontaLDots,
   PieChartIcon,
   PlugInIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "../context/AuthContext";
+import HomeIcon from "../components/svg/HomeIcon";
+import IncentivesIcon from "../components/svg/IncentivesIcon";
+import CelebritiesIcon from "../components/svg/CelebritiesIcon";
+import MusicIcon from "../components/svg/MusicIcon";
+import SettingIcon from "../components/svg/SettingIcon";
 
 type NavItem = {
   name: string;
@@ -22,7 +25,7 @@ type NavItem = {
 
 
 
- 
+
 
 const othersItems: NavItem[] = [
   {
@@ -62,35 +65,35 @@ const AppSidebar: React.FC = () => {
 
   const navItems: NavItem[] = [
     {
-      icon: <GridIcon />,
+      icon: <HomeIcon />,
       name: "Dashboard",
       path: "/"
     },
     {
-      icon: <GridIcon />,
+      icon: <IncentivesIcon />,
       name: "Incentives",
       path: "/incentives"
     },
     {
-      icon: <GridIcon />,
+      icon: <CelebritiesIcon />,
       name: "Celebrities",
       path: "/media-gallery"
     },
     {
-      icon: <GridIcon />,
+      icon: <MusicIcon />,
       name: "Music",
       path: "/music"
     },
     // Show Settings only for super-admin
     ...(user?.role === "super-admin"
       ? [{
-          icon: <GridIcon />,
-          name: "Settings",
-          path: "/setting"
-        }]
+        icon: <SettingIcon />,
+        name: "Settings",
+        path: "/setting"
+      }]
       : [])
   ];
-  
+
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
     index: number;
@@ -99,6 +102,7 @@ const AppSidebar: React.FC = () => {
     {}
   );
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  // const { toggleSidebar, toggleMobileSidebar } = useSidebar();
 
   // const isActive = (path: string) => location.pathname === path;
   const isActive = useCallback(
@@ -142,77 +146,49 @@ const AppSidebar: React.FC = () => {
     }
   }, [openSubmenu]);
 
-  // const handleSubmenuToggle = (index: number, menuType: "main" | "others") => {
-  //   setOpenSubmenu((prevOpenSubmenu) => {
-  //     if (
-  //       prevOpenSubmenu &&
-  //       prevOpenSubmenu.type === menuType &&
-  //       prevOpenSubmenu.index === index
-  //     ) {
-  //       return null;
-  //     }
-  //     return { type: menuType, index };
-  //   });
-  // };
-
   const renderMenuItems = (items: NavItem[], menuType: "main" | "others") => (
-    <ul className="flex flex-col gap-4">
+    <ul className="flex flex-col">
       {items.map((nav, index) => (
         <li key={nav.name}>
           {nav.subItems ? (
             <></>
-            // <button
-            //   onClick={() => handleSubmenuToggle(index, menuType)}
-            //   className={`menu-item group ${openSubmenu?.type === menuType && openSubmenu?.index === index
-            //     ? "menu-item-active"
-            //     : "menu-item-inactive"
-            //     } cursor-pointer ${!isExpanded && !isHovered
-            //       ? "lg:justify-center"
-            //       : "lg:justify-start"
-            //     }`}
-            // >
-            //   <span
-            //     className={`menu-item-icon-size  ${openSubmenu?.type === menuType && openSubmenu?.index === index
-            //       ? "menu-item-icon-active"
-            //       : "menu-item-icon-inactive"
-            //       }`}
-            //   >
-            //     {nav.icon}
-            //   </span>
-            //   {(isExpanded || isHovered || isMobileOpen) && (
-            //     <span className="menu-item-text">{nav.name}</span>
-            //   )}
-            //   {(isExpanded || isHovered || isMobileOpen) && (
-            //     <ChevronDownIcon
-            //       className={`ml-auto w-5 h-5 transition-transform duration-200 ${openSubmenu?.type === menuType &&
-            //         openSubmenu?.index === index
-            //         ? "rotate-180 text-brand-500"
-            //         : ""
-            //         }`}
-            //     />
-            //   )}
-            // </button>
           ) : (
             nav.path && (
               <Link
                 to={nav.path}
-                className={`menu-item group ${isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
+                className={`relative flex justify-between items-center w-full gap-3 px-3 py-3 font-medium  text-theme-sm group my-1 ${isActive(nav.path)
+                  ? "bg-[#7e3a14] text-white"
+                  : "menu-item-inactive"
                   }`}
               >
-                <span
-                  className={`menu-item-icon-size ${isActive(nav.path)
-                    ? "menu-item-icon-active"
-                    : "menu-item-icon-inactive"
-                    }`}
-                >
-                  {nav.icon}
-                </span>
-                {(isExpanded || isHovered || isMobileOpen) && (
-                  <span className="menu-item-text">{nav.name}</span>
-                )}
+                <div className="flex gap-4">
+                  <span
+                    className={`menu-item-icon-size ${isActive(nav.path)
+                      ? "text-[#F47521]"
+                      : "text-white group-hover:text-[#F47521]"
+                      }`}
+                  >
+                    {nav.icon}
+                  </span>
+
+                  {(isExpanded || isHovered || isMobileOpen) && (
+                    <span className="inter-medium text-sm text-[#E4E4E4]">{nav.name}</span>
+                  )}
+                </div>
+                <div>
+                  <img
+                    src="/images/rightarrow.svg"
+                    className="object-contain"
+                    alt="Logo"
+                    width={8}
+                    height={8} />
+                </div>
               </Link>
             )
           )}
+
+
+
           {nav.subItems && (isExpanded || isHovered || isMobileOpen) && (
             <div
               ref={(el) => {
@@ -248,16 +224,7 @@ const AppSidebar: React.FC = () => {
                             new
                           </span>
                         )}
-                        {/* {subItem.pro && (
-                          <span
-                            className={`ml-auto ${isActive(subItem.path)
-                              ? "menu-dropdown-badge-active"
-                              : "menu-dropdown-badge-inactive"
-                              } menu-dropdown-badge`}
-                          >
-                            pro
-                          </span>
-                        )} */}
+
                       </span>
                     </Link>
                   </li>
@@ -270,20 +237,39 @@ const AppSidebar: React.FC = () => {
     </ul>
   );
 
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === "k") {
+        event.preventDefault();
+        inputRef.current?.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+
+
+
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
-        ${isExpanded || isMobileOpen
-          ? "w-[290px]"
-          : isHovered
-            ? "w-[290px]"
-            : "w-[90px]"
-        }
-        ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
-        lg:translate-x-0`}
+      className={`fixed flex flex-col lg:mt-0 top-0 px-5 left-0 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200
+      ${isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"}
+      ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
+      lg:translate-x-0`}
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      style={{
+        background: `linear-gradient(to bottom, #0D0707 50%, #380E08 100%)`,
+      }}
     >
+
       <div
         className={`py-8 flex ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
           }`}
@@ -291,33 +277,34 @@ const AppSidebar: React.FC = () => {
         <Link to="/">
           {isExpanded || isHovered || isMobileOpen ? (
             <>
-              <div className="flex space-x-4">
-                <img src="./favicon.png" className="w-10 h-10" alt="FameOflame" />
-                <p className="text-center text-[24px]   dark:text-white/60">FameOFlame</p>
+              <div className="flex items-center px-4 py-2">
+                <img
+                  src="/images/logo/fameflameLogo.svg"
+                  className="object-contain"
+                  alt="Logo"
+                  width={90}
+                  height={40} />
+                {/* 
+                <img
+                  onClick={handleToggle}
+                  src="/images/sidebarIcon.svg"
+                  alt="Sidebar Icon"
+                  width={20}
+                  height={20}
+                  className="object-contain"
+                /> */}
+
               </div>
 
-              {/* <img
-                className="dark:hidden"
-                src="/images/logo/logo.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-              <img
-                className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              /> */}
             </>
           ) : (
             <img
-              src="/images/logo/logo-icon.svg"
+              src="/images/appicon.png"
               alt="Logo"
               width={32}
               height={32}
             />
+
           )}
         </Link>
       </div>
@@ -332,7 +319,7 @@ const AppSidebar: React.FC = () => {
                   }`}
               >
                 {isExpanded || isHovered || isMobileOpen ? (
-                  "Menu"
+                  <></>
                 ) : (
                   <HorizontaLDots className="size-6" />
                 )}
