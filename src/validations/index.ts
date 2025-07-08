@@ -17,6 +17,6 @@ export const inceltivesValitionSchema = Yup.object().shape({
 export const celebrityValitionSchema = Yup.object().shape({
     celebrityName: Yup.string().required("Celebrity name is required"),
     celebrityGender: Yup.string().required("Celebrity gender is required"),
-    profession: Yup.string().required("Profession/Nationality is required"),
-    celebrityImage: Yup.string().required("Celebrity image is required"),
+    celebrityProfession: Yup.string().required("Profession/Nationality is required"),
+    celebrityImage: Yup.string().required("Image is required"),
 });

@@ -1,16 +1,15 @@
-import { Formik, Form, FormikHelpers, ErrorMessage } from 'formik';
-import { useState } from 'react';
-import { AxiosError } from 'axios';
+import { Formik, Form } from 'formik';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import Button from '../../ui/button/Button';
-import Spinner from '../../ui/spinner/Spinner';
 import CustomDropdown from '../../reusableComponents/CustomDropdown';
-import { useAuth } from '../../../context/AuthContext';
-
-import { celebrityValitionSchema, inceltivesValitionSchema } from '../../../validations';
 import ImageUploader from './ImageUploader';
-
-
+import CustomInput from '../../input/CustomInputField';
+import { celebrityUploadApi, getCelebritiesApi } from '../../../../services/celebrities';
+import { useDropzone } from 'react-dropzone';
+import { CelebritiesValuesSchema } from '../../../interface';
+import { celebrityValitionSchema } from '../../../validations';
+import { useGlobal } from '../../../context/GlobalMainContext';
 
 const genderOptions = ['Male', 'Female', 'Unisex'];
 const professionOptions = [
@@ -25,103 +24,126 @@ const professionOptions = [
     'French'
 ];
 
+const AddCelebrityForm = () => {
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+    const [uploading, setUploading] = useState(false);
+    const [progress, setProgress] = useState(0);
+    const [celebritiesApiResponse, setCelebritiesApiResponse] = useState([]);
+    const { setCelebritiesDataContext } = useGlobal();
+    console.log(" AddCelebrityForm ~ selectedFiles:", selectedFiles);
+
+    const { getRootProps, getInputProps } = useDropzone({
+        onDrop: (acceptedFiles) => {
+            const maxSize = 1048576; // 1MB
+            const validFiles = acceptedFiles.filter((file) => {
+                if (file.size <= maxSize) {
+                    return true;
+                } else {
+                    toast.error(`${file.name} is larger than 1MB and was not added.`);
+                    return false;
+                }
+            });
+            setSelectedFiles(validFiles);
+        },
+        multiple: true,
+        accept: {
+            'image/*': ['.jpg', '.jpeg', '.png', '.webp', '.gif']
+        },
+    });
+
+    const handleSubmit = async (values: CelebritiesValuesSchema, { setFieldValue, resetForm }: any) => {
+        if (selectedFiles.length === 0) return;
+
+        setUploading(true);
+        try {
+            const response = await celebrityUploadApi(
+                selectedFiles,
+                values,
+                (url: string) => setFieldValue('celebrityImage', url),
+                setProgress
+            );
+            setCelebritiesApiResponse(response);
+            resetForm();
+            setSelectedFiles([]);
+            console.log('✅Upload success:', response);
+        } catch (error) {
+            console.error('Upload failed', error);
+        } finally {
+            setUploading(false);
+        }
+    };
 
 
-const AddCelebrityForm = ({
-    // editingData = null,
-    // onEditSubmit,
-    // editLoading,
-}) => {
-    // const [loading, setLoading] = useState<boolean>(false);
-    // const { setAddIncentivesFormData } = useAuth();
-    // const [uploadedImage, setUploadedImage] = useState<string>('');
-    // const [uploadedFileName, setUploadedFileName] = useState<string>('');
 
-    // const handleSubmit = async (
-    //     values: AddIncentivesValues,
-    //     { resetForm }: FormikHelpers<AddIncentivesValues>
+    const getCelebritiesHandler = async () => {
+        try {
+            const response = await getCelebritiesApi();
+            setCelebritiesDataContext(response);
+            console.log("getCelebritiesHandler ~ response:", response)
+            return response;
+        } catch (error) {
+            console.log("🚀 ~ getCelebritiesHandler ~ error:", error)
+            throw error;
+        }
+    };
 
-    // ) => {
 
-    //     setLoading(true);
-    //     const plainText = values.incentives.replace(/<[^>]+>/g, '');
-    //     try {
-    //         if (editingData && onEditSubmit) {
-    //             onEditSubmit({
-    //                 incentives: plainText,
-    //                 gender: values.gender,
-    //                 incentivesMood: values.incentivesMood,
-    //                 incentivesNature: values.incentivesNature,
-    //             });
-    //         } else {
-    //             const response = await addIncentivesApi({
-    //                 incentives: plainText,
-    //                 gender: values.gender,
-    //                 incentivesMood: values.incentivesMood,
-    //                 incentivesNature: values.incentivesNature,
-    //             });
-    //             toast.success('Incentive added successfully');
-    //             setAddIncentivesFormData(response.data);
-    //             resetForm();
-    //         }
-    //     } catch (err: unknown) {
-    //         const axiosError = err as AxiosError<{ message: string }>;
-    //         toast.error(axiosError.response?.data.message || 'Something went wrong');
-    //         throw axiosError;
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
 
-    const handleSubmit = () => { }
+    useEffect(() => {
+        getCelebritiesHandler();
+    }, [celebritiesApiResponse]);
+
+
+    // getCelebrities
 
     return (
         <Formik
             initialValues={{
+                celebrityImage: selectedFiles[0]?.name,
                 celebrityName: '',
                 celebrityGender: '',
-                profession: '',
-                celebrityImage: '',
+                celebrityProfession: '',
             }}
             enableReinitialize
             validationSchema={celebrityValitionSchema}
             onSubmit={handleSubmit}
         >
-            {({
-                values,
-                errors,
-                touched,
-                setFieldValue,
-            }) => {
-                console.log("🚀 ~ values:", values)
-                // const plainText = values.incentives.replace(/<[^>]+>/g, '').trim();
-                // const charCount = plainText.length;
 
-                return (
-                    <Form>
-                        <h1 className="text-xl font-medium mb-4">Upload Your Celebrity Image</h1>
+            {({ values, errors, touched, setFieldValue, resetForm, submitForm }) => (
+                <Form>
+                    <div className="mt-10 space-y-4">
+                        <h1 className="text-xl font-medium">Upload Your Celebrity Image</h1>
+
                         <ImageUploader
-                            onUploadSuccess={(url) => {
-                                setFieldValue('celebrityImage', url);
-                                // setUploadedImage(url); // set for preview
-                                // setUploadedFileName('Uploaded-Image.jpg'); // dummy, or get from actual file if needed
-                            }}
+                            getRootProps={getRootProps}
+                            getInputProps={getInputProps}
+                            values={values}
+                            error={errors.celebrityImage}
+                            touched={touched.celebrityImage}
+                            name="celebrityImage"
+                            errorClassName="h-4"
+                            selectedFiles={selectedFiles}
+                        //   onUploadSuccess={(url) => setFieldValue('celebrityImage', url)}
                         />
 
-                        {/* <div className="mt-4">
-                            <p className="text-sm text-gray-700 font-medium mb-1">Uploaded Image:</p>
-                            <img src={values.celebrityImage} alt="Preview" className="w-32 h-32 object-cover rounded border" />
-                            {/* <p className="text-xs mt-1 text-gray-500">{uploadedFileName}</p> */}
-                        {/* </div> */}
+                        <CustomInput
+                            label="Celebrity Name"
+                            name="celebrityName"
+                            value={values.celebrityName}
+                            onChange={(e) => setFieldValue('celebrityName', e.target.value)}
+                            placeholder="Enter Celebrity Name"
+                            error={errors.celebrityName}
+                            touched={touched.celebrityName}
+                        />
 
-                        <div className="flex gap-4 mt-10">
+                        <div className="flex gap-4">
                             <CustomDropdown
                                 label="Gender"
                                 options={genderOptions}
                                 values={values.celebrityGender}
-                                onSelect={(celebrityGender) => setFieldValue('celebrityGender', celebrityGender)}
+                                onSelect={(val) => setFieldValue('celebrityGender', val)}
                                 className="w-1/2"
-                                placeholder="Select celebrityGender"
+                                placeholder="Select Gender"
                                 error={errors.celebrityGender}
                                 touched={touched.celebrityGender}
                                 name="celebrityGender"
@@ -131,31 +153,20 @@ const AddCelebrityForm = ({
                             <CustomDropdown
                                 label="Profession/Nationality"
                                 options={professionOptions}
-                                values={values.profession}
-                                onSelect={(profession) => setFieldValue('profession', profession)}
+                                values={values.celebrityProfession}
+                                onSelect={(val) => setFieldValue('celebrityProfession', val)}
                                 className="w-1/2"
-                                placeholder="Select Mood"
-                                error={errors.profession}
-                                touched={touched.profession}
-                                name="profession"
+                                placeholder="Select Profession"
+                                error={errors.celebrityProfession}
+                                touched={touched.celebrityProfession}
+                                name="celebrityProfession"
                                 errorClassName="h-4"
                             />
                         </div>
 
 
-                        {/* <CustomDropdown
-                            label="Incentives Nature"
-                            options={incentivesNatureOptions}
-                            values={values.incentivesNature}
-                            onSelect={(incentivesNature) => setFieldValue('incentivesNature', incentivesNature)}
-                            placeholder="Select Nature"
-                            error={errors.incentivesNature}
-                            touched={touched.incentivesNature}
-                            name="incentivesNature"
-                            errorClassName="h-4"
-                        /> */}
 
-                        {/* <div className="flex justify-end space-x-4">
+                        <div className="flex justify-end space-x-4">
                             <Button
                                 type="button"
                                 onClick={() => resetForm()}
@@ -164,57 +175,22 @@ const AddCelebrityForm = ({
                             >
                                 Cancel
                             </Button>
+
                             <Button
                                 type="submit"
                                 onClick={submitForm}
-                                className="w-32 bg-gradient-to-r from-orange-600 to-orange-400 text-white flex items-center justify-center"
+                                className="w-32 bg-gradient-to-r from-orange-600 to-orange-400 text-white"
                                 size="sm"
-                                disabled={isSubmitting || loading}
+                                disabled={uploading || selectedFiles.length === 0}
                             >
-                                {loading || editLoading ? (
-                                    <>
-                                        <Spinner />
-                                        {editingData ? 'Updating...' : 'Saving...'}
-                                    </>
-                                ) : (
-                                    editingData ? 'Update' : 'Save'
-                                )}
+                                {uploading ? `Uploading... ${progress}%` : 'Save'}
                             </Button>
-                        </div> */}
+                        </div>
 
-                        {/* <div className="w-full bg-[#9D968D] h-0.5 my-10" /> */}
-
-
-
-                        {/* <div className="bg-[#FFF6EB] px-6 flex items-center justify-between py-4"> */}
-                        {/* <div className="flex space-x-2">
-                                <button type="button">
-                                    <FilterIcon />
-                                </button>
-                                <p className="text-black text-lg">Filter</p>
-                            </div> */}
-
-                        {/* <div className="flex w-7/12 items-center justify-center space-x-4"> */}
-                        {/* <div className="flex-shrink-0 w-1/4 p-[2px] bg-gradient-to-r from-orange-600 to-orange-400">
-                                    <div className="flex items-center bg-white overflow-hidden">
-                                        <input
-                                            type="text"
-                                            placeholder="Search"
-                                            className="w-full px-4 py-2 focus:outline-none"
-                                        />
-                                        <button type="button" className="px-3 flex items-center justify-center">
-                                            <SearchBarIcon />
-                                        </button>
-                                    </div>
-                                </div> */}
-
-                        {/* </div> */}
-                        {/* </div> */}
-
-
-                    </Form>
-                );
-            }}
+                        <div className="w-full bg-[#9D968D] h-0.5 my-10" />
+                    </div>
+                </Form>
+            )}
         </Formik>
     );
 };

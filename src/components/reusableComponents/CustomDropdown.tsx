@@ -10,8 +10,8 @@ type CustomDropdownProps = {
     className?: string;
     error?: string | undefined;
     touched?: boolean | undefined;
-    name:string;
-    errorClassName:string;
+    name: string;
+    errorClassName: string;
 };
 
 // Reusable Dropdown Component

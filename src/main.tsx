@@ -8,17 +8,20 @@ import { AppWrapper } from "./components/common/PageMeta.tsx";
 import { ThemeProvider } from "./context/ThemeContext.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
 import { ToastContainer } from "react-toastify";
+import { GlobalMainProvider } from "./context/GlobalMainContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
 
   <StrictMode>
-    <AuthProvider>
-      <ThemeProvider>
-      <ToastContainer />
-        <AppWrapper>
-          <App />
-        </AppWrapper>
-      </ThemeProvider>
-    </AuthProvider>
+    <GlobalMainProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          <ToastContainer />
+          <AppWrapper>
+            <App />
+          </AppWrapper>
+        </ThemeProvider>
+      </AuthProvider>
+    </GlobalMainProvider>
   </StrictMode>
 );

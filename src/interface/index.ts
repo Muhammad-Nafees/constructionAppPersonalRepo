@@ -33,3 +33,13 @@ export type AddIncentivesValues = {
   incentivesNature: string;
   _id?: any
 };
+
+
+export type CelebritiesValuesSchema = {
+
+  celebrityName: string,
+  celebrityGender: string,
+  celebrityProfession: string,
+  celebrityImage: string
+
+}

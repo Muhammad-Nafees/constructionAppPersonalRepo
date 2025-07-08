@@ -13,6 +13,7 @@ import SearchBarIcon from "../../components/svg/SearchBarIcon";
 import FilterIcon from "../../components/svg/FilterIcon";
 import debounce from "lodash/debounce";
 import AddCelebrityForm from "../../components/form/addCelebrity-form/AddCelebrityForm";
+import { useGlobal } from "../../context/GlobalMainContext";
 
 const CelebrityPage = () => {
   const [loading, setLoading] = useState(false);
@@ -32,11 +33,11 @@ const CelebrityPage = () => {
     []
   );
 
-  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const value = e.target.value;
-  //   setFilterValue(value);
-  //   debouncedSearch(value);
-  // };
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFilterValue(value);
+    debouncedSearch(value);
+  };
 
   // const handleCheckboxChange = (index: number) => {
   //   setDeletenIncentivesIdsData((prev) =>
@@ -93,27 +94,27 @@ const CelebrityPage = () => {
   //   getIncentivesData();
   // }, [addIncentivesFormData, sortOrder]);
 
-  // useEffect(() => {
-  //   return () => {
-  //     debouncedSearch.cancel();
-  //   };
-  // }, []);
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, []);
 
+  const { celebritiesDataContext } = useGlobal();
 
+  const filteredCelebrities = (celebritiesDataContext?.data || []).filter((item: any) => {
+    const searchText = debouncedFilter.toLowerCase().replace(/\s+/g, '');
+    const fields = [
+      item.celebrityName,
+      item.celebrityGender,
+      item.professionNationality,
+    ];
 
-  // const filteredIncentives = incentivesData.filter((item) => {
-  //   const searchText = debouncedFilter.toLowerCase().replace(/\s+/g, '');
-  //   const fields = [
-  //     item.incentives,
-  //     item.gender,
-  //     item.incentivesMood,
-  //     item.incentivesNature,
-  //   ];
+    return fields.some(field =>
+      field?.toLowerCase().replace(/\s+/g, '').includes(searchText)
+    );
+  });
 
-  //   return fields.some(field =>
-  //     field.toLowerCase().replace(/\s+/g, '').includes(searchText)
-  //   );
-  // });
 
 
 
@@ -143,7 +144,7 @@ const CelebrityPage = () => {
           <div className="flex bg-red-300 items-center justify-center space-x-4">
             <div className="flex-shrink-0 w-4/4 p-[2px] bg-gradient-to-r from-orange-600 to-orange-400">
               <div className="flex items-center bg-white overflow-hidden">
-                {/* <input
+                <input
                   value={filterValue}
                   onChange={handleInputChange}
                   type="text"
@@ -152,7 +153,7 @@ const CelebrityPage = () => {
                 />
                 <button type="button" className="px-3 flex items-center justify-center">
                   <SearchBarIcon />
-                </button> */}
+                </button>
               </div>
             </div>
           </div>
@@ -162,17 +163,15 @@ const CelebrityPage = () => {
           <h3 className="text-lg font-semibold text-gray-800 mb-4">All Celebrities</h3>
           {deletenIncentivesIdsData.length > 0 && (
             <div className="flex justify-end">
-              {/* <button
-                onClick={handlerDeleteIncentives}
+              <button
+                // onClick={handlerDeleteIncentives}
                 className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
               >
                 Delete
-              </button> */}
+              </button>
             </div>
           )}
         </div>
-
-
 
         <div className="relative border border-[#E0D4C4] overflow-x-auto min-h-[200px] max-h-[400px] overflow-y-auto">
           <table className="w-full text-left border-collapse">
@@ -182,10 +181,6 @@ const CelebrityPage = () => {
                 <th className="px-4 py-3 w-64">
                   <div className="flex items-center space-x-4">
                     <span>Celebrity Image</span>
-                    <div className="flex leading-none">
-                      {/* <button type="button" onClick={() => handleSort("asc")}><AccendingArrow /></button>
-                      <button type="button" onClick={() => handleSort("desc")}><DescendingArrow /></button> */}
-                    </div>
                   </div>
                 </th>
                 <th className="px-4 py-3 w-40">Celebrity Name</th>
@@ -193,34 +188,44 @@ const CelebrityPage = () => {
                 <th className="px-4 py-3 w-40">Profession/Nationality</th>
               </tr>
             </thead>
+
             <tbody>
+              {celebritiesDataContext?.data?.map((celebrity: any, index: number) => (
+                <tr key={celebrity._id || index} className="border-b border-[#E0D4C4] text-sm text-gray-700">
+                  {/*  Actions */}
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-4">
+                      <input type="checkbox" className="w-4 h-4" />
+                      <button>
+                        <EditIcon />
+                      </button>
+                    </div>
+                  </td>
 
-              <tr className="border-b border-[#E0D4C4] text-sm text-gray-700 ">
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-4">
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4"
-                    // checked={deletenIncentivesIdsData.includes(item._id)}
-                    // onChange={() => handleCheckboxChange(item._id)}
-                    />
-                    <button
-                    // onClick={() => handleEditClick(item)}
-                    >
-                      <EditIcon />
-                    </button>
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <p className="w-[250px] break-words">{'item?.incentives'}</p>
-                </td>
-                <td className="px-4 py-3">{'item?.CelebName'}</td>
-                <td className="px-4 py-3">{'item?.CelebGender'}</td>
-                <td className="px-4 py-3">{'item?.profession'}</td>
-              </tr>
+                  {/*  Celebrity Image */}
+                  <td className="px-4 py-3">
+                    {celebrity.images?.[0]?.url ? (
+                      <img
+                        src={celebrity.images[0].url}
+                        alt={celebrity.images[0].filename}
+                        className="w-16 h-16 object-cover rounded"
+                      />
+                    ) : (
+                      <span className="text-gray-400 italic">No image</span>
+                    )}
+                  </td>
 
+                  {/* Celebrity Name */}
+                  <td className="px-4 py-3">{celebrity.celebrityName || '—'}</td>
+
+                  {/* Gender */}
+                  <td className="px-4 py-3">{celebrity.celebrityGender || '—'}</td>
+
+                  {/* Profession/Nationality */}
+                  <td className="px-4 py-3">{celebrity.professionNationality || '—'}</td>
+                </tr>
+              ))}
             </tbody>
-
           </table>
         </div>
 
