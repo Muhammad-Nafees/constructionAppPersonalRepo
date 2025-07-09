@@ -53,6 +53,11 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
     editLoading,
 }) => {
     const [loading, setLoading] = useState<boolean>(false);
+    const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
+    const toggleAccordion = (key: string) => {
+        setActiveAccordion(activeAccordion === key ? null : key);
+    };
+
     const { setAddIncentivesFormData } = useAuth();
 
     const handleSubmit = async (
@@ -119,30 +124,64 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
 
                 return (
                     <Form>
-                        <h1 className="text-xl font-medium mb-4">Write Incentives</h1>
-
-                        <div className="quill-wrapper">
-                            <ReactQuill
-                                theme="snow"
-                                value={values.incentives}
-                                onChange={(content, delta, source, editor) => {
-                                    const plainText = editor.getText().trim();
-                                    const charCount = plainText.length;
-
-                                    if (charCount <= MAX_CHAR_LIMIT) {
-                                        setFieldValue('incentives', content);
-                                    } else {
-                                        // Block new characters being typed
-                                        const currentText = values.incentives;
-                                        setFieldValue('incentives', currentText);
-                                    }
-                                }}
-                                className="custom-quill"
-                                placeholder="Start typing here (max 350 characters)"
-                            />
+                        {/* <h1 className="text-xl font-medium mb-4">Write Incentives</h1> */}
 
 
-                            <div className="flex items-center">
+                        <div className="w-full">
+                            {/* Header Section */}
+                            <div className="bg-[#400F09] py-4 w-full flex justify-between px-4 items-center ">
+                                <h1 className="text-xl font-medium text-white">Incentives Menu</h1>
+
+                                <div className="gap-10 flex items-center">
+                                    <div className="flex space-x-2">
+
+                                        <Button
+                                            type="button"
+                                            className="w-32 text-white bg-[#D27639] py-2"
+                                            onClick={() => toggleAccordion("add")}
+                                        >
+                                            Bulk Import
+                                        </Button>
+
+                                        <Button
+                                            type="button"
+                                            className="w-32 text-white bg-[#D27639] py-2"
+                                        >
+                                            Export All
+                                        </Button>
+
+                                    </div>
+
+                                    {/* Dashed Divider */}
+                                    <div className="h-10 border border-dashed border-red-300" />
+                                    <Button
+                                        type="button"
+                                        className="w-32 text-white bg-gradient-to-r from-orange-400 to-red-600 py-2"
+                                        onClick={() => toggleAccordion("add")}
+                                    >
+                                        Bulk Import
+                                    </Button>
+
+                                </div>
+                            </div>
+
+
+                            {/* Accordion Section - Add New */}
+                            <div
+                                className={`overflow-hidden transition-all duration-500 ease-in-out ${activeAccordion === "add"
+                                    ? "max-h-[1000px] border border-dashed border-red-300"
+                                    : "max-h-0"
+                                    }`}
+                            >
+
+                                <div className="p-4 bg-[#FFF9F4]">
+                                    <p className="text-[#400F09] font-medium mb-2">Add new incentive form:</p>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* <div className="flex items-center">
                                 {errors.incentives && touched.incentives ? (
                                     <ErrorMessage
                                         name="incentives"
@@ -155,10 +194,9 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
                                 <p className="ml-auto char-limit">
                                     {charCount} / {MAX_CHAR_LIMIT} Characters
                                 </p>
-                            </div>
-                        </div>
+                            </div> */}
 
-                        <div className="flex gap-4 mt-10">
+                        {/* <div className="flex gap-4 mt-10">
                             <CustomDropdown
                                 label="Gender"
                                 options={genderOptions}
@@ -226,7 +264,7 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
                         </div>
 
                         <div className="w-full bg-[#9D968D] h-0.5 my-10" />
-
+ */}
 
 
                         {/* <div className="bg-[#FFF6EB] px-6 flex items-center justify-between py-4"> */}
