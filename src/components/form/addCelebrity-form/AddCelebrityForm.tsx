@@ -51,10 +51,12 @@ const AddCelebrityForm = () => {
         },
     });
 
+
+
     const handleSubmit = async (values: CelebritiesValuesSchema, { setFieldValue, resetForm }: any) => {
         if (selectedFiles.length === 0) return;
-
         setUploading(true);
+
         try {
             const response = await celebrityUploadApi(
                 selectedFiles,
@@ -99,12 +101,12 @@ const AddCelebrityForm = () => {
     return (
         <Formik
             initialValues={{
-                celebrityImage: selectedFiles[0]?.name,
+                celebrityImage: 'clebrityimage',
                 celebrityName: '',
                 celebrityGender: '',
                 celebrityProfession: '',
             }}
-            enableReinitialize
+            enableReinitialize={false}
             validationSchema={celebrityValitionSchema}
             onSubmit={handleSubmit}
         >

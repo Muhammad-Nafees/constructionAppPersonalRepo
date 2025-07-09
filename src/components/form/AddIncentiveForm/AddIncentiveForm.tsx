@@ -25,6 +25,7 @@ const incentivesMoodOptions = [
     'Ultra Badass (Dark Badass)',
     "I'm a Saint (Good Incentive)",
 ];
+
 const incentivesNatureOptions = [
     'Celebrities',
     'Players',

@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import SearchBarIcon from "../../components/svg/SearchBarIcon";
 import FilterIcon from "../../components/svg/FilterIcon";
 import debounce from "lodash/debounce";
+import CustomCheckbox from "../../components/reusableComponents/CustomCheckBox";
 
 const Incentives = () => {
   const [loading, setLoading] = useState(false);
@@ -239,12 +240,18 @@ const Incentives = () => {
                   <tr key={index} className="border-b border-[#E0D4C4] text-sm text-gray-700 ">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-4">
-                        <input
+                        {/* <input
                           type="checkbox"
                           className="w-4 h-4"
                           checked={deletenIncentivesIdsData.includes(item._id)}
                           onChange={() => handleCheckboxChange(item._id)}
+                        /> */}
+                        <CustomCheckbox
+                          className="w-4 h-4"
+                          checked={deletenIncentivesIdsData.includes(item._id)}
+                          onChange={() => handleCheckboxChange(item._id)}
                         />
+
                         <button onClick={() => handleEditClick(item)}>
                           <EditIcon />
                         </button>

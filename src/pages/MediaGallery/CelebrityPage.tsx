@@ -1,37 +1,31 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import PageMeta from "../../components/common/PageMeta";
-import AddIncentiveForm from "../../components/form/AddIncentiveForm/AddIncentiveForm";
-import { AddIncentivesValues } from "../../interface";
-import { deleteIncentivesApi, getIncentivesApi, updateIncentiveApi } from "../../../services/incentives";
+import AddCelebrityForm from "../../components/form/addCelebrity-form/AddCelebrityForm";
+import { AddIncentivesValues, CelebritiesValuesSchema } from "../../interface";
+import { deleteCelebritiesApi, getCelebritiesApi } from "../../../services/celebrities";
 import { AxiosError } from "axios";
-import { useAuth } from "../../context/AuthContext";
+import { toast } from "react-toastify";
+import { useGlobal } from "../../context/GlobalMainContext";
+import CustomCheckbox from "../../components/reusableComponents/CustomCheckBox";
 import AccendingArrow from "../../components/svg/AccendingArrow";
 import DescendingArrow from "../../components/svg/DescendingArrow";
 import EditIcon from "../../components/svg/EditIcon";
-import { toast } from "react-toastify";
-import SearchBarIcon from "../../components/svg/SearchBarIcon";
 import FilterIcon from "../../components/svg/FilterIcon";
+import SearchBarIcon from "../../components/svg/SearchBarIcon";
 import debounce from "lodash/debounce";
-import AddCelebrityForm from "../../components/form/addCelebrity-form/AddCelebrityForm";
-import { useGlobal } from "../../context/GlobalMainContext";
 
 const CelebrityPage = () => {
   const [loading, setLoading] = useState(false);
-  const [incentivesData, setAddIncentivesData] = useState<AddIncentivesValues[]>([]);
-  const { addIncentivesFormData } = useAuth();
-  const [deletenIncentivesIdsData, setDeletenIncentivesIdsData] = useState<number[]>([]);
+  const [celebritiesData, setCelebritiesData] = useState<AddIncentivesValues[]>([]);
+  const [deleteIds, setDeleteIds] = useState<number[]>([]);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [filterValue, setFilterValue] = useState("");
   const [debouncedFilter, setDebouncedFilter] = useState("");
-  const [editData, setEditData] = useState<AddIncentivesValues | null>(null);
-  const [editLoading, setEditLoading] = useState(false);
-  console.log("🚀 ~ Incentives ~ editData:", editData)
+  const [editCelebritiesData, setEditCelebritiesData] = useState<CelebritiesValuesSchema | null>(null);
+  const { celebritiesDataContext } = useGlobal();
   const formRef = useRef<HTMLDivElement | null>(null);
 
-  const debouncedSearch = useMemo(
-    () => debounce((value: string) => setDebouncedFilter(value), 300),
-    []
-  );
+  const debouncedSearch = useMemo(() => debounce(setDebouncedFilter, 300), []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -39,82 +33,69 @@ const CelebrityPage = () => {
     debouncedSearch(value);
   };
 
-  // const handleCheckboxChange = (index: number) => {
-  //   setDeletenIncentivesIdsData((prev) =>
-  //     prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
-  //   );
-  // };
 
-  // const handleSort = (order: "asc" | "desc") => {
-  //   setSortOrder(order);
-  // };
 
-  // const handleEditClick = (item: AddIncentivesValues) => {
-  //   setEditData(item);
-  //   setTimeout(() => {
-  //     formRef.current?.scrollIntoView({ behavior: "smooth" });
-  //   }, 100);
-  // };
+  const handleCheckboxChange = (id: number) => {
+    setDeleteIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
 
-  // const handlerDeleteIncentives = async () => {
-  //   try {
-  //     const response = await deleteIncentivesApi(deletenIncentivesIdsData);
-  //     getIncentivesData();
-  //     toast.success("Deleted successfully!");
-  //     setDeletenIncentivesIdsData([]);
-  //     return response;
-  //   } catch (err) {
-  //     console.log("Error deleting incentives:", err);
-  //     toast.error("Error deleting incentives");
-  //   }
-  // };
+
+  const handleSort = (order: "asc" | "desc") => setSortOrder(order);
 
 
 
-  // const getIncentivesData = async () => {
-  //   setLoading(true);
-  //   try {
-  //     const response = await getIncentivesApi();
-  //     let sortedData = [...(response?.incentivesData || [])];
-  //     sortedData.sort((a, b) => {
-  //       const timeA = new Date(a.createdAt).getTime();
-  //       const timeB = new Date(b.createdAt).getTime();
-  //       return sortOrder === "asc" ? timeA - timeB : timeB - timeA;
-  //     });
-  //     setAddIncentivesData(sortedData);
-  //   } catch (error: unknown) {
-  //     const axiosError = error as AxiosError<{ message: string }>;
-  //     console.log("Error fetching incentives:", axiosError);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  const handleEditClick = (item: CelebritiesValuesSchema) => {
+    setEditCelebritiesData(item);
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
 
-  // useEffect(() => {
-  //   getIncentivesData();
-  // }, [addIncentivesFormData, sortOrder]);
+  const handleDelete = async () => {
+    try {
+      await deleteCelebritiesApi(deleteIds);
+      await getCelebritiesData();
+      toast.success("Celebrity deleted successfully!");
+      setDeleteIds([]);
+    } catch (error) {
+      toast.error("Error deleting celebrities");
+    }
+  };
+
+
+  const getCelebritiesData = async () => {
+    setLoading(true);
+    try {
+      const response = await getCelebritiesApi();
+      const sortedData = [...(response?.data || [])].sort((a, b) => {
+        const timeA = new Date(a.createdAt).getTime();
+        const timeB = new Date(b.createdAt).getTime();
+        return sortOrder === "asc" ? timeA - timeB : timeB - timeA;
+      });
+      setCelebritiesData(sortedData);
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      console.error("Error fetching celebrities:", axiosError);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
 
   useEffect(() => {
-    return () => {
-      debouncedSearch.cancel();
-    };
-  }, []);
+    getCelebritiesData();
+  }, [celebritiesDataContext, sortOrder]);
 
-  const { celebritiesDataContext } = useGlobal();
+  useEffect(() => () => debouncedSearch.cancel(), []);
 
-  const filteredCelebrities = (celebritiesDataContext?.data || []).filter((item: any) => {
-    const searchText = debouncedFilter.toLowerCase().replace(/\s+/g, '');
-    const fields = [
-      item.celebrityName,
-      item.celebrityGender,
-      item.professionNationality,
-    ];
-
-    return fields.some(field =>
-      field?.toLowerCase().replace(/\s+/g, '').includes(searchText)
-    );
+  const filteredCelebrities = (celebritiesData || []).filter((item: any) => {
+    const searchText = debouncedFilter.toLowerCase().replace(/\s+/g, "");
+    const fields = [item.celebrityName, item.celebrityGender, item.professionNationality];
+    return fields.some((field) => field?.toLowerCase().replace(/\s+/g, "").includes(searchText));
   });
-
 
 
 
@@ -123,25 +104,15 @@ const CelebrityPage = () => {
       <PageMeta title="FameOflame" description="FameOflame admin panel" />
 
       <div className="w-[90%] mx-auto space-y-6">
-        {/* <div ref={formRef}> */}
         <AddCelebrityForm />
-
-        {/* <AddIncentiveForm
-            editingData={editData}
-            onEditSubmit={(data) => editData && handlerUpdateIncentives(editData._id, data)}
-            editLoading={editLoading}
-          /> */}
-        {/* </div> */}
 
         <div className="bg-[#FFF6EB] px-6 flex items-center justify-between py-4 ">
           <div className="flex space-x-2">
-            <button type="button">
-              <FilterIcon />
-            </button>
+            <button type="button"><FilterIcon /></button>
             <p className="text-black text-lg">Filter</p>
           </div>
 
-          <div className="flex bg-red-300 items-center justify-center space-x-4">
+          <div className="flex items-center justify-center space-x-4">
             <div className="flex-shrink-0 w-4/4 p-[2px] bg-gradient-to-r from-orange-600 to-orange-400">
               <div className="flex items-center bg-white overflow-hidden">
                 <input
@@ -161,15 +132,13 @@ const CelebrityPage = () => {
 
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-800 mb-4">All Celebrities</h3>
-          {deletenIncentivesIdsData.length > 0 && (
-            <div className="flex justify-end">
-              <button
-                // onClick={handlerDeleteIncentives}
-                className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
-              >
-                Delete
-              </button>
-            </div>
+          {deleteIds.length > 0 && (
+            <button
+              onClick={handleDelete}
+              className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
+            >
+              Delete
+            </button>
           )}
         </div>
 
@@ -178,72 +147,13 @@ const CelebrityPage = () => {
             <thead className="bg-[#FDF6EE] border-b border-[#E0D4C4]">
               <tr className="text-[#BB501C] text-sm font-semibold">
                 <th className="px-4 py-3 w-12">Actions</th>
-                <th className="px-4 py-3 w-64">
-                  <div className="flex items-center space-x-4">
-                    <span>Celebrity Image</span>
-                  </div>
-                </th>
-                <th className="px-4 py-3 w-40">Celebrity Name</th>
-                <th className="px-4 py-3 w-60">Celebrity Gender</th>
-                <th className="px-4 py-3 w-40">Profession/Nationality</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {celebritiesDataContext?.data?.map((celebrity: any, index: number) => (
-                <tr key={celebrity._id || index} className="border-b border-[#E0D4C4] text-sm text-gray-700">
-                  {/*  Actions */}
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-4">
-                      <input type="checkbox" className="w-4 h-4" />
-                      <button>
-                        <EditIcon />
-                      </button>
-                    </div>
-                  </td>
-
-                  {/*  Celebrity Image */}
-                  <td className="px-4 py-3">
-                    {celebrity.images?.[0]?.url ? (
-                      <img
-                        src={celebrity.images[0].url}
-                        alt={celebrity.images[0].filename}
-                        className="w-16 h-16 object-cover rounded"
-                      />
-                    ) : (
-                      <span className="text-gray-400 italic">No image</span>
-                    )}
-                  </td>
-
-                  {/* Celebrity Name */}
-                  <td className="px-4 py-3">{celebrity.celebrityName || '—'}</td>
-
-                  {/* Gender */}
-                  <td className="px-4 py-3">{celebrity.celebrityGender || '—'}</td>
-
-                  {/* Profession/Nationality */}
-                  <td className="px-4 py-3">{celebrity.professionNationality || '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-
-
-
-        {/* <div className="relative border border-[#E0D4C4] overflow-x-auto min-h-[200px] max-h-[400px] overflow-y-auto">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-[#FDF6EE] border-b border-[#E0D4C4]">
-              <tr className="text-[#BB501C] text-sm font-semibold">
-                <th className="px-4 py-3 w-12">Actions</th>
-                <th className="px-4 py-3 w-64">
+                <th className="px-4 py-3 w-24">
                   <div className="flex items-center space-x-4">
                     <span>Celebrity Image</span>
                     <div className="flex leading-none">
-                      {/* <button type="button" onClick={() => handleSort("asc")}><AccendingArrow /></button>
-                      <button type="button" onClick={() => handleSort("desc")}><DescendingArrow /></button> */}
-        {/* </div>
+                      <button onClick={() => handleSort("asc")}><AccendingArrow /></button>
+                      <button onClick={() => handleSort("desc")}><DescendingArrow /></button>
+                    </div>
                   </div>
                 </th>
                 <th className="px-4 py-3 w-40">Celebrity Name</th>
@@ -262,53 +172,49 @@ const CelebrityPage = () => {
                     </div>
                   </td>
                 </tr>
-              ) : incentivesData.length === 0 ? ( */}
-        {/* // No data created yet  */}
-        {/* <tr>
-                  <td colSpan={5}>
-                    <div className="flex justify-center py-10">
-                      <p className="text-[20px]">No Incentives Created Yet</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : filteredIncentives.length === 0 ? (
-                // Data exists but no match found
-                <tr>
-                  <td colSpan={5}>
-                    <div className="flex justify-center py-10">
-                      <p className="text-[20px]">No Incentives Found</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : ( */}
-        {/* filteredIncentives.map((item, index) => (
-                  <tr key={index} className="border-b border-[#E0D4C4] text-sm text-gray-700 ">
+              ) : filteredCelebrities.length > 0 ? (
+                filteredCelebrities.map((celebrity: any, index: number) => (
+                  <tr key={celebrity._id || index} className="border-b border-[#E0D4C4] text-sm text-gray-700">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-4">
-                        {/* <input
-                          type="checkbox"
+                        <CustomCheckbox
                           className="w-4 h-4"
-                          checked={deletenIncentivesIdsData.includes(item._id)}
-                          onChange={() => handleCheckboxChange(item._id)}
+                          checked={deleteIds.includes(celebrity._id)}
+                          onChange={() => handleCheckboxChange(celebrity._id)}
                         />
                         <button onClick={() => handleEditClick(item)}>
                           <EditIcon />
-                        </button> */}
-        {/* </div>
+                        </button>
+                      </div>
                     </td>
-                      <td className="px-4 py-3">
-                      <p className="w-[250px] break-words">{item?.incentives}</p>
+                    <td className="px-4 py-3">
+                      {celebrity.images?.[0]?.url ? (
+                        <img
+                          src={celebrity.images[0].url}
+                          alt={celebrity.images[0].filename}
+                          className="w-16 h-16 object-cover rounded"
+                        />
+                      ) : (
+                        <span className="text-gray-400 italic">No image</span>
+                      )}
                     </td>
-                    <td className="px-4 py-3">{item?.gender}</td>
-                    <td className="px-4 py-3">{item?.incentivesMood}</td>
-                    <td className="px-4 py-3">{item?.incentivesNature}</td>  
+                    <td className="px-4 py-3">{celebrity.celebrityName || '—'}</td>
+                    <td className="px-4 py-3">{celebrity.celebrityGender || '—'}</td>
+                    <td className="px-4 py-3">{celebrity.professionNationality || '—'}</td>
                   </tr>
                 ))
+              ) : (
+                <tr>
+                  <td colSpan={5}>
+                    <div className="flex justify-center py-10">
+                      <p className="text-[20px]">No Celebrities Found</p>
+                    </div>
+                  </td>
+                </tr>
               )}
-            </tbody> */}
-
-        {/* </table> */}
-        {/* </div>  */}
+            </tbody>
+          </table>
+        </div>
       </div>
     </>
   );

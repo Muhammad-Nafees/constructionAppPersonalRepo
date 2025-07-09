@@ -73,3 +73,28 @@ export const getCelebritiesApi = async () => {
     throw error;
   }
 };
+
+
+
+export const deleteCelebritiesApi = async (celebritiesIds: number[]) => {
+  try {
+    const token = await localStorage.getItem("token");
+
+    if (!token) throw new Error("Authorization token not found");
+    console.log("deleteIncentivesApi ~ token:", token)
+
+    const response = await api.delete("uploadfiles/deleteCelebrities", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      data: {
+        ids: celebritiesIds
+      }
+    });
+
+    console.log("delete incnetrive response:", response.data);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
