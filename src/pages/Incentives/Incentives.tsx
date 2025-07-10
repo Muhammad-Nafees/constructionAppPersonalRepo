@@ -256,7 +256,6 @@ const Incentives = () => {
 
                 {/* Vertical Divider */}
                 <div className="w-px h-5 bg-[#E0D4C4]" />
-
                 {/* Select All */}
                 <button className="flex gap-2 items-center justify-center px-2 py-1 rounded">
                   <div className="bg-[#EF2222] w-6 h-6 rounded flex justify-center items-center ">
