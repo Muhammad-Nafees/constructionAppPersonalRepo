@@ -67,7 +67,7 @@ const AddCelebrityForm = () => {
             setCelebritiesApiResponse(response);
             resetForm();
             setSelectedFiles([]);
-            console.log('✅Upload success:', response);
+            console.log('Upload success:', response);
         } catch (error) {
             console.error('Upload failed', error);
         } finally {

@@ -12,7 +12,7 @@ import { GlobalMainProvider } from "./context/GlobalMainContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
 
-  <StrictMode>
+  // <StrictMode>
     <GlobalMainProvider>
       <AuthProvider>
         <ThemeProvider>
@@ -23,5 +23,5 @@ createRoot(document.getElementById("root")!).render(
         </ThemeProvider>
       </AuthProvider>
     </GlobalMainProvider>
-  </StrictMode>
+  // </StrictMode>
 );

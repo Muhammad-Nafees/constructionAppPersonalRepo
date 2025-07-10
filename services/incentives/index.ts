@@ -25,6 +25,7 @@ export const addIncentivesApi = async (values: AddIncentivesPayload) => {
   }
 };
 
+
 export const getIncentivesApi = async () => {
   try {
     const token = await localStorage.getItem("token");

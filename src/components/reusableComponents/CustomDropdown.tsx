@@ -54,7 +54,7 @@ const CustomDropdown = ({
 
 
     return (
-        <div className={`relative  ${className}`} ref={dropdownRef}>
+        <div className={`w-full ${className}`} ref={dropdownRef}>
 
             {label && (
                 <label className="block text-md font-medium text-[#000000] mb-2">
@@ -66,7 +66,7 @@ const CustomDropdown = ({
                 <button
                     type="button"
                     onClick={handleToggle}
-                    className="w-full px-4 py-2 text-left bg-white "
+                    className="w-full px-4 py-2 text-left bg-white"
                 >
                     <div className="flex justify-between items-center">
                         <span className={values ? "text-gray-900" : "text-gray-500"}>
@@ -86,10 +86,8 @@ const CustomDropdown = ({
                             </svg>
                         </div>
 
-
                     </div>
                 </button>
-
             </div>
 
             {
@@ -102,23 +100,35 @@ const CustomDropdown = ({
                     :
                     <div className={errorClassName} />
             }
-
             {isOpen && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 max-h-60 overflow-auto">
+                <div className="absolute w-[34%] z-50 mt-1 bg-white border border-gray-300 max-h-60 overflow-auto shadow-md rounded">
                     {options.map((option, index) => (
                         <button
                             key={index}
                             type="button"
                             onClick={() => handleSelect(option)}
-                            className="w-full px-4 py-3 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none transition-colors duration-150 first:rounded-t-lg last:rounded-b-lg"
+                            className="w-full px-4 py-3 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
                         >
                             <span className="text-gray-900">{option}</span>
                         </button>
                     ))}
                 </div>
             )}
+
+
         </div>
     );
 };
 
 export default CustomDropdown;
+
+{/* {
+                error && touched ?
+                    <ErrorMessage
+                        name={name}
+                        component="div"
+                        className="text-sm text-red-500 pt-1"
+                    />
+                    :
+                    <div className={errorClassName} />
+            } */}

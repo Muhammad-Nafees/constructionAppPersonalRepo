@@ -15,13 +15,14 @@ export interface ICreateAdminValues {
   name: string;
   email: string;
   password: string;
-}
+};
 
 export type AddIncentivesPayload = {
   incentives: string;
-  gender: string,
-  incentivesMood: string,
-  incentivesNature: string
+  gender: string;
+  incentivesMood: string;
+  incentivesNature: string;
+  incentiveStatus: boolean;
   // category: string;
   // badnessLevel: string;
 };
@@ -31,15 +32,14 @@ export type AddIncentivesValues = {
   gender: string,
   incentivesMood: string,
   incentivesNature: string;
+  incentiveStatus: boolean;
   _id?: any
 };
 
 
 export type CelebritiesValuesSchema = {
-
-  celebrityName: string,
-  celebrityGender: string,
-  celebrityProfession: string,
-  celebrityImage: string
-
-}
+  celebrityName: string;
+  celebrityGender: string;
+  celebrityProfession: string;
+  celebrityImage: string;
+};
