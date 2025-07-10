@@ -1,8 +1,7 @@
-import { Formik, Form, FormikHelpers, ErrorMessage, useFormikContext } from 'formik';
+import { Formik, Form, FormikHelpers, ErrorMessage } from 'formik';
 import { useState } from 'react';
 import { AxiosError } from 'axios';
 import { toast } from 'react-toastify';
-
 import ReactQuill from 'react-quill-new';
 import 'react-quill/dist/quill.snow.css';
 import Button from '../../ui/button/Button';
@@ -15,7 +14,6 @@ import { AddIncentivesValues } from '../../../interface';
 import { inceltivesValitionSchema } from '../../../validations';
 import './AddIncentives.css';
 import { useDropzone } from 'react-dropzone';
-import ToggleSwitch from '../form-elements/ToggleSwitch';
 import ToggleSwitchButton from '../../reusableComponents/ToggleSwitchButton';
 
 const MAX_CHAR_LIMIT = 350;
@@ -46,7 +44,11 @@ interface AddIncentiveFormProps {
     editingData?: AddIncentivesValues | null;
     onEditSubmit?: (data: AddIncentivesValues) => void;
     editLoading: boolean;
-    setEditData: React.Dispatch<React.SetStateAction<AddIncentivesValues | null>>
+    setEditData: React.Dispatch<React.SetStateAction<AddIncentivesValues | null>>;
+    setActiveAccordion: React.Dispatch<React.SetStateAction<string | null>>;
+    activeAccordion: string | null;
+    toggleAccordion: (accordion: string) => void;
+
 };
 
 
@@ -55,16 +57,15 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
     editingData = null,
     onEditSubmit,
     editLoading,
-    setEditData
+    setEditData,
+    activeAccordion,
+    toggleAccordion
 }) => {
     console.log("🚀 ~ editingData in addicnetiveform:", editingData)
     const [loading, setLoading] = useState<boolean>(false);
-    const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
 
 
-    const toggleAccordion = (key: string) => {
-        setActiveAccordion(activeAccordion === key ? null : key);
-    };
+
 
     const { setAddIncentivesFormData } = useAuth();
 
@@ -154,9 +155,6 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
                 isSubmitting,
                 errors,
             }) => {
-                // const plainText = values.incentives.re   place(/<[^>]+>/g, '').trim();
-                // const charCount = plainText.length;
-
                 return (
                     <Form>
                         {/* <h1 className="text-xl font-medium mb-4">Write Incentives</h1> */}
@@ -191,7 +189,14 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
                                     <Button
                                         type="button"
                                         className="w-32 text-white bg-gradient-to-r from-orange-400 to-red-600"
-                                        onClick={() => toggleAccordion("addnew")}
+                                        onClick={() => {
+                                            resetForm();
+                                            if (editingData) {
+                                                setEditData(null)
+                                            }
+                                            toggleAccordion("addnew")
+                                        }
+                                        }
                                     >
                                         Add New
                                     </Button>
@@ -303,6 +308,8 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
                                             value={values.incentiveStatus}
                                             onChange={(val) => setFieldValue('incentiveStatus', val)}
                                             label={values.incentiveStatus ? 'Active' : "Inactive"}
+                                            className="w-10 h-5 flex items-center rounded-full cursor-pointer transition-colors duration-300 "
+                                            classNameKnob="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 "
                                         />
                                     </div>
 
@@ -390,7 +397,6 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
 
                             </div>
                         </div>
-
 
 
                     </Form>

@@ -14,6 +14,7 @@ import debounce from "lodash/debounce";
 import CustomCheckbox from "../../components/reusableComponents/CustomCheckBox";
 import ToggleSwitchButton from "../../components/reusableComponents/ToggleSwitchButton";
 import DeleteIcon from "../../components/svg/DeleteIcon";
+import TrashIcon from "../../components/svg/TrashIcon";
 
 const Incentives = () => {
   const [loading, setLoading] = useState(false);
@@ -25,6 +26,8 @@ const Incentives = () => {
   const [debouncedFilter, setDebouncedFilter] = useState("");
   const [editData, setEditData] = useState<AddIncentivesValues | null>(null);
   const [isActiveIncentives, setIsActiveIncentives] = useState(false);
+  const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
+
 
   // console.log("🚀 ~ Incentives ~ isActiveIncentives:", isActiveIncentives)
   const [editLoading, setEditLoading] = useState(false);
@@ -32,6 +35,11 @@ const Incentives = () => {
   const formRef = useRef<HTMLDivElement | null>(null);
 
 
+  const toggleAccordionEdit = (key: string) => {
+    // If we're in edit mode, ignore toggle
+    if (editData) return;
+    setActiveAccordion(activeAccordion === key ? null : key);
+  };
 
   const handleSelectAll = () => {
     if (deletenIncentivesIdsData.length === filteredIncentives.length) {
@@ -42,6 +50,10 @@ const Incentives = () => {
   };
 
 
+
+  const toggleAccordion = (key: string) => {
+    setActiveAccordion(activeAccordion === key ? null : key);
+  };
 
   const debouncedSearch = useMemo(
     () => debounce((value: string) => setDebouncedFilter(value), 300),
@@ -162,6 +174,9 @@ const Incentives = () => {
             onEditSubmit={(data) => editData && handlerUpdateIncentives(editData._id, data)}
             editLoading={editLoading}
             setEditData={setEditData}
+            activeAccordion={activeAccordion}
+            setActiveAccordion={setActiveAccordion}
+            toggleAccordion={toggleAccordion}
           />
         </div>
 
@@ -209,12 +224,18 @@ const Incentives = () => {
                 <div className="w-px h-5 bg-[#E0D4C4]" />
 
                 {/* Select All */}
-                <button className="bg-[#847E76] px-2 py-1 rounded">
-                  <p className="text-[#F47521] text-xs font-medium">Select All</p>
+                <button
+                  onClick={handleSelectAll}
+                  className="bg-[#fde3d3] px-2 py-1 rounded"
+                >
+                  <p className="text-[#F47521] text-xs font-medium">
+                    {deletenIncentivesIdsData.length === filteredIncentives.length ? 'Unselect All' : 'Select All'}
+                  </p>
                 </button>
 
+
                 {/* Export */}
-                <button className="bg-[#FCE3D4] px-2 py-1 rounded">
+                <button className="bg-[#dcfcd3] px-2 py-1 rounded">
                   <p className="text-[#43B925] text-xs font-medium">Export {deletenIncentivesIdsData.length}</p>
                 </button>
 
@@ -229,6 +250,8 @@ const Incentives = () => {
                   value={isActiveIncentives}
                   onChange={setIsActiveIncentives}
                   label="Active"
+                  className="w-10 h-5 flex items-center rounded-full cursor-pointer transition-colors duration-300 "
+                  classNameKnob="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 "
                 />
 
 
@@ -237,14 +260,17 @@ const Incentives = () => {
                 <div className="w-px h-5 bg-[#E0D4C4]" />
 
                 {/* Select All */}
-                <button className="bg-[#847E76] px-2 py-1 rounded">
-                  <p className="text-[#F47521] text-xs font-medium">Select All</p>
+                <button className="flex gap-2 items-center justify-center px-2 py-1 rounded">
+                  <div className="bg-[#EF2222] w-6 h-6 rounded flex justify-center items-center ">
+                    <TrashIcon />
+                  </div>
+                  <p className="text-[#F47521] text-xs font-medium">Delete All</p>
                 </button>
 
                 {/* Export */}
-                <button className="bg-[#FCE3D4] px-2 py-1 rounded">
+                {/* <button className="bg-[#FCE3D4] px-2 py-1 rounded">
                   <p className="text-[#43B925] text-xs font-medium">Export {deletenIncentivesIdsData.length}</p>
-                </button>
+                </button> */}
 
                 {/* Optional Delete Button */}
               </div>
@@ -357,7 +383,10 @@ const Incentives = () => {
                         <DeleteIcon />
                       </button>
 
-                      <button onClick={() => handleEditClick(item)}>
+                      <button onClick={() => {
+                        handleEditClick(item)
+                        toggleAccordionEdit("addnew")
+                      }}>
                         <EditIcon />
                       </button>
                     </td>
@@ -371,7 +400,9 @@ const Incentives = () => {
                     <td className="px-4 py-3">
                       <ToggleSwitchButton
                         value={item?.incentiveStatus}
-
+                        label=""
+                        className="w-10 h-5 flex items-center rounded-full cursor-pointer transition-colors duration-300 "
+                        classNameKnob="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 "
                       // onChange={setincentiveStatus}
                       />
                     </td>
