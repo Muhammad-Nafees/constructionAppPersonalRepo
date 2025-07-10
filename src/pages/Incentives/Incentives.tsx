@@ -255,7 +255,6 @@ const Incentives = () => {
                 />
 
 
-
                 {/* Vertical Divider */}
                 <div className="w-px h-5 bg-[#E0D4C4]" />
 
