@@ -254,7 +254,6 @@ const Incentives = () => {
                   classNameKnob="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 "
                 />
 
-
                 {/* Vertical Divider */}
                 <div className="w-px h-5 bg-[#E0D4C4]" />
 
