@@ -2,17 +2,13 @@ import { Formik, Form, FormikHelpers, ErrorMessage } from 'formik';
 import { useState } from 'react';
 import { AxiosError } from 'axios';
 import { toast } from 'react-toastify';
-import ReactQuill from 'react-quill-new';
-import 'react-quill/dist/quill.snow.css';
 import Button from '../../ui/button/Button';
 import Spinner from '../../ui/spinner/Spinner';
 import CustomDropdown from '../../reusableComponents/CustomDropdown';
-
 import { useAuth } from '../../../context/AuthContext';
-import { addIncentivesApi } from '../../../../services/incentives';
+import { addIncentivesApi, exportCsvIncentivesApi, uploadCsvIncentivesApi } from '../../../../services/incentives';
 import { AddIncentivesValues } from '../../../interface';
 import { inceltivesValitionSchema } from '../../../validations';
-import './AddIncentives.css';
 import { useDropzone } from 'react-dropzone';
 import ToggleSwitchButton from '../../reusableComponents/ToggleSwitchButton';
 
@@ -48,7 +44,7 @@ interface AddIncentiveFormProps {
     setActiveAccordion: React.Dispatch<React.SetStateAction<string | null>>;
     activeAccordion: string | null;
     toggleAccordion: (accordion: string) => void;
-
+    getIncentivesData: () => Promise<void>
 };
 
 
@@ -59,10 +55,15 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
     editLoading,
     setEditData,
     activeAccordion,
-    toggleAccordion
+    toggleAccordion,
+    getIncentivesData
 }) => {
     console.log("🚀 ~ editingData in addicnetiveform:", editingData)
     const [loading, setLoading] = useState<boolean>(false);
+    const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+    // const [uploading, setUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+    // const [uploadSuccess, setUploadSuccess] = useState(false);
 
 
 
@@ -110,28 +111,50 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
         }
     };
 
-
-
     const { getRootProps, getInputProps } = useDropzone({
         onDrop: (acceptedFiles) => {
-            const validFiles = acceptedFiles.filter((file) => {
-                if (file.name.endsWith(".csv")) {
-                    return true;
-                } else {
-                    toast.error(`${file.name} is not a CSV file and was not added.`);
-                    return false;
+            const csvFile = acceptedFiles.find((file) => file.name.endsWith(".csv"));
+
+            if (!csvFile) {
+                toast.error("Only .csv files are allowed.");
+                return;
+            };
+
+            setUploadedFile(csvFile);
+            // setUploading(true);
+            setUploadProgress(0);
+            // setUploadSuccess(false);
+
+            uploadCsvIncentivesApi(
+                csvFile,
+                (msg) => {
+                    toast.success(msg);
+                    // setUploadSuccess(true);
+                    // setUploading(false);
+                },
+                (progress) => {
+                    setUploadProgress(progress);
                 }
-            });
-            console.log("🚀 ~ validFiles ~ validFiles:", validFiles)
-            //   setSelectedFiles(validFiles);
+            );
+            getIncentivesData()
         },
-        multiple: false, // Optional: Only 1 file at a time
+        multiple: false,
         accept: {
-            'text/csv': ['.csv']
+            "text/csv": [".csv"],
         },
     });
 
 
+    const exportCsvincentiveHandler = async () => {
+        try {
+            const response = await exportCsvIncentivesApi();
+            console.log("🚀 ~ exportCsvincentiveHandler ~ response:", response);
+            return response;
+        } catch (error) {
+            console.log("🚀 ~ exportCsvincentiveHandler ~ error:", error)
+            throw error;
+        }
+    };
 
     return (
         <Formik
@@ -175,6 +198,7 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
                                         </Button>
 
                                         <Button
+                                            onClick={exportCsvincentiveHandler}
                                             type="button"
                                             className="w-32 text-white bg-[#B54D40] py-2"
                                         >
@@ -361,41 +385,111 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
                                     : "max-h-0"
                                     }`}
                             >
-                                <div className="p-4 bg-[#FFF9F4] flex">
-                                    {/* Main Grid with Relative to handle dropdown overflow */}
-                                    <div className="flex w-full justify-between gap-4">
-                                        <div className='w-full'>
-                                            <p className="text-[#400F09] font-medium mb-2">Bulk Import</p>
-                                            {/* Left Input Box */}
+                                <div className="p-4 bg-[#FFF9F4]">
+                                    <div className="flex w-full gap-4 border border-orange-500 rounded">
+                                        {/* Left: Instructions */}
+                                        <div className="w-1/2 bg-[#A84317] text-white p-6 space-y-2">
+                                            <h2 className="text-[#FFFFFF] text-lg mb-2">Read the instructions carefully to create a File for BULK UPLOAD incentives.</h2>
+                                            <ol className="list-decimal list-inside text-sm space-y-1 marker:text-[#FF9B61]">
+                                                <li>
+                                                    Download Sample File{" "}
+                                                    <a
+                                                        href="/samlefamoflameIncentives.csv"
+                                                        download
+                                                        className="ml-2 bg-[#CC5A18] text-[#FFCAA7] text-xs px-2 py-[2px] rounded"
+                                                    >
+                                                        Click Here
+                                                    </a>
 
-                                            <div {...getRootProps()} className="p-[2px] bg-gradient-to-r from-orange-600 to-orange-400 cursor-pointer border-1 text-center border">
-                                                <input {...getInputProps({ multiple: true })} />
+                                                </li>
+                                                <li>
+                                                    Put the Data in appropriate columns as specified in Sample File.
+                                                </li>
+                                                <li>
+                                                    Add only Incentives on your own, otherwise simply copy the data from the file.
+                                                </li>
+                                                <li>Do not change the File Type at all.</li>
+                                                <li>
+                                                    Finally, upload the File here after inserting all the incentives.
+                                                </li>
+                                                <li>
+                                                    That's it! You can now edit the incentives in Bulk or individually using the Web App.
+                                                </li>
+                                            </ol>
 
-                                                <div className="flex flex-col items-center space-y-2 w-full px-4 py-2 text-left bg-[#FFFFFF] py-10">
+                                        </div>
+
+                                        {/* Right: CSV Upload */}
+                                        <div className="w-1/2 p-6">
+                                            <div {...getRootProps()} className="border-2 border-dashed border-orange-400 rounded cursor-pointer p-6 text-center">
+                                                <input {...getInputProps()} />
+                                                <div className="flex flex-col items-center space-y-2">
                                                     <img src="/images/uploadIcon.svg" alt="upload" className="w-10 h-10" />
                                                     <p className="text-orange-600 font-semibold">Drag & Drop or Choose File to Upload</p>
-                                                    <p className="text-gray-500 text-sm text-center">
-                                                        Files accepted: JPEG, JPG, PNG, GIF, WEBP <br />
-                                                        Image should be 1000x1000 pixels or 1:1 ratio <br />
-                                                        Max Size: 1MB
+                                                    <p className="text-gray-500 text-sm">
+                                                        File accepted: <strong>.csv</strong> only <br />
+                                                        Example: incentives.csv <br />
+                                                        Max Size: 2MB
                                                     </p>
                                                     <span className="text-orange-500 underline">Browse</span>
                                                 </div>
                                             </div>
 
+                                            {/* Uploaded File Info */}
+                                            {uploadedFile && (
+                                                <div className="mt-4 bg-white p-3 rounded border border-gray-300 shadow-sm">
+                                                    <div className="flex items-center justify-between">
+                                                        {/* Left: File Info */}
+                                                        <div className="flex items-center gap-3">
+                                                            <img
+                                                                src="/images/csvIcon.png" //  
+                                                                alt="csv"
+                                                                className="w-6 h-6"
+                                                            />
+                                                            <div>
+                                                                <p className="text-sm font-medium text-gray-800">{uploadedFile.name}</p>
+                                                                <p className="text-xs text-gray-500">
+                                                                    {(uploadedFile.size / 1024 / 1024).toFixed(1)}mb &nbsp; | &nbsp; {uploadProgress ?? 0}%
+                                                                </p>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Right: Delete Button */}
+                                                        <button
+                                                            onClick={() => {
+                                                                setUploadedFile(null);
+                                                                setUploadProgress(null);
+                                                                // setUploadSuccess(false);
+                                                            }}
+                                                            className="bg-[#FF9B61] w-6 h-6 rounded flex justify-center items-center"
+                                                        >
+
+
+
+                                                            <svg width="20" height="20" viewBox="0 0 10 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                <path d="M8.36194 2.93435C7.7742 2.8735 7.18645 2.82787 6.59506 2.79365V2.78985L6.51475 2.2955C6.45999 1.94565 6.37967 1.42088 5.52544 1.42088H4.56898C3.7184 1.42088 3.63808 1.92283 3.57967 2.29169L3.50301 2.77844C3.16351 2.80125 2.824 2.82407 2.4845 2.85829L1.73978 2.93435C1.58645 2.94956 1.47694 3.09026 1.49154 3.24617C1.50614 3.40208 1.63756 3.51616 1.79089 3.50095L2.53561 3.4249C4.44851 3.22716 6.37602 3.30321 8.31084 3.50475C8.32179 3.50475 8.32909 3.50475 8.34004 3.50475C8.47876 3.50475 8.59923 3.39447 8.61383 3.24617C8.62479 3.09026 8.51527 2.94956 8.36194 2.93435Z" fill="white" />
+                                                                <path d="M7.69071 4.04117C7.6031 3.9461 7.48263 3.89286 7.35851 3.89286H2.74417C2.62005 3.89286 2.49593 3.9461 2.41196 4.04117C2.328 4.13623 2.28054 4.26552 2.28784 4.39862L2.51418 8.30018C2.55434 8.87819 2.60545 9.60071 3.8795 9.60071H6.22318C7.49723 9.60071 7.54834 8.882 7.5885 8.30018L7.81483 4.40242C7.82213 4.26552 7.77468 4.13623 7.69071 4.04117ZM5.65734 7.69556H4.44169C4.29202 7.69556 4.1679 7.56626 4.1679 7.41035C4.1679 7.25444 4.29202 7.12515 4.44169 7.12515H5.65734C5.80701 7.12515 5.93113 7.25444 5.93113 7.41035C5.93113 7.56626 5.80701 7.69556 5.65734 7.69556ZM5.96399 6.17448H4.13869C3.98902 6.17448 3.8649 6.04519 3.8649 5.88928C3.8649 5.73336 3.98902 5.60407 4.13869 5.60407H5.96399C6.11366 5.60407 6.23778 5.73336 6.23778 5.88928C6.23778 6.04519 6.11366 6.17448 5.96399 6.17448Z" fill="white" />
+                                                            </svg>
+
+
+                                                        </button>
+                                                    </div>
+
+                                                    {/* Progress Bar */}
+                                                    <div className="w-full bg-gray-200 rounded h-2 mt-2">
+                                                        <div
+                                                            className="bg-orange-500 h-2 rounded transition-all duration-300 ease-in-out"
+                                                            style={{ width: `${uploadProgress ?? 0}%` }}
+                                                        ></div>
+                                                    </div>
+                                                </div>
+                                            )}
 
                                         </div>
-
-
-                                        {/* Right Dropdowns */}
-
-
                                     </div>
                                 </div>
-
-                                {/* buttons */}
-
                             </div>
+
                         </div>
 
 

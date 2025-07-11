@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import AddIncentiveForm from "../../components/form/AddIncentiveForm/AddIncentiveForm";
 import { AddIncentivesValues } from "../../interface";
-import { deleteIncentivesApi, getIncentivesApi, updateIncentiveApi } from "../../../services/incentives";
+import { deleteAllIncentivesApi, deleteIncentivesApi, getIncentivesApi, updateIncentiveApi } from "../../../services/incentives";
 import { AxiosError } from "axios";
 import { useAuth } from "../../context/AuthContext";
 import AccendingArrow from "../../components/svg/AccendingArrow";
@@ -16,23 +16,26 @@ import ToggleSwitchButton from "../../components/reusableComponents/ToggleSwitch
 import DeleteIcon from "../../components/svg/DeleteIcon";
 import TrashIcon from "../../components/svg/TrashIcon";
 
+
+
 const Incentives = () => {
   const [loading, setLoading] = useState(false);
   const [incentivesData, setAddIncentivesData] = useState<AddIncentivesValues[]>([]);
   const { addIncentivesFormData } = useAuth();
-  const [deletenIncentivesIdsData, setDeletenIncentivesIdsData] = useState<number[]>([]);
+  const [IncentivesIdsData, setIncentivesIdsData] = useState<number[]>([]);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [filterValue, setFilterValue] = useState("");
   const [debouncedFilter, setDebouncedFilter] = useState("");
   const [editData, setEditData] = useState<AddIncentivesValues | null>(null);
   const [isActiveIncentives, setIsActiveIncentives] = useState(false);
   const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
-
-
+  const [loadingDeleteAllIncentives, setLoadingDeletAllIncentives] = useState(false)
+  const [statusMap, setStatusMap] = useState<Record<string, boolean>>({});
   // console.log("🚀 ~ Incentives ~ isActiveIncentives:", isActiveIncentives)
   const [editLoading, setEditLoading] = useState(false);
 
   const formRef = useRef<HTMLDivElement | null>(null);
+
 
 
   const toggleAccordionEdit = (key: string) => {
@@ -42,10 +45,10 @@ const Incentives = () => {
   };
 
   const handleSelectAll = () => {
-    if (deletenIncentivesIdsData.length === filteredIncentives.length) {
-      setDeletenIncentivesIdsData([]);
+    if (IncentivesIdsData.length === filteredIncentives.length) {
+      setIncentivesIdsData([]);
     } else {
-      setDeletenIncentivesIdsData(filteredIncentives.map((item) => item._id));
+      setIncentivesIdsData(filteredIncentives.map((item) => item._id));
     }
   };
 
@@ -67,7 +70,7 @@ const Incentives = () => {
   };
 
   const handleCheckboxChange = (index: number) => {
-    setDeletenIncentivesIdsData((prev) =>
+    setIncentivesIdsData((prev) =>
       prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
     );
   };
@@ -86,10 +89,10 @@ const Incentives = () => {
 
   const handlerDeleteIncentives = async (id: any) => {
     try {
-      const response = await deleteIncentivesApi(id ? [id] : deletenIncentivesIdsData);
+      const response = await deleteIncentivesApi(id ? [id] : IncentivesIdsData);
       getIncentivesData();
       toast.success("Deleted successfully!");
-      setDeletenIncentivesIdsData([]);
+      setIncentivesIdsData([]);
       return response;
     } catch (err) {
       console.log("Error deleting incentives:", err);
@@ -97,6 +100,7 @@ const Incentives = () => {
     }
   };
 
+  
 
   const handlerUpdateIncentives = async (id: string, values: AddIncentivesValues) => {
     setEditLoading(true);
@@ -135,6 +139,81 @@ const Incentives = () => {
     }
   };
 
+
+
+  const deleteIncentivesData = async () => {
+    setLoadingDeletAllIncentives(true);
+    try {
+      const response = await deleteAllIncentivesApi();
+      toast.success("Incentives deleted successfully!");
+      getIncentivesData();
+      setLoadingDeletAllIncentives(false);
+      return response;
+    } catch (error: unknown) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      console.log("Error fetching incentives:", axiosError);
+    } finally {
+      setLoadingDeletAllIncentives(false);
+    }
+  };
+
+
+  const handlerBulkToggleStatus = async () => {
+    const newStatus = !isActiveIncentives;
+
+    // 1️⃣ Immediate UI feedback
+    setIsActiveIncentives(newStatus);
+
+    // 2️⃣ Run API after transition
+    setTimeout(async () => {
+      try {
+        await Promise.all(
+          IncentivesIdsData.map((id) =>
+            updateIncentiveApi(id, { incentiveStatus: newStatus })
+          )
+        );
+        toast.success("Status updated successfully!");
+        setIsActiveIncentives(false);
+
+        getIncentivesData();
+      } catch (error) {
+        toast.error("Error updating status");
+
+        // 3️⃣ Optional: Revert toggle if API fails
+        setIsActiveIncentives(!newStatus);
+      }
+    }, 300); // Wait for 300ms animation to complete
+  };
+
+  const handleToggleStatus = async (id: string) => {
+    const current = statusMap[id];
+    const updatedMap = { ...statusMap, [id]: !current };
+
+    // 1. Immediate UI update
+    setStatusMap(updatedMap);
+
+    // 2. API call
+    try {
+      await updateIncentiveApi(id, { incentiveStatus: !current });
+      toast.success("Status updated");
+      getIncentivesData(); // optional if you want to refresh from server
+    } catch (err) {
+      toast.error("Error updating status");
+      // 3. Revert toggle on error
+      setStatusMap((prev) => ({ ...prev, [id]: current }));
+    }
+  };
+
+  useEffect(() => {
+    const initialMap: Record<string, boolean> = {};
+    incentivesData.forEach((item) => {
+      initialMap[item._id] = item.incentiveStatus;
+    });
+    setStatusMap(initialMap);
+  }, [incentivesData]);
+
+
+  // deleteAllIncentives
   useEffect(() => {
     getIncentivesData();
   }, [addIncentivesFormData, sortOrder]);
@@ -177,8 +256,11 @@ const Incentives = () => {
             activeAccordion={activeAccordion}
             setActiveAccordion={setActiveAccordion}
             toggleAccordion={toggleAccordion}
+            getIncentivesData={getIncentivesData}
           />
         </div>
+
+
 
         <div className="bg-[#FFF6EB] px-6 flex items-center justify-between py-4 ">
           <div className="flex space-x-2">
@@ -187,6 +269,8 @@ const Incentives = () => {
             </button> */}
             <p className="text-black text-lg">Filter</p>
           </div>
+
+
 
           <div className="flex bg-red-300 items-center justify-center space-x-4">
             <div className="flex-shrink-0 w-4/4 p-[2px] bg-gradient-to-r from-orange-600 to-orange-400">
@@ -206,18 +290,20 @@ const Incentives = () => {
           </div>
         </div>
 
+
+
         <div className="flex items-center justify-between mb-4">
           {/* Left side: Title */}
           <h3 className="text-lg font-semibold text-gray-800 w-40">All Incentives</h3>
 
           {/* Right side: Actions only if items selected */}
-          {deletenIncentivesIdsData.length > 0 && (
+          {IncentivesIdsData.length > 0 && (
             <div className="flex items-center justify-between w-full">
 
               <div className="flex items-center space-x-3">
                 {/* X Records Selected */}
                 <p className="text-[#847E76] text-sm">
-                  {deletenIncentivesIdsData.length} Record{deletenIncentivesIdsData.length > 1 && 's'} Selected
+                  {IncentivesIdsData.length} Record{IncentivesIdsData.length > 1 && 's'} Selected
                 </p>
 
                 {/* Vertical Divider */}
@@ -229,14 +315,14 @@ const Incentives = () => {
                   className="bg-[#fde3d3] px-2 py-1 rounded"
                 >
                   <p className="text-[#F47521] text-xs font-medium">
-                    {deletenIncentivesIdsData.length === filteredIncentives.length ? 'Unselect All' : 'Select All'}
+                    {IncentivesIdsData.length === filteredIncentives.length ? 'Unselect All' : 'Select All'}
                   </p>
                 </button>
 
 
                 {/* Export */}
                 <button className="bg-[#dcfcd3] px-2 py-1 rounded">
-                  <p className="text-[#43B925] text-xs font-medium">Export {deletenIncentivesIdsData.length}</p>
+                  <p className="text-[#43B925] text-xs font-medium">Export {IncentivesIdsData.length}</p>
                 </button>
 
                 {/* Optional Delete Button */}
@@ -248,7 +334,7 @@ const Incentives = () => {
                 {/* X Records Selected */}
                 <ToggleSwitchButton
                   value={isActiveIncentives}
-                  onChange={setIsActiveIncentives}
+                  onChange={handlerBulkToggleStatus}
                   label="Active"
                   className="w-10 h-5 flex items-center rounded-full cursor-pointer transition-colors duration-300 "
                   classNameKnob="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 "
@@ -257,16 +343,36 @@ const Incentives = () => {
                 {/* Vertical Divider */}
                 <div className="w-px h-5 bg-[#E0D4C4]" />
                 {/* Select All */}
-                <button className="flex gap-2 items-center justify-center px-2 py-1 rounded">
+                {/* <button onClick={deleteIncentivesData} className="flex gap-2 items-center justify-center px-2 py-1 rounded">
                   <div className="bg-[#EF2222] w-6 h-6 rounded flex justify-center items-center ">
                     <TrashIcon />
                   </div>
                   <p className="text-[#F47521] text-xs font-medium">Delete All</p>
+                </button> */}
+                <button
+                  onClick={deleteIncentivesData}
+                  disabled={loadingDeleteAllIncentives}
+                  className={`flex gap-2 items-center justify-center px-2 py-1 rounded ${loadingDeleteAllIncentives ? 'opacity-60 cursor-not-allowed' : ''}`}
+                >
+                  <div className="bg-[#EF2222] w-6 h-6 rounded flex justify-center items-center">
+                    {loadingDeleteAllIncentives ? (
+                      // Replace this with any spinner component if you use one, or keep it simple
+                      <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                      </svg>
+                    ) : (
+                      <TrashIcon />
+                    )}
+                  </div>
+                  <p className="text-[#F47521] text-xs font-medium">
+                    {loadingDeleteAllIncentives ? 'Deleting...' : 'Delete All'}
+                  </p>
                 </button>
 
                 {/* Export */}
                 {/* <button className="bg-[#FCE3D4] px-2 py-1 rounded">
-                  <p className="text-[#43B925] text-xs font-medium">Export {deletenIncentivesIdsData.length}</p>
+                  <p className="text-[#43B925] text-xs font-medium">Export {IncentivesIdsData.length}</p>
                 </button> */}
 
                 {/* Optional Delete Button */}
@@ -290,7 +396,7 @@ const Incentives = () => {
             <thead className="bg-[#FDF6EE] border-b border-[#E0D4C4]">
               <tr className="text-[#BB501C] text-sm font-semibold">
                 <th className="px-4 py-3 w-28">
-                  <CustomCheckbox className="w-4 h-4" checked={deletenIncentivesIdsData.length === filteredIncentives.length} onChange={handleSelectAll} />
+                  <CustomCheckbox className="w-4 h-4" checked={IncentivesIdsData.length === filteredIncentives.length} onChange={handleSelectAll} />
                 </th>
 
 
@@ -350,7 +456,7 @@ const Incentives = () => {
                       <div className="flex items-center gap-4">
                         <CustomCheckbox
                           className="w-4 h-4"
-                          checked={deletenIncentivesIdsData.includes(item._id)}
+                          checked={IncentivesIdsData.includes(item._id)}
                           onChange={() => handleCheckboxChange(item._id)}
                         />
                       </div>
@@ -360,12 +466,12 @@ const Incentives = () => {
                     {/* <input
                           type="checkbox"
                           className="w-4 h-4"
-                          checked={deletenIncentivesIdsData.includes(item._id)}
+                          checked={IncentivesIdsData.includes(item._id)}
                           onChange={() => handleCheckboxChange(item._id)}
                         /> */}
                     {/* <CustomCheckbox
                           className="w-4 h-4"
-                          checked={deletenIncentivesIdsData.includes(item._id)}
+                          checked={IncentivesIdsData.includes(item._id)}
                           onChange={() => handleCheckboxChange(item._id)}
                         /> */}
                     {/* <button onClick={() => handleEditClick(item)}>
@@ -396,8 +502,8 @@ const Incentives = () => {
                     <td className="px-4 py-3">{item?.incentivesNature}</td>
                     <td className="px-4 py-3">
                       <ToggleSwitchButton
-                        value={item?.incentiveStatus}
-                        label=""
+                        value={statusMap[item._id]} // get initial or updated value
+                        onChange={() => handleToggleStatus(item._id)}
                         className="w-10 h-5 flex items-center rounded-full cursor-pointer transition-colors duration-300 "
                         classNameKnob="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 "
                       // onChange={setincentiveStatus}

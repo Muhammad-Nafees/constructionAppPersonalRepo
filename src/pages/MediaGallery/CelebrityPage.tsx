@@ -1,101 +1,65 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+// import { useEffect, useMemo, useRef, useState } from "react";
 import PageMeta from "../../components/common/PageMeta";
-import AddCelebrityForm from "../../components/form/addCelebrity-form/AddCelebrityForm";
-import { AddIncentivesValues, CelebritiesValuesSchema } from "../../interface";
-import { deleteCelebritiesApi, getCelebritiesApi } from "../../../services/celebrities";
-import { AxiosError } from "axios";
-import { toast } from "react-toastify";
-import { useGlobal } from "../../context/GlobalMainContext";
-import CustomCheckbox from "../../components/reusableComponents/CustomCheckBox";
-import AccendingArrow from "../../components/svg/AccendingArrow";
-import DescendingArrow from "../../components/svg/DescendingArrow";
-import EditIcon from "../../components/svg/EditIcon";
-import FilterIcon from "../../components/svg/FilterIcon";
-import SearchBarIcon from "../../components/svg/SearchBarIcon";
-import debounce from "lodash/debounce";
+//  import { AddIncentivesValues, CelebritiesValuesSchema } from "../../interface";
+// import { deleteCelebritiesApi, getCelebritiesApi } from "../../../services/celebrities";
+// import { AxiosError } from "axios";
+// import { toast } from "react-toastify";
+// import { useGlobal } from "../../context/GlobalMainContext";
+ 
+// import debounce from "lodash/debounce";
 
 const CelebrityPage = () => {
-  const [loading, setLoading] = useState(false);
-  const [celebritiesData, setCelebritiesData] = useState<AddIncentivesValues[]>([]);
-  const [deleteIds, setDeleteIds] = useState<number[]>([]);
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [filterValue, setFilterValue] = useState("");
-  const [debouncedFilter, setDebouncedFilter] = useState("");
-  const [editCelebritiesData, setEditCelebritiesData] = useState<CelebritiesValuesSchema | null>(null);
-  const { celebritiesDataContext } = useGlobal();
-  const formRef = useRef<HTMLDivElement | null>(null);
+  // const [loading, setLoading] = useState(false);
+  // const [celebritiesData, setCelebritiesData] = useState<AddIncentivesValues[]>([]);
+  // const [deleteIds, setDeleteIds] = useState<number[]>([]);
+  // const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  // const [filterValue, setFilterValue] = useState("");
+  // const [debouncedFilter, setDebouncedFilter] = useState("");
+  // const [editCelebritiesData, setEditCelebritiesData] = useState<CelebritiesValuesSchema | null>(null);
+  // const { celebritiesDataContext } = useGlobal();
+  // const formRef = useRef<HTMLDivElement | null>(null);
 
-  const debouncedSearch = useMemo(() => debounce(setDebouncedFilter, 300), []);
+  // const debouncedSearch = useMemo(() => debounce(setDebouncedFilter, 300), []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setFilterValue(value);
-    debouncedSearch(value);
-  };
+  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const value = e.target.value;
+  //   // setFilterValue(value);
+  //   debouncedSearch(value);
+  // };
+ 
+ 
 
-
-
-  const handleCheckboxChange = (id: number) => {
-    setDeleteIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-    );
-  };
-
-
-  const handleSort = (order: "asc" | "desc") => setSortOrder(order);
-
-
-
-  const handleEditClick = (item: CelebritiesValuesSchema) => {
-    setEditCelebritiesData(item);
-    setTimeout(() => {
-      formRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
-  };
-
-  const handleDelete = async () => {
-    try {
-      await deleteCelebritiesApi(deleteIds);
-      await getCelebritiesData();
-      toast.success("Celebrity deleted successfully!");
-      setDeleteIds([]);
-    } catch (error) {
-      toast.error("Error deleting celebrities");
-    }
-  };
-
-
-  const getCelebritiesData = async () => {
-    setLoading(true);
-    try {
-      const response = await getCelebritiesApi();
-      const sortedData = [...(response?.data || [])].sort((a, b) => {
-        const timeA = new Date(a.createdAt).getTime();
-        const timeB = new Date(b.createdAt).getTime();
-        return sortOrder === "asc" ? timeA - timeB : timeB - timeA;
-      });
-      setCelebritiesData(sortedData);
-    } catch (error) {
-      const axiosError = error as AxiosError<{ message: string }>;
-      console.error("Error fetching celebrities:", axiosError);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const getCelebritiesData = async () => {
+  //   // setLoading(true);
+  //   try {
+  //     const response = await getCelebritiesApi();
+  //     const sortedData = [...(response?.data || [])].sort((a, b) => {
+  //       const timeA = new Date(a.createdAt).getTime();
+  //       const timeB = new Date(b.createdAt).getTime();
+  //       return sortOrder === "asc" ? timeA - timeB : timeB - timeA;
+  //     });
+  //     setCelebritiesData(sortedData);
+  //   } catch (error) {
+  //     const axiosError = error as AxiosError<{ message: string }>;
+  //     console.error("Error fetching celebrities:", axiosError);
+  //   } finally {
+  //     // setLoading(false);
+  //   }
+  // };
 
 
 
-  useEffect(() => {
-    getCelebritiesData();
-  }, [celebritiesDataContext, sortOrder]);
+  // useEffect(() => {
+  //   getCelebritiesData();
+  // }, [celebritiesDataContext, sortOrder]);
 
-  useEffect(() => () => debouncedSearch.cancel(), []);
+  // useEffect(() => () => debouncedSearch.cancel(), []);
 
-  const filteredCelebrities = (celebritiesData || []).filter((item: any) => {
-    const searchText = debouncedFilter.toLowerCase().replace(/\s+/g, "");
-    const fields = [item.celebrityName, item.celebrityGender, item.professionNationality];
-    return fields.some((field) => field?.toLowerCase().replace(/\s+/g, "").includes(searchText));
-  });
+  // const filteredCelebrities = (celebritiesData || []).filter((item: any) => {
+  //   const searchText = debouncedFilter.toLowerCase().replace(/\s+/g, "");
+  //   const fields = [item.celebrityName, item.celebrityGender, item.professionNationality];
+  //   return fields.some((field) => field?.toLowerCase().replace(/\s+/g, "").includes(searchText));
+  // });
 
 
 
@@ -103,7 +67,7 @@ const CelebrityPage = () => {
     <>
       <PageMeta title="FameOflame" description="FameOflame admin panel" />
 
-      <div className="w-[90%] mx-auto space-y-6">
+      {/* <div className="w-[90%] mx-auto space-y-6">
         <AddCelebrityForm />
 
         <div className="bg-[#FFF6EB] px-6 flex items-center justify-between py-4 ">
@@ -215,7 +179,12 @@ const CelebrityPage = () => {
             </tbody>
           </table>
         </div>
+      </div> */}
+
+      <div className="flex justify-center items-center  h-screen w-full">
+        <p className="text-[80px] text-center">Celebrities Coming Soon</p>
       </div>
+
     </>
   );
 };

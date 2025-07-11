@@ -11,6 +11,7 @@ export const celebrityUploadApi = async (
   onUploadSuccess: (url: string, fileName: string) => void,
   onUploadProgress?: (progress: number) => void
 ) => {
+
   if (!acceptedFiles || acceptedFiles.length === 0) return;
 
   const formData = new FormData();

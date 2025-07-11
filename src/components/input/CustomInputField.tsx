@@ -1,6 +1,5 @@
 import { ErrorMessage } from 'formik';
-import { useState } from 'react';
-
+ 
 type CustomInputProps = {
     label?: string;
     value: string;
@@ -24,7 +23,7 @@ const CustomInput = ({
     name,
     errorClassName = "h-4"
 }: CustomInputProps) => {
-    const [isFocused, setIsFocused] = useState(false);
+    // const [isFocused, setIsFocused] = useState(false);
 
     return (
         <div className={`relative w-full ${className} mt-5`}>
@@ -40,8 +39,8 @@ const CustomInput = ({
                     name={name}
                     value={value}
                     onChange={onChange}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
+                    // onFocus={() => setIsFocused(true)}
+                    // onBlur={() => setIsFocused(false)}
                     placeholder={placeholder}
                     className="w-full px-4 py-2 text-gray-900 bg-white focus:outline-none"
                 />

@@ -16,7 +16,7 @@ import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
-import MediaGallery from "./pages/MediaGallery/CelebrityPage";
+// import MediaGallery from "./pages/MediaGallery/CelebrityPage";
 import Music from "./pages/Music/Music";
 // import Accounts from "./pages/Accounts/Accounts";
 // import Finances from "./pages/Finances/Finances";

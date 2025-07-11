@@ -1,11 +1,11 @@
 import axios from "axios";
-import { localBaseUrl } from "../constant";
+import { base_url } from "../constant";
 import { toast } from "react-toastify";
 import { logoutHandler } from "../../src/utils/logoutHandler";
 // const navigate = useNavigate();
 
 const api = axios.create({
-    baseURL: localBaseUrl,
+    baseURL: base_url,
     withCredentials: true // So cookies are sent
 });
 
