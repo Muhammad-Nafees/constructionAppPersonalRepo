@@ -11,30 +11,11 @@ import { AddIncentivesValues } from '../../../interface';
 import { inceltivesValitionSchema } from '../../../validations';
 import { useDropzone } from 'react-dropzone';
 import ToggleSwitchButton from '../../reusableComponents/ToggleSwitchButton';
+import { genderOptions, incentivesMoodOptions, incentivesNatureOptions } from '../../../data';
 
 const MAX_CHAR_LIMIT = 350;
 
-const genderOptions = ['Male', 'Female', 'Unisex'];
-const incentivesMoodOptions = [
-    'Slightly Bad (Less Bad Incentive)',
-    'More Bad (Still a Bad Incentive)',
-    'Badass (Dirty Incentive)',
-    'Ultra Badass (Dark Badass)',
-    "I'm a Saint (Good Incentive)",
-];
 
-const incentivesNatureOptions = [
-    'Celebrities',
-    'Players',
-    'Unisex',
-    'Movies',
-    'TV Shows',
-    'Holidays',
-    'Hobbies',
-    'Expenses',
-    'Sexual Orientation',
-    'Occupation',
-];
 
 interface AddIncentiveFormProps {
     editingData?: AddIncentivesValues | null;
@@ -58,7 +39,7 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
     toggleAccordion,
     getIncentivesData
 }) => {
-    console.log("🚀 ~ editingData in addicnetiveform:", editingData)
+    // console.log("🚀 ~ editingData in addicnetiveform:", editingData)
     const [loading, setLoading] = useState<boolean>(false);
     const [uploadedFile, setUploadedFile] = useState<File | null>(null);
     // const [uploading, setUploading] = useState(false);
@@ -145,10 +126,12 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
     });
 
 
+
     const exportCsvincentiveHandler = async () => {
         try {
             const response = await exportCsvIncentivesApi();
-            console.log("🚀 ~ exportCsvincentiveHandler ~ response:", response);
+            toast.success("Bulk Incentives Successfully Exported")
+            // console.log("🚀 ~ exportCsvincentiveHandler ~ response:", response);
             return response;
         } catch (error) {
             console.log("🚀 ~ exportCsvincentiveHandler ~ error:", error)
@@ -258,11 +241,11 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
 
                                                 {/* Error & Characters Left */}
                                                 <div className="flex items-center mt-1">
-                                                    {!errors.incentives && !touched.incentives &&
+                                                    {/* {!errors.incentives && !touched.incentives &&
                                                         <p className='text-sm text-[#DF6022]'>Please type incentives here</p>
-                                                    }
+                                                    } */}
                                                     {errors.incentives && touched.incentives ? (
-                                                        <div className="text-sm text-[#DF6022]">
+                                                        <div className="text-sm text-red-500">
                                                             <ErrorMessage name="incentives" />
                                                         </div>
                                                     ) : (
@@ -293,7 +276,7 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
                                                 error={errors.gender}
                                                 touched={touched.gender}
                                                 name="gender"
-                                                errorClassName="text-red-500 h-6"
+                                                errorClassName="h-6"
                                             />
 
                                             <CustomDropdown
@@ -306,7 +289,7 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
                                                 error={errors.incentivesMood}
                                                 touched={touched.incentivesMood}
                                                 name="incentivesMood"
-                                                errorClassName="text-red-500 h-6"
+                                                errorClassName="h-6"
                                             />
 
                                             <CustomDropdown
@@ -318,7 +301,7 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
                                                 error={errors.incentivesNature}
                                                 touched={touched.incentivesNature}
                                                 name="incentivesNature"
-                                                errorClassName="text-red-500 h-6"
+                                                errorClassName="h-6"
                                             />
                                         </div>
 
@@ -464,8 +447,6 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
                                                             className="bg-[#FF9B61] w-6 h-6 rounded flex justify-center items-center"
                                                         >
 
-
-
                                                             <svg width="20" height="20" viewBox="0 0 10 11" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                                 <path d="M8.36194 2.93435C7.7742 2.8735 7.18645 2.82787 6.59506 2.79365V2.78985L6.51475 2.2955C6.45999 1.94565 6.37967 1.42088 5.52544 1.42088H4.56898C3.7184 1.42088 3.63808 1.92283 3.57967 2.29169L3.50301 2.77844C3.16351 2.80125 2.824 2.82407 2.4845 2.85829L1.73978 2.93435C1.58645 2.94956 1.47694 3.09026 1.49154 3.24617C1.50614 3.40208 1.63756 3.51616 1.79089 3.50095L2.53561 3.4249C4.44851 3.22716 6.37602 3.30321 8.31084 3.50475C8.32179 3.50475 8.32909 3.50475 8.34004 3.50475C8.47876 3.50475 8.59923 3.39447 8.61383 3.24617C8.62479 3.09026 8.51527 2.94956 8.36194 2.93435Z" fill="white" />
                                                                 <path d="M7.69071 4.04117C7.6031 3.9461 7.48263 3.89286 7.35851 3.89286H2.74417C2.62005 3.89286 2.49593 3.9461 2.41196 4.04117C2.328 4.13623 2.28054 4.26552 2.28784 4.39862L2.51418 8.30018C2.55434 8.87819 2.60545 9.60071 3.8795 9.60071H6.22318C7.49723 9.60071 7.54834 8.882 7.5885 8.30018L7.81483 4.40242C7.82213 4.26552 7.77468 4.13623 7.69071 4.04117ZM5.65734 7.69556H4.44169C4.29202 7.69556 4.1679 7.56626 4.1679 7.41035C4.1679 7.25444 4.29202 7.12515 4.44169 7.12515H5.65734C5.80701 7.12515 5.93113 7.25444 5.93113 7.41035C5.93113 7.56626 5.80701 7.69556 5.65734 7.69556ZM5.96399 6.17448H4.13869C3.98902 6.17448 3.8649 6.04519 3.8649 5.88928C3.8649 5.73336 3.98902 5.60407 4.13869 5.60407H5.96399C6.11366 5.60407 6.23778 5.73336 6.23778 5.88928C6.23778 6.04519 6.11366 6.17448 5.96399 6.17448Z" fill="white" />
@@ -501,3 +482,231 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
 };
 
 export default AddIncentiveForm;
+
+
+
+
+
+
+
+//   const [loading, setLoading] = useState(false);
+//   const [incentivesData, setAddIncentivesData] = useState<AddIncentivesValues[]>([]);
+//   const { addIncentivesFormData } = useAuth();
+//   const [IncentivesIdsData, setIncentivesIdsData] = useState<number[]>([]);
+//   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+//   const [filterValue, setFilterValue] = useState("");
+//   const [debouncedFilter, setDebouncedFilter] = useState("");
+//   const [editData, setEditData] = useState<AddIncentivesValues | null>(null);
+//   const [isActiveIncentives, setIsActiveIncentives] = useState(false);
+//   const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
+//   const [loadingDeleteAllIncentives, setLoadingDeletAllIncentives] = useState(false)
+//   const [statusMap, setStatusMap] = useState<Record<string, boolean>>({});
+//   // console.log("🚀 ~ Incentives ~ isActiveIncentives:", isActiveIncentives)
+//   const [editLoading, setEditLoading] = useState(false);
+
+//   const formRef = useRef<HTMLDivElement | null>(null);
+
+
+
+//   const toggleAccordionEdit = (key: string) => {
+//     // If we're in edit mode, ignore toggle
+//     if (editData) return;
+//     setActiveAccordion(activeAccordion === key ? null : key);
+//   };
+
+//   const handleSelectAll = () => {
+//     if (IncentivesIdsData.length === filteredIncentives.length) {
+//       setIncentivesIdsData([]);
+//     } else {
+//       setIncentivesIdsData(filteredIncentives.map((item) => item._id));
+//     }
+//   };
+
+
+
+//   const toggleAccordion = (key: string) => {
+//     setActiveAccordion(activeAccordion === key ? null : key);
+//   };
+
+//   const debouncedSearch = useMemo(
+//     () => debounce((value: string) => setDebouncedFilter(value), 300),
+//     []
+//   );
+
+//   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     const value = e.target.value;
+//     setFilterValue(value);
+//     debouncedSearch(value);
+//   };
+
+//   const handleCheckboxChange = (index: number) => {
+//     setIncentivesIdsData((prev) =>
+//       prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+//     );
+//   };
+
+//   const handleSort = (order: "asc" | "desc") => {
+//     setSortOrder(order);
+//   };
+
+//   const handleEditClick = (item: AddIncentivesValues) => {
+//     console.log("🚀 ~ handleEditClick ~ item:", item)
+//     setEditData(item);
+//     setTimeout(() => {
+//       formRef.current?.scrollIntoView({ behavior: "smooth" });
+//     }, 100);
+//   };
+
+//   const handlerDeleteIncentives = async (id: any) => {
+//     try {
+//       const response = await deleteIncentivesApi(id ? [id] : IncentivesIdsData);
+//       getIncentivesData();
+//       toast.success("Deleted successfully!");
+//       setIncentivesIdsData([]);
+//       return response;
+//     } catch (err) {
+//       console.log("Error deleting incentives:", err);
+//       toast.error("Error deleting incentives");
+//     }
+//   };
+
+
+
+//   const handlerUpdateIncentives = async (id: string, values: AddIncentivesValues) => {
+//     setEditLoading(true);
+//     try {
+//       const response = await updateIncentiveApi(id, values);
+//       toast.success("Incentive updated successfully!");
+//       setEditData(null);
+//       setEditLoading(false);
+//       getIncentivesData();
+//       return response;
+//     } catch (err) {
+//       console.log("Error updating incentive:", err);
+//       toast.error("Error updating incentive");
+//       setEditLoading(false);
+//     }
+//   };
+
+
+
+//   const getIncentivesData = async () => {
+//     setLoading(true);
+//     try {
+//       const response = await getIncentivesApi();
+//       let sortedData = [...(response?.incentivesData || [])];
+//       sortedData.sort((a, b) => {
+//         const timeA = new Date(a.createdAt).getTime();
+//         const timeB = new Date(b.createdAt).getTime();
+//         return sortOrder === "asc" ? timeA - timeB : timeB - timeA;
+//       });
+//       setAddIncentivesData(sortedData);
+//     } catch (error: unknown) {
+//       const axiosError = error as AxiosError<{ message: string }>;
+//       console.log("Error fetching incentives:", axiosError);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+
+
+//   const deleteIncentivesData = async () => {
+//     setLoadingDeletAllIncentives(true);
+//     try {
+//       const response = await deleteAllIncentivesApi();
+//       toast.success("Incentives deleted successfully!");
+//       getIncentivesData();
+//       setLoadingDeletAllIncentives(false);
+//       return response;
+//     } catch (error: unknown) {
+//       const axiosError = error as AxiosError<{ message: string }>;
+//       console.log("Error fetching incentives:", axiosError);
+//     } finally {
+//       setLoadingDeletAllIncentives(false);
+//     }
+//   };
+
+
+//   const handlerBulkToggleStatus = async () => {
+//     const newStatus = !isActiveIncentives;
+
+//     // 1️⃣ Immediate UI feedback
+//     setIsActiveIncentives(newStatus);
+
+//     // 2️⃣ Run API after transition
+//     setTimeout(async () => {
+//       try {
+//         await Promise.all(
+//           IncentivesIdsData.map((id) =>
+//             updateIncentiveApi(id, { incentiveStatus: newStatus })
+//           )
+//         );
+//         toast.success("Status updated successfully!");
+//         setIsActiveIncentives(false);
+
+//         getIncentivesData();
+//       } catch (error) {
+//         toast.error("Error updating status");
+
+//         // 3️⃣ Optional: Revert toggle if API fails
+//         setIsActiveIncentives(!newStatus);
+//       }
+//     }, 300); // Wait for 300ms animation to complete
+//   };
+
+//   const handleToggleStatus = async (id: string) => {
+//     const current = statusMap[id];
+//     const updatedMap = { ...statusMap, [id]: !current };
+
+//     // 1. Immediate UI update
+//     setStatusMap(updatedMap);
+
+//     // 2. API call
+//     try {
+//       await updateIncentiveApi(id, { incentiveStatus: !current });
+//       toast.success("Status updated");
+//       getIncentivesData(); // optional if you want to refresh from server
+//     } catch (err) {
+//       toast.error("Error updating status");
+//       // 3. Revert toggle on error
+//       setStatusMap((prev) => ({ ...prev, [id]: current }));
+//     }
+//   };
+
+//   useEffect(() => {
+//     const initialMap: Record<string, boolean> = {};
+//     incentivesData.forEach((item) => {
+//       initialMap[item._id] = item.incentiveStatus;
+//     });
+//     setStatusMap(initialMap);
+//   }, [incentivesData]);
+
+
+//   // deleteAllIncentives
+//   useEffect(() => {
+//     getIncentivesData();
+//   }, [addIncentivesFormData, sortOrder]);
+
+//   useEffect(() => {
+//     return () => {
+//       debouncedSearch.cancel();
+//     };
+//   }, []);
+
+
+
+//   const filteredIncentives = incentivesData.filter((item) => {
+//     const searchText = debouncedFilter.toLowerCase().replace(/\s+/g, '');
+//     const fields = [
+//       item.incentives,
+//       item.gender,
+//       item.incentivesMood,
+//       item.incentivesNature,
+//     ];
+
+//     return fields.some(field =>
+//       field.toLowerCase().replace(/\s+/g, '').includes(searchText)
+//     );
+//   });
+

@@ -12,8 +12,9 @@ export const inceltivesValitionSchema = Yup.object().shape({
     gender: Yup.string().required("Gender is required"),
     incentivesMood: Yup.string().required("IncentivesMood is required"),
     incentivesNature: Yup.string().required("IncentivesNature is required"),
-    incentiveStatus:Yup.string().required("incentiveStatus is required"),
+    incentiveStatus: Yup.string().required("IncentiveStatus is required"),
 });
+
 
 
 export const celebrityValitionSchema = Yup.object().shape({

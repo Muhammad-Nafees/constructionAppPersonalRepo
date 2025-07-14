@@ -26,26 +26,29 @@ export const addIncentivesApi = async (values: AddIncentivesPayload) => {
 };
 
 
-export const getIncentivesApi = async () => {
+
+export const getIncentivesApi = async (page: number, limit = 50) => {
+  console.log("incentivesApiIIINNNN ~ page:", page)
   try {
     const token = await localStorage.getItem("token");
-
     if (!token) throw new Error("Authorization token not found");
-    console.log("🚀 ~ getIncentivesApi ~ token:", token)
 
-    const response = await api.get("incentives/getIncentives", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    console.log("🚀 ~ getIncentivesApi response:", response.data);
+    const response = await api.get(
+      `incentives/getIncentives?limit=${limit}&page=${page}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    // console.log("🚀 ~ getIncentivesApi ~ response:", response?.data?.docs)
     return response.data;
   } catch (error) {
-    console.error("🚀 ~ getIncentivesApi error:", error);
+    console.error("getIncentivesApi error:", error);
     throw error;
   }
 };
+
 
 
 export const deleteAllIncentivesApi = async () => {

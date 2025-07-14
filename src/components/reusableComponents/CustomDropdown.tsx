@@ -11,7 +11,7 @@ type CustomDropdownProps = {
     error?: string | undefined;
     touched?: boolean | undefined;
     name: string;
-    errorClassName: string;
+    errorClassName?: string;
 };
 
 // Reusable Dropdown Component
@@ -54,7 +54,7 @@ const CustomDropdown = ({
 
 
     return (
-        <div className={`w-full ${className}`} ref={dropdownRef}>
+        <div className={`${className}`} ref={dropdownRef}>
 
             {label && (
                 <label className="block text-md font-medium text-[#000000] mb-2">
