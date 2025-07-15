@@ -62,7 +62,7 @@ const CustomDropdown = ({
                 </label>
             )}
 
-            <div className="p-[2px] bg-gradient-to-r from-orange-600 to-orange-400 ">
+            <div className="p-[2px] bg-gradient-to-r from-orange-600 to-orange-400">
                 <button
                     type="button"
                     onClick={handleToggle}

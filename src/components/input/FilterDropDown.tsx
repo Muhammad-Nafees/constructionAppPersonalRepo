@@ -3,12 +3,12 @@ import { useState, useRef, useEffect } from "react";
 type FilterDropdownProps = {
     label?: string;
     options: string[];
-    values: string[]|string;
+    values: string | string[];
     onSelect: (option: string) => void;
     placeholder?: string;
     className?: string;
     name: string;
-    buttonClassName: string
+    buttonClassName: string;
 };
 
 const FilterDropdown = ({
@@ -18,7 +18,7 @@ const FilterDropdown = ({
     onSelect,
     placeholder = "Select an option",
     className = "",
-    buttonClassName
+    buttonClassName,
 }: FilterDropdownProps) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -41,24 +41,18 @@ const FilterDropdown = ({
 
     return (
         <div className={`relative ${className}`} ref={dropdownRef}>
-            {label && <label className="block mb-2 text-md font-medium text-[#000000]">{label}</label>}
-
+            {label && <label className="block mb-2 text-sm sm:text-md font-medium text-[#000000]">{label}</label>}
             <button
                 type="button"
                 onClick={handleToggle}
-                className={`${buttonClassName} px-3 py-2 justify-between text-left border-[#AFA69B] bg-[#FFF6EB] border-2`}
+                className={`${buttonClassName} px-3 py-2 justify-between text-left border-[#AFA69B] bg-[#FFF6EB] border-2 text-sm sm:text-base`}
             >
-                <div className="flex justify-between items-center gap-4">
-                    <span
-                        className={`${values ? "text-gray-900" : "text-gray-500"
-                            } truncate block w-full overflow-hidden whitespace-nowrap text-ellipsis`}
-                    >
+                <div className="flex justify-between items-center gap-2 sm:gap-4">
+                    <span className={`${values ? "text-gray-900" : "text-gray-500"} text-[13px] truncate w-full  overflow-hidden whitespace-nowrap text-ellipsis`}>
                         {values || placeholder}
                     </span>
-
                     <svg
-                        className={`w-5 h-5  transition-transform duration-200 ${isOpen ? "rotate-180" : ""
-                            }`}
+                        className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
                         fill="none"
                         stroke="currentColor"
                         strokeWidth={2}
@@ -68,8 +62,6 @@ const FilterDropdown = ({
                     </svg>
                 </div>
             </button>
-
-
             {isOpen && (
                 <div className="absolute w-full z-50 mt-1 bg-white border border-gray-300 max-h-60 overflow-auto shadow-md rounded">
                     {options.map((option, index) => (
@@ -77,7 +69,7 @@ const FilterDropdown = ({
                             key={index}
                             type="button"
                             onClick={() => handleSelect(option)}
-                            className="w-full px-4 py-3 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+                            className="w-full px-4 py-2 sm:py-3 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none text-sm sm:text-base"
                         >
                             <span className="text-gray-900">{option}</span>
                         </button>

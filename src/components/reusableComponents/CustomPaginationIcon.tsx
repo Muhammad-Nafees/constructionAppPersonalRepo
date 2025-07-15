@@ -7,6 +7,7 @@ type Props = {
     pageNumber?: number; // for number
     isActive?: boolean;
     onClick?: () => void;
+    // disabled:boolean
 };
 
 const CustomPaginationItem: React.FC<Props> = ({
@@ -15,16 +16,17 @@ const CustomPaginationItem: React.FC<Props> = ({
     pageNumber,
     isActive = false,
     onClick,
+    // disabled
 }) => {
     if (type === 'arrow') {
         const iconSrc =
             direction === 'left'
                 ? './images/svgs/leftarrowpagination.svg'
                 : './images/svgs/rightarrowpagination.svg';
-
         return (
             <button
                 onClick={onClick}
+                // disabled={disabled}
                 className="bg-[#A86B63] w-8 h-8 rounded-lg flex items-center justify-center"
             >
                 <img src={iconSrc} alt={`${direction} arrow`} width={10} height={10} />

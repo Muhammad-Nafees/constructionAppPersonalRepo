@@ -173,7 +173,31 @@ export const exportCsvIncentivesApi = async () => {
     throw error;
   }
 };
+export const exportSelectedIncentivesApi = async (ids: string[]) => {
+  try {
+    const response = await api.post(
+      "incentives/exportSelected",
+      { ids },
+      { responseType: "blob" }
+    );
 
+    const blob = new Blob([response.data], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "incentives.csv");
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+  } catch (error) {
+    console.error("CSV export failed:", error);
+    throw error;
+  }
+};
+
+// api/incentives/exportSelected
 
 // router.post("/upload-csv", upload.single("file"), uploadCSVIncentives);
 // router.get("/exportIncentives", exportAllIncentives); // Bulk export

@@ -15,8 +15,6 @@ import { genderOptions, incentivesMoodOptions, incentivesNatureOptions } from '.
 
 const MAX_CHAR_LIMIT = 350;
 
-
-
 interface AddIncentiveFormProps {
     editingData?: AddIncentivesValues | null;
     onEditSubmit?: (data: AddIncentivesValues) => void;
@@ -25,7 +23,7 @@ interface AddIncentiveFormProps {
     setActiveAccordion: React.Dispatch<React.SetStateAction<string | null>>;
     activeAccordion: string | null;
     toggleAccordion: (accordion: string) => void;
-    getIncentivesData: () => Promise<void>
+    fetchIncentives: () => Promise<void>;
 };
 
 
@@ -37,28 +35,19 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
     setEditData,
     activeAccordion,
     toggleAccordion,
-    getIncentivesData
+    fetchIncentives,
 }) => {
-    // console.log("🚀 ~ editingData in addicnetiveform:", editingData)
     const [loading, setLoading] = useState<boolean>(false);
     const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-    // const [uploading, setUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState<number | null>(null);
-    // const [uploadSuccess, setUploadSuccess] = useState(false);
-
-
-
 
     const { setAddIncentivesFormData } = useAuth();
 
     const handleSubmit = async (
         values: AddIncentivesValues,
         { resetForm }: FormikHelpers<AddIncentivesValues>
-
     ) => {
-
         setLoading(true);
-        // const plainText = values.incentives.replace(/<[^>]+>/g, '');
         try {
             if (editingData && onEditSubmit) {
                 onEditSubmit({
@@ -66,11 +55,9 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
                     gender: values.gender,
                     incentivesMood: values.incentivesMood,
                     incentivesNature: values.incentivesNature,
-                    incentiveStatus: values.incentiveStatus
-                    // incentiveStatus:
+                    incentiveStatus: values.incentiveStatus,
                 });
             } else {
-
                 const response = await addIncentivesApi({
                     incentives: values.incentives,
                     gender: values.gender,
@@ -78,11 +65,10 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
                     incentivesNature: values.incentivesNature,
                     incentiveStatus: values.incentiveStatus,
                 });
-
                 toast.success('Incentive added successfully');
                 setAddIncentivesFormData(response.data);
                 resetForm();
-            };
+            }
         } catch (err: unknown) {
             const axiosError = err as AxiosError<{ message: string }>;
             toast.error(axiosError.response?.data.message || 'Something went wrong');
@@ -95,49 +81,58 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
     const { getRootProps, getInputProps } = useDropzone({
         onDrop: (acceptedFiles) => {
             const csvFile = acceptedFiles.find((file) => file.name.endsWith(".csv"));
-
             if (!csvFile) {
                 toast.error("Only .csv files are allowed.");
                 return;
-            };
-
+            }
             setUploadedFile(csvFile);
-            // setUploading(true);
             setUploadProgress(0);
-            // setUploadSuccess(false);
-
             uploadCsvIncentivesApi(
                 csvFile,
                 (msg) => {
                     toast.success(msg);
-                    // setUploadSuccess(true);
-                    // setUploading(false);
+                    fetchIncentives();
                 },
                 (progress) => {
                     setUploadProgress(progress);
                 }
             );
-            getIncentivesData()
         },
         multiple: false,
-        accept: {
-            "text/csv": [".csv"],
-        },
+        accept: { "text/csv": [".csv"] },
     });
 
 
-
-    const exportCsvincentiveHandler = async () => {
+    const exportCsvincentiveHandler = async (): Promise<void> => {
         try {
-            const response = await exportCsvIncentivesApi();
-            toast.success("Bulk Incentives Successfully Exported")
-            // console.log("🚀 ~ exportCsvincentiveHandler ~ response:", response);
-            return response;
+            const response: any = await exportCsvIncentivesApi();
+
+            if (!response || response.data?.size === 0) {
+                toast.warning("Exported file is empty.");
+                return;
+            }
+
+            toast.success("Bulk Incentives Successfully Exported");
         } catch (error) {
-            console.log("🚀 ~ exportCsvincentiveHandler ~ error:", error)
-            throw error;
+            const axiosError = error as AxiosError;
+            console.error("Export Error:", axiosError);
+
+            const status = axiosError?.response?.status;
+
+            const errorMessages: Record<number, string> = {
+                404: "No incentives found to export.",
+                500: "Server error while exporting incentives.",
+            };
+
+            toast.error(
+                status && errorMessages[status]
+                    ? errorMessages[status]
+                    : "Failed to export incentives. Please try again."
+            );
         }
     };
+
+
 
     return (
         <Formik
@@ -160,186 +155,132 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
                 resetForm,
                 isSubmitting,
                 errors,
-            }) => {
-                return (
-                    <Form>
-                        {/* <h1 className="text-xl font-medium mb-4">Write Incentives</h1> */}
-
-                        <div className="w-full">
-                            {/* Header Section */}
-                            <div className="bg-[#400F09] py-4 w-full flex justify-between px-4 items-center ">
-                                <h1 className="text-xl font-medium text-white">Incentives Menu</h1>
-
-                                <div className="gap-10 flex items-center">
-                                    <div className="flex space-x-2">
-                                        <Button
-                                            type="button"
-                                            className="w-32 text-white bg-[#D27639] py-2"
-                                            onClick={() => toggleAccordion("bulkimport")}
-                                        >
-                                            Bulk Import
-                                        </Button>
-
-                                        <Button
-                                            onClick={exportCsvincentiveHandler}
-                                            type="button"
-                                            className="w-32 text-white bg-[#B54D40] py-2"
-                                        >
-                                            Export All
-                                        </Button>
-                                    </div>
-
-
-
-                                    {/* Dashed Divider */}
-                                    <div className="h-10 border border-dashed border-[#EF6D22]" />
+            }) => (
+                <Form>
+                    <div className="w-full">
+                        <div className="bg-[#400F09] py-3 sm:py-4 w-full flex flex-col sm:flex-row justify-between px-4 items-center gap-3">
+                            <h1 className="text-lg sm:text-xl font-medium text-white">Incentives Menu</h1>
+                            <div className="flex flex-wrap gap-2 sm:gap-4 items-center">
+                                <div className="flex space-x-2">
                                     <Button
                                         type="button"
-                                        className="w-32 text-white bg-gradient-to-r from-orange-400 to-red-600"
-                                        onClick={() => {
-                                            resetForm();
-                                            if (editingData) {
-                                                setEditData(null)
-                                            }
-                                            toggleAccordion("addnew")
-                                        }
-                                        }
+                                        className="w-28 sm:w-32 text-white bg-[#D27639] py-2 text-sm sm:text-base"
+                                        onClick={() => toggleAccordion("bulkimport")}
                                     >
-                                        Add New
+                                        Bulk Import
                                     </Button>
-
+                                    <Button
+                                        onClick={exportCsvincentiveHandler}
+                                        type="button"
+                                        className="w-28 sm:w-32 text-white bg-[#B54D40] py-2 text-sm sm:text-base"
+                                    >
+                                        Export All
+                                    </Button>
                                 </div>
+                                <div className="h-8 sm:h-10 border border-dashed border-[#EF6D22]" />
+                                <Button
+                                    type="button"
+                                    className="w-28 sm:w-32 text-white bg-gradient-to-r from-orange-400 to-red-600 py-2 text-sm sm:text-base"
+                                    onClick={() => {
+                                        resetForm();
+                                        if (editingData) setEditData(null);
+                                        toggleAccordion("addnew");
+                                    }}
+                                >
+                                    Add New
+                                </Button>
                             </div>
+                        </div>
 
-
-
-                            {/* Accordion Section - Add New */}
-                            <div
-                                className={`overflow-hidden transition-all duration-500 ease-in-out ${activeAccordion === "addnew"
-                                    ? "max-h-[1000px] border border-dashed border-red-300"
-                                    : "max-h-0"
-                                    }`}
-                            >
-                                <div className="p-4 bg-[#FFF9F4] flex">
-                                    {/* Main Grid with Relative to handle dropdown overflow */}
-                                    <div className="flex w-full justify-between gap-4">
-                                        <div className='w-1/2'>
-                                            <p className="text-[#400F09] font-medium mb-2">Write Incentive</p>
-                                            {/* Left Input Box */}
-                                            <div className="">
-                                                <textarea
-                                                    className="w-full h-60 px-4 py-3 border border-orange-400 resize-none outline-none placeholder:text-gray-500"
-                                                    placeholder="Start typing the short overview here | Explain Level at a glance here"
-                                                    name="incentives"
-                                                    value={values.incentives}
-                                                    onChange={(e) => {
-                                                        setFieldValue("incentives", e.target.value);
-                                                    }}
-                                                    maxLength={MAX_CHAR_LIMIT}
-                                                    style={{ verticalAlign: "top" }}
-                                                />
-
-                                                {/* Error & Characters Left */}
-                                                <div className="flex items-center mt-1">
-                                                    {/* {!errors.incentives && !touched.incentives &&
-                                                        <p className='text-sm text-[#DF6022]'>Please type incentives here</p>
-                                                    } */}
-                                                    {errors.incentives && touched.incentives ? (
-                                                        <div className="text-sm text-red-500">
-                                                            <ErrorMessage name="incentives" />
-                                                        </div>
-                                                    ) : (
-                                                        <div className="h-4" />
-                                                    )}
-                                                    <p className="ml-auto text-sm text-[#767883]">
-                                                        {MAX_CHAR_LIMIT - values.incentives.length} Characters Left
-                                                    </p>
-
+                        <div className={`overflow-hidden transition-all duration-500 ease-in-out ${activeAccordion === "addnew" ? "max-h-[1000px] border border-dashed border-red-300" : "max-h-0"}`}>
+                            <div className="p-4 bg-[#FFF9F4]">
+                                <div className="flex flex-col sm:flex-row w-full justify-between gap-4">
+                                    <div className="w-full sm:w-1/2">
+                                        <p className="text-[#400F09] font-medium mb-2 text-sm sm:text-base">Write Incentive</p>
+                                        <textarea
+                                            className="w-full h-48 sm:h-60 px-4 py-3 border border-orange-400 resize-none outline-none placeholder:text-gray-500 text-sm sm:text-base"
+                                            placeholder="Please type incentives here"
+                                            name="incentives"
+                                            value={values.incentives}
+                                            onChange={(e) => setFieldValue("incentives", e.target.value)}
+                                            maxLength={MAX_CHAR_LIMIT}
+                                            style={{ verticalAlign: "top" }}
+                                        />
+                                        <div className="flex items-center mt-1">
+                                            {errors.incentives && touched.incentives ? (
+                                                <div className="text-sm text-red-500">
+                                                    <ErrorMessage name="incentives" />
                                                 </div>
-                                            </div>
-
+                                            ) : <div className="h-4" />}
+                                            <p className="ml-auto text-xs sm:text-sm text-[#767883]">
+                                                {MAX_CHAR_LIMIT - values.incentives.length} Characters Left
+                                            </p>
                                         </div>
-
-
-
-
-                                        {/* Right Dropdowns */}
-                                        <div className="w-1/2 flex flex-col gap-2">
-
-                                            <CustomDropdown
-                                                label="Gender"
-                                                options={genderOptions}
-                                                values={values.gender}
-                                                onSelect={(gender) => setFieldValue("gender", gender)}
-                                                className="w-full"
-                                                placeholder="Select Gender"
-                                                error={errors.gender}
-                                                touched={touched.gender}
-                                                name="gender"
-                                                errorClassName="h-6"
-                                            />
-
-                                            <CustomDropdown
-                                                label="Incentives Mood"
-                                                options={incentivesMoodOptions}
-                                                values={values.incentivesMood}
-                                                onSelect={(mood) => setFieldValue("incentivesMood", mood)}
-                                                className="w-full"
-                                                placeholder="Select Mood"
-                                                error={errors.incentivesMood}
-                                                touched={touched.incentivesMood}
-                                                name="incentivesMood"
-                                                errorClassName="h-6"
-                                            />
-
-                                            <CustomDropdown
-                                                label="Incentives Nature"
-                                                options={incentivesNatureOptions}
-                                                values={values.incentivesNature}
-                                                onSelect={(nature) => setFieldValue("incentivesNature", nature)}
-                                                placeholder="Select Nature"
-                                                error={errors.incentivesNature}
-                                                touched={touched.incentivesNature}
-                                                name="incentivesNature"
-                                                errorClassName="h-6"
-                                            />
-                                        </div>
-
                                     </div>
-                                </div>
-
-                                {/* buttons */}
-                                <div className="flex justify-between space-x-6 px-4 items-center pb-8" >
-                                    <div>
-                                        <ToggleSwitchButton
-                                            value={values.incentiveStatus}
-                                            onChange={(val) => setFieldValue('incentiveStatus', val)}
-                                            label={values.incentiveStatus ? 'Active' : "Inactive"}
-                                            className="w-10 h-5 flex items-center rounded-full cursor-pointer transition-colors duration-300 "
-                                            classNameKnob="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 "
+                                    <div className="w-full sm:w-1/2 flex flex-col gap-2 sm:gap-3">
+                                        <CustomDropdown
+                                            label="Gender"
+                                            options={genderOptions}
+                                            values={values.gender}
+                                            onSelect={(gender) => setFieldValue("gender", gender)}
+                                            className="w-full"
+                                            placeholder="Select Gender"
+                                            error={errors.gender}
+                                            touched={touched.gender}
+                                            name="gender"
+                                            errorClassName="h-6 text-sm"
+                                        />
+                                        <CustomDropdown
+                                            label="Incentives Mood"
+                                            options={incentivesMoodOptions}
+                                            values={values.incentivesMood}
+                                            onSelect={(mood) => setFieldValue("incentivesMood", mood)}
+                                            className="w-full"
+                                            placeholder="Select Mood"
+                                            error={errors.incentivesMood}
+                                            touched={touched.incentivesMood}
+                                            name="incentivesMood"
+                                            errorClassName="h-6 text-sm"
+                                        />
+                                        <CustomDropdown
+                                            label="Incentives Nature"
+                                            options={incentivesNatureOptions}
+                                            values={values.incentivesNature}
+                                            onSelect={(nature) => setFieldValue("incentivesNature", nature)}
+                                            placeholder="Select Nature"
+                                            error={errors.incentivesNature}
+                                            touched={touched.incentivesNature}
+                                            name="incentivesNature"
+                                            errorClassName="h-6 text-sm"
                                         />
                                     </div>
+                                </div>
 
 
-                                    <div>
+                                <div className="flex flex-col sm:flex-row justify-between space-x-0 sm:space-x-6 px-4 items-center pb-8 mt-4">
+                                    <ToggleSwitchButton
+                                        value={values.incentiveStatus}
+                                        onChange={(val) => setFieldValue('incentiveStatus', val)}
+                                        label={values.incentiveStatus ? 'Active' : "Inactive"}
+                                        className="w-10 h-5 flex items-center rounded-full cursor-pointer transition-colors duration-300 "
+                                        classNameKnob="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 "
+                                    />
+                                    <div className="flex gap-2 mt-4 sm:mt-0">
                                         <Button
                                             type="button"
                                             onClick={() => {
                                                 resetForm();
-                                                if (editingData) {
-                                                    setEditData(null);
-                                                }
+                                                if (editingData) setEditData(null);
                                             }}
-                                            className="w-32 bg-gray-300 text-gray-700"
+                                            className="w-28 sm:w-32 bg-gray-300 text-gray-700 text-sm sm:text-base"
                                             size="sm"
                                         >
                                             Cancel
                                         </Button>
-
                                         <Button
                                             type="submit"
                                             onClick={submitForm}
-                                            className="w-32 bg-gradient-to-r gap-2 from-orange-600 to-orange-400 text-white flex items-center justify-center ml-2"
+                                            className="w-28 sm:w-32 bg-gradient-to-r from-orange-600 to-orange-400 text-white flex items-center justify-center text-sm sm:text-base"
                                             size="sm"
                                             disabled={isSubmitting || loading || editLoading}
                                         >
@@ -348,365 +289,92 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
                                                     <Spinner />
                                                     {editingData ? 'Updating...' : 'Saving...'}
                                                 </>
-                                            ) : (
-                                                editingData ? 'Update' : 'Save'
-                                            )}
+                                            ) : editingData ? 'Update' : 'Save'}
                                         </Button>
-
-                                    </div>
-
-                                </div>
-
-
-                            </div>
-
-                            {/* accordion section - Bulk Import */}
-
-                            <div
-                                className={`overflow-hidden transition-all duration-500 ease-in-out ${activeAccordion === "bulkimport"
-                                    ? "max-h-[1000px] border border-dashed border-red-300"
-                                    : "max-h-0"
-                                    }`}
-                            >
-                                <div className="p-4 bg-[#FFF9F4]">
-                                    <div className="flex w-full gap-4 border border-orange-500 rounded">
-                                        {/* Left: Instructions */}
-                                        <div className="w-1/2 bg-[#A84317] text-white p-6 space-y-2">
-                                            <h2 className="text-[#FFFFFF] text-lg mb-2">Read the instructions carefully to create a File for BULK UPLOAD incentives.</h2>
-                                            <ol className="list-decimal list-inside text-sm space-y-1 marker:text-[#FF9B61]">
-                                                <li>
-                                                    Download Sample File{" "}
-                                                    <a
-                                                        href="/samlefamoflameIncentives.csv"
-                                                        download
-                                                        className="ml-2 bg-[#CC5A18] text-[#FFCAA7] text-xs px-2 py-[2px] rounded"
-                                                    >
-                                                        Click Here
-                                                    </a>
-
-                                                </li>
-                                                <li>
-                                                    Put the Data in appropriate columns as specified in Sample File.
-                                                </li>
-                                                <li>
-                                                    Add only Incentives on your own, otherwise simply copy the data from the file.
-                                                </li>
-                                                <li>Do not change the File Type at all.</li>
-                                                <li>
-                                                    Finally, upload the File here after inserting all the incentives.
-                                                </li>
-                                                <li>
-                                                    That's it! You can now edit the incentives in Bulk or individually using the Web App.
-                                                </li>
-                                            </ol>
-
-                                        </div>
-
-                                        {/* Right: CSV Upload */}
-                                        <div className="w-1/2 p-6">
-                                            <div {...getRootProps()} className="border-2 border-dashed border-orange-400 rounded cursor-pointer p-6 text-center">
-                                                <input {...getInputProps()} />
-                                                <div className="flex flex-col items-center space-y-2">
-                                                    <img src="/images/uploadIcon.svg" alt="upload" className="w-10 h-10" />
-                                                    <p className="text-orange-600 font-semibold">Drag & Drop or Choose File to Upload</p>
-                                                    <p className="text-gray-500 text-sm">
-                                                        File accepted: <strong>.csv</strong> only <br />
-                                                        Example: incentives.csv <br />
-                                                        Max Size: 2MB
-                                                    </p>
-                                                    <span className="text-orange-500 underline">Browse</span>
-                                                </div>
-                                            </div>
-
-                                            {/* Uploaded File Info */}
-                                            {uploadedFile && (
-                                                <div className="mt-4 bg-white p-3 rounded border border-gray-300 shadow-sm">
-                                                    <div className="flex items-center justify-between">
-                                                        {/* Left: File Info */}
-                                                        <div className="flex items-center gap-3">
-                                                            <img
-                                                                src="/images/csvIcon.png" //  
-                                                                alt="csv"
-                                                                className="w-6 h-6"
-                                                            />
-                                                            <div>
-                                                                <p className="text-sm font-medium text-gray-800">{uploadedFile.name}</p>
-                                                                <p className="text-xs text-gray-500">
-                                                                    {(uploadedFile.size / 1024 / 1024).toFixed(1)}mb &nbsp; | &nbsp; {uploadProgress ?? 0}%
-                                                                </p>
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Right: Delete Button */}
-                                                        <button
-                                                            onClick={() => {
-                                                                setUploadedFile(null);
-                                                                setUploadProgress(null);
-                                                                // setUploadSuccess(false);
-                                                            }}
-                                                            className="bg-[#FF9B61] w-6 h-6 rounded flex justify-center items-center"
-                                                        >
-
-                                                            <svg width="20" height="20" viewBox="0 0 10 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                                <path d="M8.36194 2.93435C7.7742 2.8735 7.18645 2.82787 6.59506 2.79365V2.78985L6.51475 2.2955C6.45999 1.94565 6.37967 1.42088 5.52544 1.42088H4.56898C3.7184 1.42088 3.63808 1.92283 3.57967 2.29169L3.50301 2.77844C3.16351 2.80125 2.824 2.82407 2.4845 2.85829L1.73978 2.93435C1.58645 2.94956 1.47694 3.09026 1.49154 3.24617C1.50614 3.40208 1.63756 3.51616 1.79089 3.50095L2.53561 3.4249C4.44851 3.22716 6.37602 3.30321 8.31084 3.50475C8.32179 3.50475 8.32909 3.50475 8.34004 3.50475C8.47876 3.50475 8.59923 3.39447 8.61383 3.24617C8.62479 3.09026 8.51527 2.94956 8.36194 2.93435Z" fill="white" />
-                                                                <path d="M7.69071 4.04117C7.6031 3.9461 7.48263 3.89286 7.35851 3.89286H2.74417C2.62005 3.89286 2.49593 3.9461 2.41196 4.04117C2.328 4.13623 2.28054 4.26552 2.28784 4.39862L2.51418 8.30018C2.55434 8.87819 2.60545 9.60071 3.8795 9.60071H6.22318C7.49723 9.60071 7.54834 8.882 7.5885 8.30018L7.81483 4.40242C7.82213 4.26552 7.77468 4.13623 7.69071 4.04117ZM5.65734 7.69556H4.44169C4.29202 7.69556 4.1679 7.56626 4.1679 7.41035C4.1679 7.25444 4.29202 7.12515 4.44169 7.12515H5.65734C5.80701 7.12515 5.93113 7.25444 5.93113 7.41035C5.93113 7.56626 5.80701 7.69556 5.65734 7.69556ZM5.96399 6.17448H4.13869C3.98902 6.17448 3.8649 6.04519 3.8649 5.88928C3.8649 5.73336 3.98902 5.60407 4.13869 5.60407H5.96399C6.11366 5.60407 6.23778 5.73336 6.23778 5.88928C6.23778 6.04519 6.11366 6.17448 5.96399 6.17448Z" fill="white" />
-                                                            </svg>
-
-
-                                                        </button>
-                                                    </div>
-
-                                                    {/* Progress Bar */}
-                                                    <div className="w-full bg-gray-200 rounded h-2 mt-2">
-                                                        <div
-                                                            className="bg-orange-500 h-2 rounded transition-all duration-300 ease-in-out"
-                                                            style={{ width: `${uploadProgress ?? 0}%` }}
-                                                        ></div>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                        </div>
                                     </div>
                                 </div>
                             </div>
-
                         </div>
 
-
-                    </Form>
-                );
-            }}
+                        <div className={`overflow-hidden transition-all duration-500 ease-in-out ${activeAccordion === "bulkimport" ? "max-h-[1000px] border border-dashed border-red-300" : "max-h-0"}`}>
+                            <div className="p-4 bg-[#FFF9F4]">
+                                <div className="flex flex-col sm:flex-row w-full gap-4 border border-orange-500 rounded">
+                                    <div className="w-full sm:w-1/2 bg-[#A84317] text-white p-4 sm:p-6 space-y-2">
+                                        <h2 className="text-white text-base sm:text-lg mb-2">Read the instructions carefully to create a File for BULK UPLOAD incentives.</h2>
+                                        <ol className="list-decimal list-inside text-xs sm:text-sm space-y-1 marker:text-[#FF9B61]">
+                                            <li>
+                                                Download Sample File{" "}
+                                                <a
+                                                    href="http://localhost:8000/samplefamoflameIncentives.csv"
+                                                    download
+                                                    className="ml-2 bg-[#CC5A18] text-[#FFCAA7] text-xs px-2 py-[2px] rounded"
+                                                >
+                                                    Click Here
+                                                </a>
+                                            </li>
+                                            <li>Put the Data in appropriate columns as specified in Sample File.</li>
+                                            <li>Add only Incentives on your own, otherwise simply copy the data from the file.</li>
+                                            <li>Do not change the File Type at all.</li>
+                                            <li>Finally, upload the File here after inserting all the incentives.</li>
+                                            <li>That's it! You can now edit the incentives in Bulk or individually using the Web App.</li>
+                                        </ol>
+                                    </div>
+                                    <div className="w-full sm:w-1/2 p-4 sm:p-6">
+                                        <div {...getRootProps()} className="border-2 border-dashed border-orange-400 rounded cursor-pointer p-4 sm:p-6 text-center">
+                                            <input {...getInputProps()} />
+                                            <div className="flex flex-col items-center space-y-2">
+                                                <img src="/images/uploadIcon.svg" alt="upload" className="w-8 h-8 sm:w-10 sm:h-10" />
+                                                <p className="text-orange-600 font-semibold text-sm sm:text-base">Drag & Drop or Choose File to Upload</p>
+                                                <p className="text-gray-500 text-xs sm:text-sm">
+                                                    File accepted: <strong>.csv</strong> only <br />
+                                                    Example: incentives.csv <br />
+                                                    {/* Max Size: 2MB */}
+                                                </p>
+                                                <span className="text-orange-500 underline text-sm">Browse</span>
+                                            </div>
+                                        </div>
+                                        {uploadedFile && (
+                                            <div className="mt-4 bg-white p-3 rounded border border-gray-300 shadow-sm">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <img src="/images/csvIcon.png" alt="csv" className="w-6 h-6" />
+                                                        <div>
+                                                            <p className="text-sm font-medium text-gray-800">{uploadedFile.name}</p>
+                                                            <p className="text-xs text-gray-500">
+                                                                {(uploadedFile.size / 1024 / 1024).toFixed(1)}mb | {uploadProgress ?? 0}%
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => {
+                                                            setUploadedFile(null);
+                                                            setUploadProgress(null);
+                                                        }}
+                                                        className="bg-[#FF9B61] w-6 h-6 rounded flex justify-center items-center"
+                                                    >
+                                                        <svg width="20" height="20" viewBox="0 0 10 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M8.36194 2.93435C7.7742 2.8735 7.18645 2.82787 6.59506 2.79365V2.78985L6.51475 2.2955C6.45999 1.94565 6.37967 1.42088 5.52544 1.42088H4.56898C3.7184 1.42088 3.63808 1.92283 3.57967 2.29169L3.50301 2.77844C3.16351 2.80125 2.824 2.82407 2.4845 2.85829L1.73978 2.93435C1.58645 2.94956 1.47694 3.09026 1.49154 3.24617C1.50614 3.40208 1.63756 3.51616 1.79089 3.50095L2.53561 3.4249C4.44851 3.22716 6.37602 3.30321 8.31084 3.50475C8.32179 3.50475 8.32909 3.50475 8.34004 3.50475C8.47876 3.50475 8.59923 3.39447 8.61383 3.24617C8.62479 3.09026 8.51527 2.94956 8.36194 2.93435Z" fill="white" />
+                                                            <path d="M7.69071 4.04117C7.6031 3.9461 7.48263 3.89286 7.35851 3.89286H2.74417C2.62005 3.89286 2.49593 3.9461 2.41196 4.04117C2.328 4.13623 2.28054 4.26552 2.28784 4.39862L2.51418 8.30018C2.55434 8.87819 2.60545 9.60071 3.8795 9.60071H6.22318C7.49723 9.60071 7.54834 8.882 7.5885 8.30018L7.81483 4.40242C7.82213 4.26552 7.77468 4.13623 7.69071 4.04117ZM5.65734 7.69556H4.44169C4.29202 7.69556 4.1679 7.56626 4.1679 7.41035C4.1679 7.25444 4.29202 7.12515 4.44169 7.12515H5.65734C5.80701 7.12515 5.93113 7.25444 5.93113 7.41035C5.93113 7.56626 5.80701 7.69556 5.65734 7.69556ZM5.96399 6.17448H4.13869C3.98902 6.17448 3.8649 6.04519 3.8649 5.88928C3.8649 5.73336 3.98902 5.60407 4.13869 5.60407H5.96399C6.11366 5.60407 6.23778 5.73336 6.23778 5.88928C6.23778 6.04519 6.11366 6.17448 5.96399 6.17448Z" fill="white" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                                <div className="w-full bg-gray-200 rounded h-2 mt-2">
+                                                    <div
+                                                        className="bg-orange-500 h-2 rounded transition-all duration-300 ease-in-out"
+                                                        style={{ width: `${uploadProgress ?? 0}%` }}
+                                                    ></div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </Form>
+            )}
         </Formik>
     );
 };
 
 export default AddIncentiveForm;
-
-
-
-
-
-
-
-//   const [loading, setLoading] = useState(false);
-//   const [incentivesData, setAddIncentivesData] = useState<AddIncentivesValues[]>([]);
-//   const { addIncentivesFormData } = useAuth();
-//   const [IncentivesIdsData, setIncentivesIdsData] = useState<number[]>([]);
-//   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-//   const [filterValue, setFilterValue] = useState("");
-//   const [debouncedFilter, setDebouncedFilter] = useState("");
-//   const [editData, setEditData] = useState<AddIncentivesValues | null>(null);
-//   const [isActiveIncentives, setIsActiveIncentives] = useState(false);
-//   const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
-//   const [loadingDeleteAllIncentives, setLoadingDeletAllIncentives] = useState(false)
-//   const [statusMap, setStatusMap] = useState<Record<string, boolean>>({});
-//   // console.log("🚀 ~ Incentives ~ isActiveIncentives:", isActiveIncentives)
-//   const [editLoading, setEditLoading] = useState(false);
-
-//   const formRef = useRef<HTMLDivElement | null>(null);
-
-
-
-//   const toggleAccordionEdit = (key: string) => {
-//     // If we're in edit mode, ignore toggle
-//     if (editData) return;
-//     setActiveAccordion(activeAccordion === key ? null : key);
-//   };
-
-//   const handleSelectAll = () => {
-//     if (IncentivesIdsData.length === filteredIncentives.length) {
-//       setIncentivesIdsData([]);
-//     } else {
-//       setIncentivesIdsData(filteredIncentives.map((item) => item._id));
-//     }
-//   };
-
-
-
-//   const toggleAccordion = (key: string) => {
-//     setActiveAccordion(activeAccordion === key ? null : key);
-//   };
-
-//   const debouncedSearch = useMemo(
-//     () => debounce((value: string) => setDebouncedFilter(value), 300),
-//     []
-//   );
-
-//   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     const value = e.target.value;
-//     setFilterValue(value);
-//     debouncedSearch(value);
-//   };
-
-//   const handleCheckboxChange = (index: number) => {
-//     setIncentivesIdsData((prev) =>
-//       prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
-//     );
-//   };
-
-//   const handleSort = (order: "asc" | "desc") => {
-//     setSortOrder(order);
-//   };
-
-//   const handleEditClick = (item: AddIncentivesValues) => {
-//     console.log("🚀 ~ handleEditClick ~ item:", item)
-//     setEditData(item);
-//     setTimeout(() => {
-//       formRef.current?.scrollIntoView({ behavior: "smooth" });
-//     }, 100);
-//   };
-
-//   const handlerDeleteIncentives = async (id: any) => {
-//     try {
-//       const response = await deleteIncentivesApi(id ? [id] : IncentivesIdsData);
-//       getIncentivesData();
-//       toast.success("Deleted successfully!");
-//       setIncentivesIdsData([]);
-//       return response;
-//     } catch (err) {
-//       console.log("Error deleting incentives:", err);
-//       toast.error("Error deleting incentives");
-//     }
-//   };
-
-
-
-//   const handlerUpdateIncentives = async (id: string, values: AddIncentivesValues) => {
-//     setEditLoading(true);
-//     try {
-//       const response = await updateIncentiveApi(id, values);
-//       toast.success("Incentive updated successfully!");
-//       setEditData(null);
-//       setEditLoading(false);
-//       getIncentivesData();
-//       return response;
-//     } catch (err) {
-//       console.log("Error updating incentive:", err);
-//       toast.error("Error updating incentive");
-//       setEditLoading(false);
-//     }
-//   };
-
-
-
-//   const getIncentivesData = async () => {
-//     setLoading(true);
-//     try {
-//       const response = await getIncentivesApi();
-//       let sortedData = [...(response?.incentivesData || [])];
-//       sortedData.sort((a, b) => {
-//         const timeA = new Date(a.createdAt).getTime();
-//         const timeB = new Date(b.createdAt).getTime();
-//         return sortOrder === "asc" ? timeA - timeB : timeB - timeA;
-//       });
-//       setAddIncentivesData(sortedData);
-//     } catch (error: unknown) {
-//       const axiosError = error as AxiosError<{ message: string }>;
-//       console.log("Error fetching incentives:", axiosError);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-
-
-//   const deleteIncentivesData = async () => {
-//     setLoadingDeletAllIncentives(true);
-//     try {
-//       const response = await deleteAllIncentivesApi();
-//       toast.success("Incentives deleted successfully!");
-//       getIncentivesData();
-//       setLoadingDeletAllIncentives(false);
-//       return response;
-//     } catch (error: unknown) {
-//       const axiosError = error as AxiosError<{ message: string }>;
-//       console.log("Error fetching incentives:", axiosError);
-//     } finally {
-//       setLoadingDeletAllIncentives(false);
-//     }
-//   };
-
-
-//   const handlerBulkToggleStatus = async () => {
-//     const newStatus = !isActiveIncentives;
-
-//     // 1️⃣ Immediate UI feedback
-//     setIsActiveIncentives(newStatus);
-
-//     // 2️⃣ Run API after transition
-//     setTimeout(async () => {
-//       try {
-//         await Promise.all(
-//           IncentivesIdsData.map((id) =>
-//             updateIncentiveApi(id, { incentiveStatus: newStatus })
-//           )
-//         );
-//         toast.success("Status updated successfully!");
-//         setIsActiveIncentives(false);
-
-//         getIncentivesData();
-//       } catch (error) {
-//         toast.error("Error updating status");
-
-//         // 3️⃣ Optional: Revert toggle if API fails
-//         setIsActiveIncentives(!newStatus);
-//       }
-//     }, 300); // Wait for 300ms animation to complete
-//   };
-
-//   const handleToggleStatus = async (id: string) => {
-//     const current = statusMap[id];
-//     const updatedMap = { ...statusMap, [id]: !current };
-
-//     // 1. Immediate UI update
-//     setStatusMap(updatedMap);
-
-//     // 2. API call
-//     try {
-//       await updateIncentiveApi(id, { incentiveStatus: !current });
-//       toast.success("Status updated");
-//       getIncentivesData(); // optional if you want to refresh from server
-//     } catch (err) {
-//       toast.error("Error updating status");
-//       // 3. Revert toggle on error
-//       setStatusMap((prev) => ({ ...prev, [id]: current }));
-//     }
-//   };
-
-//   useEffect(() => {
-//     const initialMap: Record<string, boolean> = {};
-//     incentivesData.forEach((item) => {
-//       initialMap[item._id] = item.incentiveStatus;
-//     });
-//     setStatusMap(initialMap);
-//   }, [incentivesData]);
-
-
-//   // deleteAllIncentives
-//   useEffect(() => {
-//     getIncentivesData();
-//   }, [addIncentivesFormData, sortOrder]);
-
-//   useEffect(() => {
-//     return () => {
-//       debouncedSearch.cancel();
-//     };
-//   }, []);
-
-
-
-//   const filteredIncentives = incentivesData.filter((item) => {
-//     const searchText = debouncedFilter.toLowerCase().replace(/\s+/g, '');
-//     const fields = [
-//       item.incentives,
-//       item.gender,
-//       item.incentivesMood,
-//       item.incentivesNature,
-//     ];
-
-//     return fields.some(field =>
-//       field.toLowerCase().replace(/\s+/g, '').includes(searchText)
-//     );
-//   });
-
