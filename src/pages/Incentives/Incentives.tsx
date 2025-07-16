@@ -363,12 +363,14 @@ const Incentives = () => {
                 <button onClick={handleSelectAll} className="bg-[#fde3d3] px-2 py-1 rounded text-[#F47521] text-xs font-medium">
                   {selectedIds.length === filtered.length ? 'Unselect All' : 'Select All'}
                 </button>
+                
                 <button
-                  onClick={() => exportSelectedIncentives(selectedIds)}
+                  onClick={() => exportSelectedIncentives(selectedIds.map(String))}
                   className="bg-[#dcfcd3] px-2 py-1 rounded text-[#43B925] text-xs font-medium"
                 >
                   Export {selectedIds.length}
                 </button>
+
               </div>
 
 
@@ -558,6 +560,7 @@ const Incentives = () => {
             )
           ))}
           <CustomPaginationItem type="arrow" direction="right" onClick={goToNext} />
+
         </div>
       </div>
     </>
@@ -578,32 +581,32 @@ export default Incentives;
                         //   onUploadSuccess={(url) => setFieldValue('celebrityImage', url)}
                         /> */}
 
-                        
-                      //   <tr key={celebrity._id || index} className="border-b border-[#E0D4C4] text-sm text-gray-700">
-                      //   <td className="px-4 py-3">
-                      //     <div className="flex items-center gap-4">
-                      //       {/* <CustomCheckbox
-                      //         className="w-4 h-4"
-                      //         checked={deleteIds.includes(celebrity._id)}
-                      //         onChange={() => handleCheckboxChange(celebrity._id)}
-                      //       /> */}
-                      //       {/* <button onClick={() => handleEditClick(item)}>
-                      //         <EditIcon />
-                      //       </button> */}
-                      //     </div>
-                      //   </td>
-                      //   <td className="px-4 py-3">
-                      //     {celebrity.images?.[0]?.url ? (
-                      //       <img
-                      //         src={celebrity.images[0].url}
-                      //         alt={celebrity.images[0].filename}
-                      //         className="w-16 h-16 object-cover rounded"
-                      //       />
-                      //     ) : (
-                      //       <span className="text-gray-400 italic">No image</span>
-                      //     )}
-                      //   </td>
-                      //   <td className="px-4 py-3">{celebrity.celebrityName || '—'}</td>
-                      //   <td className="px-4 py-3">{celebrity.celebrityGender || '—'}</td>
-                      //   <td className="px-4 py-3">{celebrity.professionNationality || '—'}</td>
-                      // </tr>
+
+//   <tr key={celebrity._id || index} className="border-b border-[#E0D4C4] text-sm text-gray-700">
+//   <td className="px-4 py-3">
+//     <div className="flex items-center gap-4">
+//       {/* <CustomCheckbox
+//         className="w-4 h-4"
+//         checked={deleteIds.includes(celebrity._id)}
+//         onChange={() => handleCheckboxChange(celebrity._id)}
+//       /> */}
+//       {/* <button onClick={() => handleEditClick(item)}>
+//         <EditIcon />
+//       </button> */}
+//     </div>
+//   </td>
+//   <td className="px-4 py-3">
+//     {celebrity.images?.[0]?.url ? (
+//       <img
+//         src={celebrity.images[0].url}
+//         alt={celebrity.images[0].filename}
+//         className="w-16 h-16 object-cover rounded"
+//       />
+//     ) : (
+//       <span className="text-gray-400 italic">No image</span>
+//     )}
+//   </td>
+//   <td className="px-4 py-3">{celebrity.celebrityName || '—'}</td>
+//   <td className="px-4 py-3">{celebrity.celebrityGender || '—'}</td>
+//   <td className="px-4 py-3">{celebrity.professionNationality || '—'}</td>
+// </tr>

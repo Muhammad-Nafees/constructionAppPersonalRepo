@@ -1,14 +1,12 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import PageMeta from "../../components/common/PageMeta";
-import AddIncentiveForm from "../../components/form/AddIncentiveForm/AddIncentiveForm";
-import { AddIncentivesValues } from "../../interface";
+import { CelebritiesValuesSchema } from "../../interface";
 import {
-  deleteAllIncentivesApi,
-  deleteIncentivesApi,
-  exportSelectedIncentivesApi,
-  getIncentivesApi,
-  updateIncentiveApi,
-} from "../../../services/incentives";
+  deleteCelebritiesApi,
+  exportSelectedCelebritiesApi,
+  getCelebritiesApi,
+  updateCelebrityApi,
+} from "../../../services/celebrities";
 import { AxiosError } from "axios";
 import { useAuth } from "../../context/AuthContext";
 import AccendingArrow from "../../components/svg/AccendingArrow";
@@ -22,33 +20,47 @@ import ToggleSwitchButton from "../../components/reusableComponents/ToggleSwitch
 import debounce from "lodash/debounce";
 import { toast } from "react-toastify";
 import FilterDropdown from "../../components/input/FilterDropDown";
-import { genderOptions, incentivesMoodOptions, incentivesNatureOptions } from "../../data";
+import { genderOptions, professionOptions } from "../../data";
 import CustomPaginationItem from "../../components/reusableComponents/CustomPaginationIcon";
-import ImageUploader from "../../components/form/addCelebrity-form/ImageUploader";
 import AddCelebrityForm from "../../components/form/addCelebrity-form/AddCelebrityForm";
 
 const CelebrityPage = () => {
   const { addIncentivesFormData } = useAuth();
   const formRef = useRef<HTMLDivElement | null>(null);
 
-  const [incentives, setIncentives] = useState<AddIncentivesValues[]>([]);
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [celebrities, setCelebrities] = useState<CelebritiesValuesSchema[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [loading, setLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [loadingDeleteAll, setLoadingDeleteAll] = useState(false);
   const [filter, setFilter] = useState("");
-  const [editData, setEditData] = useState<AddIncentivesValues | null>(null);
+  const [editData, setEditData] = useState<CelebritiesValuesSchema | null>(null);
   const [isBulkActive, setIsBulkActive] = useState(false);
   const [statusMap, setStatusMap] = useState<Record<string, boolean>>({});
   const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
   const [genderFilter, setGenderFilter] = useState("");
-  const [moodFilter, setMoodFilter] = useState("");
-  const [natureFilter, setNatureFilter] = useState("");
+  const [professionFilter, setProfessionFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [deleteLoadingId, setDeleteLoadingId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  const filtered = useMemo(() => {
+    return celebrities.filter(item => {
+      console.log("🚀 ~ filtered ~ item:", item)
+      console.log("🚀 ~ filtered ~ celebrities:", celebrities)
+      const text = filter.toLowerCase().replace(/\s+/g, "");
+      const matchesText = [item.celebrityName, item.celebrityGender, item.celebrityProfession]
+        .some(field => field.toLowerCase().replace(/\s+/g, "").includes(text));
+      const matchesGender = genderFilter ? item.celebrityGender === genderFilter : true;
+      const matchesProfession = professionFilter ? item.celebrityProfession === professionFilter : true;
+      const matchesStatus = statusFilter
+        ? (statusFilter === "Active" ? item.celebrityStatus : !item.celebrityStatus)
+        : true;
+      return matchesText && matchesGender && matchesProfession && matchesStatus;
+    });
+  }, [celebrities, filter, genderFilter, professionFilter, statusFilter]);
 
   const debouncedSearch = useMemo(() => debounce(setFilter, 300), []);
 
@@ -64,37 +76,47 @@ const CelebrityPage = () => {
     setActiveAccordion(prev => (prev === key ? null : key));
   }, [editData]);
 
-  const fetchIncentives = useCallback(async (page = currentPage) => {
+  const fetchCelebrities = useCallback(async (page = currentPage) => {
     setLoading(true);
     try {
-      const res = await getIncentivesApi(page, 50);
-      const sorted = [...(res?.docs || [])].sort((a, b) => {
-        const timeA = new Date(a.createdAt).getTime();
-        const timeB = new Date(b.createdAt).getTime();
+      const res = await getCelebritiesApi(page, 50);
+      const transformedDocs = res?.docs.map((doc: any) => ({
+        _id: doc._id,
+        celebrityImage: doc.images?.[0] || null,
+        celebrityName: doc.celebrityName,
+        celebrityGender: doc.celebrityGender,
+        celebrityProfession: doc.celebrityProfession,
+        celebrityStatus: doc.celebrityStatus,
+        createdAt: doc.createdAt,
+      })) || [];
+      const sorted = transformedDocs.sort((a: CelebritiesValuesSchema, b: CelebritiesValuesSchema) => {
+        const timeA = new Date(a.createdAt!).getTime();
+        const timeB = new Date(b.createdAt!).getTime();
         return sortOrder === "asc" ? timeA - timeB : timeB - timeA;
       });
-      setIncentives(sorted);
-      setTotalPages(res.totalPages);
+
+      setCelebrities(sorted);
+      setTotalPages(res.totalPages || 1);
     } catch (err) {
       const error = err as AxiosError;
       console.error("Fetch Error:", error);
-      toast.error("Error fetching incentives");
+      toast.error("Error fetching celebrities");
     } finally {
       setLoading(false);
     }
   }, [currentPage, sortOrder]);
 
-
-
   useEffect(() => {
-    fetchIncentives();
-  }, [addIncentivesFormData, sortOrder, currentPage,]);
+    fetchCelebrities();
+  }, [addIncentivesFormData, sortOrder, currentPage, fetchCelebrities]);
 
   useEffect(() => {
     const initialMap: Record<string, boolean> = {};
-    incentives.forEach(item => (initialMap[item._id] = item.incentiveStatus));
+    celebrities.forEach(item => (initialMap[item._id!] = item.celebrityStatus));
     setStatusMap(initialMap);
-  }, [incentives]);
+  }, [celebrities]);
+
+
 
   useEffect(() => {
     return () => debouncedSearch.cancel();
@@ -105,26 +127,11 @@ const CelebrityPage = () => {
     debouncedSearch(e.target.value);
   }, [debouncedSearch]);
 
-  const filtered = useMemo(() => {
-    return incentives.filter(item => {
-      const text = filter.toLowerCase().replace(/\s+/g, "");
-      const matchesText = [item.incentives, item.gender, item.incentivesMood, item.incentivesNature]
-        .some(field => field.toLowerCase().replace(/\s+/g, "").includes(text));
-      const matchesGender = genderFilter ? item.gender === genderFilter : true;
-      const matchesMood = moodFilter ? item.incentivesMood === moodFilter : true;
-      const matchesNature = natureFilter ? item.incentivesNature === natureFilter : true;
-      const matchesStatus = statusFilter
-        ? (statusFilter === "Active" ? item.incentiveStatus : !item.incentiveStatus)
-        : true;
-      return matchesText && matchesGender && matchesMood && matchesNature && matchesStatus;
-    });
-  }, [incentives, filter, genderFilter, moodFilter, natureFilter, statusFilter]);
-
   const handleSelectAll = useCallback(() => {
-    setSelectedIds(prev => prev.length === filtered.length ? [] : filtered.map(item => item._id));
+    setSelectedIds(prev => prev.length === filtered.length ? [] : filtered.map(item => item._id!));
   }, [filtered]);
 
-  const handleEditClick = useCallback((item: AddIncentivesValues) => {
+  const handleEditClick = useCallback((item: CelebritiesValuesSchema) => {
     setEditData(item);
     toggleAccordionEdit("addnew");
     setTimeout(() => {
@@ -132,104 +139,157 @@ const CelebrityPage = () => {
     }, 100);
   }, [toggleAccordionEdit]);
 
-  const handlerUpdateIncentives = useCallback(async (id: string, values: AddIncentivesValues) => {
+  const handlerUpdateCelebrity = useCallback(async (data: CelebritiesValuesSchema) => {
+    if (!editData?._id) return;
     setEditLoading(true);
     try {
-      await updateIncentiveApi(id, values);
-      toast.success("Incentive updated successfully!");
+      const formData = new FormData();
+      formData.append(
+        "entries",
+        JSON.stringify({
+          celebrityName: data.celebrityName,
+          celebrityGender: data.celebrityGender,
+          celebrityProfession: data.celebrityProfession,
+          celebrityStatus: data.celebrityStatus,
+        })
+      );
+
+      await updateCelebrityApi(editData._id, formData);
+      toast.success("Celebrity updated successfully!");
       setEditData(null);
-      fetchIncentives();
-    } catch {
-      toast.error("Error updating incentive");
+      fetchCelebrities();
+    } catch (err) {
+      const error = err as AxiosError;
+      console.error("Update Error:", error);
+      toast.error("Error updating celebrity");
     } finally {
       setEditLoading(false);
     }
-  }, [fetchIncentives]);
+  }, [editData, fetchCelebrities]);
 
-  const handleDelete = useCallback(async (id?: number) => {
-    setDeleteLoadingId(id ? id.toString() : null);
+
+
+  const handleDelete = useCallback(async (id?: string) => {
+    setDeleteLoadingId(id ? id : null);
     try {
-      await deleteIncentivesApi(id ? [id] : selectedIds);
-      toast.success("Incentive deleted successfully!");
+      await deleteCelebritiesApi(id ? [id] : selectedIds);
+      toast.success("Celebrity deleted successfully!");
       setSelectedIds([]);
-      fetchIncentives();
-    } catch {
-      toast.error("Error deleting incentives");
+      fetchCelebrities();
+    } catch (err) {
+      const error = err as AxiosError;
+      console.error("Delete Error:", error);
+      toast.error("Error deleting celebrities");
     } finally {
       setDeleteLoadingId(null);
     }
-  }, [selectedIds, fetchIncentives]);
+  }, [selectedIds, fetchCelebrities]);
+
 
   const handleDeleteAll = useCallback(async () => {
     setLoadingDeleteAll(true);
     try {
-      await deleteAllIncentivesApi();
-      toast.success("All incentives deleted");
-      fetchIncentives();
-    } catch {
-      toast.error("Failed to delete all incentives");
+      await deleteCelebritiesApi([]);
+      toast.success("All celebrities deleted");
+      fetchCelebrities();
+    } catch (err) {
+      const error = err as AxiosError;
+      console.error("Delete All Error:", error);
+      toast.error("Failed to delete all celebrities");
     } finally {
       setLoadingDeleteAll(false);
     }
-  }, [fetchIncentives]);
+  }, [fetchCelebrities]);
+
+
 
   const handleStatusToggle = useCallback(async (id: string) => {
     const current = statusMap[id];
     setStatusMap(prev => ({ ...prev, [id]: !current }));
     try {
-      await updateIncentiveApi(id, { incentiveStatus: !current });
+      const formData = new FormData();
+      formData.append(
+        "entries",
+        JSON.stringify({
+          celebrityStatus: !current,
+        })
+      );
+      await updateCelebrityApi(id, formData);
       toast.success("Status updated");
-    } catch {
+      fetchCelebrities();
+    } catch (err) {
+      const error = err as AxiosError;
+      console.error("Status Update Error:", error);
       toast.error("Error updating status");
       setStatusMap(prev => ({ ...prev, [id]: current }));
     }
-  }, [statusMap]);
+  }, [statusMap, fetchCelebrities]);
 
   const handleBulkToggle = useCallback(async () => {
     const newStatus = !isBulkActive;
     setIsBulkActive(newStatus);
     try {
-      await Promise.all(selectedIds.map(id => updateIncentiveApi(id, { incentiveStatus: newStatus })));
+      await Promise.all(
+        selectedIds.map(id => {
+          const formData = new FormData();
+          formData.append(
+            "entries",
+            JSON.stringify({
+              celebrityStatus: newStatus,
+            })
+          );
+          return updateCelebrityApi(id, formData);
+        })
+      );
       toast.success("Bulk status updated");
-      fetchIncentives();
-    } catch {
+      setStatusMap(prev => {
+        const newMap = { ...prev };
+        selectedIds.forEach(id => (newMap[id] = newStatus));
+        return newMap;
+      });
+      fetchCelebrities();
+    } catch (err) {
+      const error = err as AxiosError;
+      console.error("Bulk Status Update Error:", error);
       toast.error("Error updating bulk status");
       setIsBulkActive(!newStatus);
     }
-  }, [isBulkActive, selectedIds, fetchIncentives]);
+  }, [isBulkActive, selectedIds, fetchCelebrities]);
 
-  const exportSelectedIncentives = useCallback(async (ids: string[]) => {
+  const exportSelectedCelebrities = useCallback(async (ids: string[]) => {
     if (!ids || ids.length === 0) {
-      toast.warning("Please select at least one incentive to export.");
+      toast.warning("Please select at least one celebrity to export.");
       return;
     }
     try {
-      await exportSelectedIncentivesApi(ids);
+      const response = await exportSelectedCelebritiesApi(ids);
+      if (!response || response.size === 0) {
+        toast.warning("Exported file is empty.");
+        return;
+      }
       toast.success("CSV file downloaded successfully!");
-      fetchIncentives();
-    } catch (error) {
+    } catch (err) {
+      const error = err as AxiosError;
       console.error("Export Error:", error);
       toast.error("Something went wrong");
     }
-  }, [fetchIncentives]);
+  }, []);
 
   const clearAllFilters = useCallback(() => {
     setFilter("");
     setGenderFilter("");
-    setMoodFilter("");
-    setNatureFilter("");
+    setProfessionFilter("");
     setStatusFilter("");
   }, []);
 
   const getPaginationRange = useCallback((totalPages: number, currentPage: number): (number | "...")[] => {
+    if (totalPages <= 1) {
+      return totalPages === 0 ? [] : [1];
+    }
     const delta = 1;
     const range: number[] = [];
     const rangeWithDots: (number | "...")[] = [];
     let lastPage: number | undefined;
-
-    if (totalPages <= 5) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
-    }
 
     for (let i = 1; i <= totalPages; i++) {
       if (i === 1 || i === totalPages || (i >= currentPage - delta && i <= currentPage + delta)) {
@@ -256,53 +316,44 @@ const CelebrityPage = () => {
 
   const goToPage = useCallback((page: number) => {
     setCurrentPage(page);
-    fetchIncentives(page);
-  }, [fetchIncentives]);
+    fetchCelebrities(page);
+  }, [fetchCelebrities]);
 
   const goToPrevious = useCallback(() => {
     if (currentPage > 1) {
       setCurrentPage(prev => prev - 1);
-      fetchIncentives(currentPage - 1);
+      fetchCelebrities(currentPage - 1);
     }
-  }, [currentPage, fetchIncentives]);
+  }, [currentPage, fetchCelebrities]);
 
   const goToNext = useCallback(() => {
     if (currentPage < totalPages) {
       setCurrentPage(prev => prev + 1);
-      fetchIncentives(currentPage + 1);
+      fetchCelebrities(currentPage + 1);
     }
-  }, [currentPage, totalPages, fetchIncentives]);
+  }, [currentPage, totalPages, fetchCelebrities]);
 
   return (
     <>
       <PageMeta title="FameOflame" description="FameOflame admin panel" />
       <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div ref={formRef}>
-          {/* <AddIncentiveForm
+          <AddCelebrityForm
             editingData={editData}
-            onEditSubmit={data => editData && handlerUpdateIncentives(editData._id, data)}
+            onEditSubmit={handlerUpdateCelebrity}
             editLoading={editLoading}
             setEditData={setEditData}
-            fetchIncentives={fetchIncentives}
+            fetchCelebrities={fetchCelebrities}
             activeAccordion={activeAccordion}
             setActiveAccordion={setActiveAccordion}
             toggleAccordion={toggleAccordion}
-          /> */}
-
-
-          <AddCelebrityForm
-            toggleAccordion={toggleAccordion}
-            activeAccordion={activeAccordion}
           />
-
-
-
         </div>
 
         <div className="bg-[#FFF6EB] px-4 sm:px-6 py-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
           <p className="text-black text-base sm:text-lg font-medium">Filter</p>
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-            {(filter || genderFilter || moodFilter || natureFilter || statusFilter) && (
+            {(filter || genderFilter || professionFilter || statusFilter) && (
               <button
                 onClick={clearAllFilters}
                 className="text-[#665F56] underline text-sm hover:text-orange-700 transition-colors flex items-center gap-1"
@@ -332,19 +383,11 @@ const CelebrityPage = () => {
                 buttonClassName="w-full sm:w-32 text-sm"
               />
               <FilterDropdown
-                name="moodFilter"
-                values={moodFilter}
-                onSelect={setMoodFilter}
-                options={incentivesMoodOptions}
-                placeholder="Select Mood"
-                buttonClassName="w-full sm:w-32 text-sm"
-              />
-              <FilterDropdown
-                name="natureFilter"
-                values={natureFilter}
-                onSelect={setNatureFilter}
-                options={incentivesNatureOptions}
-                placeholder="Select Nature"
+                name="professionFilter"
+                values={professionFilter}
+                onSelect={setProfessionFilter}
+                options={professionOptions}
+                placeholder="Select Profession"
                 buttonClassName="w-full sm:w-32 text-sm"
               />
               <FilterDropdown
@@ -355,8 +398,6 @@ const CelebrityPage = () => {
                 placeholder="Select Status"
                 buttonClassName="w-full sm:w-32 text-sm"
               />
-
-
               <button className="w-10 h-10 flex items-center justify-center">
                 <img src="./images/svgs/dotsmenu.svg" alt="Menu" />
               </button>
@@ -375,14 +416,12 @@ const CelebrityPage = () => {
                   {selectedIds.length === filtered.length ? 'Unselect All' : 'Select All'}
                 </button>
                 <button
-                  onClick={() => exportSelectedIncentives(selectedIds)}
+                  onClick={() => exportSelectedCelebrities(selectedIds)}
                   className="bg-[#dcfcd3] px-2 py-1 rounded text-[#43B925] text-xs font-medium"
                 >
                   Export {selectedIds.length}
                 </button>
               </div>
-
-
               <div className="flex items-center space-x-3">
                 <ToggleSwitchButton
                   value={isBulkActive}
@@ -412,9 +451,7 @@ const CelebrityPage = () => {
           )}
         </div>
 
-
         <div className="relative border border-[#E0D4C4] min-h-[200px] h-[400px] overflow-y-auto">
-          {/* Desktop Table */}
           <table className="w-full text-left border-collapse hidden sm:table">
             <thead className="bg-[#FDF6EE] border-b border-[#E0D4C4] sticky top-0 z-10">
               <tr className="text-[#BB501C] text-sm font-semibold">
@@ -431,10 +468,10 @@ const CelebrityPage = () => {
                     </div>
                   </div>
                 </th>
-                <th className="px-4 py-3 w-24 sm:w-40">CELEBRITY NAME</th>
-                <th className="px-4 py-3 w-32 sm:w-60">CELEBRITY GENDER</th>
-                <th className="px-4 py-3 w-24 sm:w-40">PROFESSION</th>
-                <th className="px-4 py-3 w-24 sm:w-40">STATUS</th>
+                <th className="px-4 py-3 w-24 sm:w-40">Celebrity Name</th>
+                <th className="px-4 py-3 w-32 sm:w-60">Gender</th>
+                <th className="px-4 py-3 w-24 sm:w-40">Profession</th>
+                <th className="px-4 py-3 w-24 sm:w-40">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -455,21 +492,20 @@ const CelebrityPage = () => {
                       <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 13h6m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z" />
                       </svg>
-                      <p className="text-base text-gray-500">No Incentives Found</p>
+                      <p className="text-base text-gray-500">No Celebrities Found</p>
                     </div>
-
                   </td>
                 </tr>
               ) : (
                 filtered.map((item) => (
                   <tr key={item._id} className="border-b border-[#E0D4C4] text-sm text-gray-700">
                     <td className="px-4 py-3">
-                      <CustomCheckbox className="w-4 h-4" checked={selectedIds.includes(item._id)} onChange={() => setSelectedIds(prev => prev.includes(item._id) ? prev.filter(i => i !== item._id) : [...prev, item._id])} />
+                      <CustomCheckbox className="w-4 h-4" checked={selectedIds.includes(item._id!)} onChange={() => setSelectedIds(prev => prev.includes(item._id!) ? prev.filter(i => i !== item._id!) : [...prev, item._id!])} />
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-4 items-center">
                         <button onClick={() => handleDelete(item._id)} className="w-5 h-5 flex items-center justify-center">
-                          {deleteLoadingId === item._id.toString() ? (
+                          {deleteLoadingId === item._id ? (
                             <svg className="animate-spin w-5 h-5 text-[#EB6622]" viewBox="0 0 24 24" fill="none">
                               <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25" />
                               <path fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" className="opacity-75" />
@@ -481,14 +517,24 @@ const CelebrityPage = () => {
                         </button>
                       </div>
                     </td>
-                    <td className="px-4 py-3 w-[150px] sm:w-[250px] break-words">{item.incentives}</td>
-                    <td className="px-4 py-3">{item.gender}</td>
-                    <td className="px-4 py-3">{item.incentivesMood}</td>
-                    <td className="px-4 py-3">{item.incentivesNature}</td>
+                    <td className="px-4 py-3">
+                      {item.celebrityImage?.url ? (
+                        <img
+                          src={item.celebrityImage.url}
+                          alt={item.celebrityName}
+                          className="w-16 h-16 object-cover rounded"
+                        />
+                      ) : (
+                        <span className="text-gray-400 italic">No image</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 w-[150px] sm:w-[250px] break-words">{item.celebrityName}</td>
+                    <td className="px-4 py-3">{item.celebrityGender}</td>
+                    <td className="px-4 py-3">{item.celebrityProfession}</td>
                     <td className="px-4 py-3">
                       <ToggleSwitchButton
-                        value={statusMap[item._id]}
-                        onChange={() => handleStatusToggle(item._id)}
+                        value={statusMap[item._id!]}
+                        onChange={() => handleStatusToggle(item._id!)}
                         className="w-10 h-5 flex items-center rounded-full cursor-pointer transition-colors duration-300 "
                         classNameKnob="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 "
                       />
@@ -498,7 +544,6 @@ const CelebrityPage = () => {
               )}
             </tbody>
           </table>
-          {/* Mobile Card View */}
           <div className="sm:hidden space-y-4 p-4">
             {loading ? (
               <div className="flex justify-center items-center py-6">
@@ -507,19 +552,19 @@ const CelebrityPage = () => {
                 </div>
               </div>
             ) : filtered.length === 0 ? (
-              <div className="flex justify-center py-6 text-base">No Incentives Found</div>
+              <div className="flex justify-center py-6 text-base">No Celebrities Found</div>
             ) : (
               filtered.map((item) => (
                 <div key={item._id} className="border border-[#E0D4C4] rounded-lg p-4 bg-white">
                   <div className="flex justify-between items-center mb-2">
                     <CustomCheckbox
                       className="w-4 h-4"
-                      checked={selectedIds.includes(item._id)}
-                      onChange={() => setSelectedIds(prev => prev.includes(item._id) ? prev.filter(i => i !== item._id) : [...prev, item._id])}
+                      checked={selectedIds.includes(item._id!)}
+                      onChange={() => setSelectedIds(prev => prev.includes(item._id!) ? prev.filter(i => i !== item._id!) : [...prev, item._id!])}
                     />
                     <div className="flex gap-2">
                       <button onClick={() => handleDelete(item._id)} className="w-5 h-5 flex items-center justify-center">
-                        {deleteLoadingId === item._id.toString() ? (
+                        {deleteLoadingId === item._id ? (
                           <svg className="animate-spin w-5 h-5 text-[#EB6622]" viewBox="0 0 24 24" fill="none">
                             <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25" />
                             <path fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" className="opacity-75" />
@@ -531,17 +576,26 @@ const CelebrityPage = () => {
                       </button>
                     </div>
                   </div>
-
                   <div className="space-y-2 text-sm text-gray-700">
-                    <p><span className="font-semibold">Incentive:</span> {item?.incentives}</p>
-                    <p><span className="font-semibold">Gender:</span> {item?.gender}</p>
-                    <p><span className="font-semibold">Mood:</span> {item?.incentivesMood}</p>
-                    <p><span className="font-semibold">Nature:</span> {item?.incentivesNature}</p>
+                    <div>
+                      {item.celebrityImage?.url ? (
+                        <img
+                          src={item.celebrityImage.url}
+                          alt={item.celebrityName}
+                          className="w-16 h-16 object-cover rounded"
+                        />
+                      ) : (
+                        <span className="text-gray-400 italic">No image</span>
+                      )}
+                    </div>
+                    <p><span className="font-semibold">Name:</span> {item.celebrityName}</p>
+                    <p><span className="font-semibold">Gender:</span> {item.celebrityGender}</p>
+                    <p><span className="font-semibold">Profession:</span> {item.celebrityProfession}</p>
                     <div className="flex items-center gap-2">
                       <span className="font-semibold">Status:</span>
                       <ToggleSwitchButton
-                        value={statusMap[item._id]}
-                        onChange={() => handleStatusToggle(item._id)}
+                        value={statusMap[item._id!]}
+                        onChange={() => handleStatusToggle(item._id!)}
                         className="w-10 h-5 flex items-center rounded-full cursor-pointer transition-colors duration-300"
                         classNameKnob="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300"
                       />
@@ -554,7 +608,9 @@ const CelebrityPage = () => {
         </div>
 
         <div className="flex flex-wrap justify-center items-center gap-2">
-          <CustomPaginationItem type="arrow" direction="left" onClick={goToPrevious} />
+          <CustomPaginationItem type="arrow" direction="left" onClick={goToPrevious}
+          // disabled={currentPage === 1} 
+          />
           {paginationRange.map((item, index) => (
             item === "..." ? (
               <span key={`dots-${index}`} className="px-2 text-gray-500">...</span>
@@ -568,7 +624,7 @@ const CelebrityPage = () => {
               />
             )
           ))}
-          <CustomPaginationItem type="arrow" direction="right" onClick={goToNext} />
+          <CustomPaginationItem type="arrow" direction="right" onClick={goToNext} disabled={currentPage === totalPages} />
         </div>
       </div>
     </>

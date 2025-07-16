@@ -42,4 +42,7 @@ export type CelebritiesValuesSchema = {
   celebrityGender: string;
   celebrityProfession: string;
   celebrityImage: string;
+  celebrityStatus:boolean;
+  _id:string;
+  createdAt:string
 };

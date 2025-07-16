@@ -305,7 +305,7 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
                                             <li>
                                                 Download Sample File{" "}
                                                 <a
-                                                    href="http://localhost:8000/samplefamoflameIncentives.csv"
+                                                    href="https://api.fameoflame.com/samplefamoflameIncentives.csv"
                                                     download
                                                     className="ml-2 bg-[#CC5A18] text-[#FFCAA7] text-xs px-2 py-[2px] rounded"
                                                 >

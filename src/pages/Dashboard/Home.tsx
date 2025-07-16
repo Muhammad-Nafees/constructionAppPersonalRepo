@@ -13,8 +13,13 @@ export default function Home() {
         title="FameOflame"
         description="This is FameOflame admin panel where admin can make CRUD operations to sub admins and incentives and Images gallery as well"
       />
-      <div className="flex justify-center items-center  h-screen w-full">
+      {/* <div className="flex justify-center items-center  h-screen w-full">
         <p className="text-[80px] text-center">Dashboard Coming Soon</p>
+      </div> */}
+
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center min-h-screen">
+        <h1 className="text-3xl font-bold text-center mt-10">Dashboard</h1>
+        <p className="text-center text-gray-600">coming soon...</p>
       </div>
 
       {/* <div className="grid grid-cols-12 gap-4 md:gap-6">

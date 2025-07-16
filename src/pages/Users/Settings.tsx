@@ -1,54 +1,54 @@
-import { useEffect, useState } from "react";
-import { deleteAdmin, getAdmins } from "../../../services/admin/index.ts";
+// import { useEffect, useState } from "react";
+// import { deleteAdmin, getAdmins } from "../../../services/admin/index.ts";
 import PageMeta from "../../components/common/PageMeta.tsx";
-import moment from 'moment';
-import AdminRegisterForm from "../../components/form/AdminRegisteredForm.tsx/AdminRegisterForm.tsx";
-import { useAuth } from "../../context/AuthContext.tsx";
+// import moment from 'moment';
+// import AdminRegisterForm from "../../components/form/AdminRegisteredForm.tsx/AdminRegisterForm.tsx";
+// import { useAuth } from "../../context/AuthContext.tsx";
 
 const Settings = () => {
 
-  const [adminsData, setAdminsData] = useState([]);
-  const [deleteAdminData, setDeleteAdminData] = useState({})
-  const [loading, setLoading] = useState(false);
-  const { adminRegisterFormData } = useAuth();
+  // const [adminsData, setAdminsData] = useState([]);
+  // const [deleteAdminData, setDeleteAdminData] = useState({})
+  // const [loading, setLoading] = useState(false);
+  // const { adminRegisterFormData } = useAuth();
 
-  // useEffect(() => {
-  const getAllAdmins = async () => {
-    setLoading(true);
-    try {
-      const response = await getAdmins();
-      setLoading(false);
-      if (response) {
-        setAdminsData(response.data?.admins)
-      };
+  // // useEffect(() => {
+  // const getAllAdmins = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const response = await getAdmins();
+  //     setLoading(false);
+  //     if (response) {
+  //       setAdminsData(response.data?.admins)
+  //     };
 
-      console.log("🚀 ~ getAllAdmins ~ response:", response.data);
-      return response;
-    } catch (error) {
-      setLoading(false);
-      console.log("🚀 ~ getAdminsList ~ error:", error)
-      throw error;
-    }
-  };
+  //     console.log("🚀 ~ getAllAdmins ~ response:", response.data);
+  //     return response;
+  //   } catch (error) {
+  //     setLoading(false);
+  //     console.log("🚀 ~ getAdminsList ~ error:", error)
+  //     throw error;
+  //   }
+  // };
   //   getAllAdmins()
   // }, [deleteAdminData, adminRegisterFormData])
 
 
-  useEffect(() => {
-    getAllAdmins()
-  }, [deleteAdminData, adminRegisterFormData])
+  // useEffect(() => {
+  //   getAllAdmins()
+  // }, [deleteAdminData, adminRegisterFormData])
 
-  const deleteSubAdmin = async (id: string) => {
-    try {
-      const response = await deleteAdmin(id);
-      setDeleteAdminData(response.data);
-      console.log("🚀 ~ deletAdmin ~ response:", response);
-      return response;
-    } catch (error) {
-      console.log("🚀 ~ delete ~ error:", error)
-      throw error;
-    }
-  };
+  // const deleteSubAdmin = async (id: string) => {
+  //   try {
+  //     const response = await deleteAdmin(id);
+  //     setDeleteAdminData(response.data);
+  //     console.log("🚀 ~ deletAdmin ~ response:", response);
+  //     return response;
+  //   } catch (error) {
+  //     console.log("🚀 ~ delete ~ error:", error)
+  //     throw error;
+  //   }
+  // };
 
 
   return (
@@ -59,23 +59,27 @@ const Settings = () => {
       />
 
       {/* <FormElements /> */}
-      <div className="grid grid-cols-1 gap-6 py-4">
+      {/* <div className="grid grid-cols-1 gap-6 py-4">
         <div className="space-y-6">
 
           <AdminRegisterForm />
         </div>
+      </div> */}
+
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center min-h-screen">
+        <h1 className="text-3xl font-bold text-center mt-10">Setting</h1>
+        <p className="text-center text-gray-600">coming soon...</p>
       </div>
 
-
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white pt-4 dark:border-white/[0.05] dark:bg-white/[0.03]">
-        {/* Header */}
+      {/* <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white pt-4 dark:border-white/[0.05] dark:bg-white/[0.03]">
+        
         <div className="flex flex-col gap-4 px-6 mb-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Sub Admins</h3>
           </div>
         </div>
 
-        {/* Table */}
+       
         <div className="max-w-full overflow-x-auto">
           <table className="min-w-full">
             <thead className="px-6 py-3.5 border-y border-gray-100 bg-gray-50 dark:border-white/[0.05] dark:bg-gray-900">
@@ -160,11 +164,10 @@ const Settings = () => {
 
           </table>
         </div>
-      </div>
+      </div> */}
 
     </>
   );
-
 
 }
 

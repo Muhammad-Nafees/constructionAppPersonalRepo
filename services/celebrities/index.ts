@@ -1,36 +1,60 @@
-import api from "../../src/interceptors/axiosInterceptors.ts";
+import api from "../../src/interceptors/axiosInterceptors";
 
-export const celebrityUploadApi = async (
-  acceptedFiles: File[],
-  values: {
-    celebrityName: string;
-    celebrityGender: string;
-    celebrityProfession: string;
-    celebrityImage: string;
-  },
-  onUploadSuccess: (url: string, fileName: string) => void,
+export const getCelebritiesApi = async (page: number = 1, limit: number = 50) => {
+  try {
+    const token = await localStorage.getItem("token");
+
+    if (!token) throw new Error("Authorization token not found");
+
+    const response = await api.get(`uploadfiles/getCelebrities?limit=${limit}&page=${page}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log("🚀 ~ getCelebritiesApi response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("🚀 ~ getCelebritiesApi error:", error);
+    throw error;
+  }
+};
+
+export const celebrityUploadApi = async (formData: FormData) => {
+  try {
+    const token = await localStorage.getItem("token");
+
+    if (!token) throw new Error("Authorization token not found");
+
+    const response = await api.post("uploadfiles/single", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log("🚀 ~ celebrityUploadApi response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("🚀 ~ celebrityUploadApi error:", error);
+    throw error;
+  }
+};
+
+export const multipleCelebrityUploadApi = async (
+  formData: FormData,
   onUploadProgress?: (progress: number) => void
 ) => {
-
-  if (!acceptedFiles || acceptedFiles.length === 0) return;
-
-  const formData = new FormData();
-
-  acceptedFiles.forEach((file) => {
-    formData.append("files", file);
-  });
-
-  const entry = {
-    celebrityName: values.celebrityName,
-    celebrityGender: values.celebrityGender,
-    professionNationality: values.celebrityProfession,
-  };
-
-  formData.append("entries", JSON.stringify(entry));
-
   try {
-    const response = await api.post("uploadfiles/upload", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
+    const token = await localStorage.getItem("token");
+
+    if (!token) throw new Error("Authorization token not found");
+
+    const response = await api.post("uploadfiles/multiple", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
       onUploadProgress: (event) => {
         const percent = Math.round((event.loaded * 100) / (event.total || 1));
         if (onUploadProgress) {
@@ -39,63 +63,74 @@ export const celebrityUploadApi = async (
       },
     });
 
-    const firstItem = response.data?.data?.[0];
-    const firstImage = firstItem?.images?.[0];
-
-    if (firstImage?.url && firstImage?.filename) {
-      onUploadSuccess(firstImage.url, firstImage.filename);
-    }
-
+    console.log("🚀 ~ multipleCelebrityUploadApi response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Upload failed", error);
-  }
-};
-
-
-
-export const getCelebritiesApi = async () => {
-  try {
-    const token = await localStorage.getItem("token");
-
-    if (!token) throw new Error("Authorization token not found");
-    console.log("🚀 ~ getIncentivesApi ~ token:", token)
-
-    const response = await api.get("uploadfiles/getCelebrities", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    console.log("🚀 ~ getIncentivesApi response:", response.data);
-    return response.data;
-  } catch (error) {
-    console.error("🚀 ~ getIncentivesApi error:", error);
+    console.error("🚀 ~ multipleCelebrityUploadApi error:", error);
     throw error;
   }
 };
 
-
-
-export const deleteCelebritiesApi = async (celebritiesIds: number[]) => {
+export const updateCelebrityApi = async (id: string, formData: FormData) => {
   try {
     const token = await localStorage.getItem("token");
 
     if (!token) throw new Error("Authorization token not found");
-    console.log("deleteIncentivesApi ~ token:", token)
+
+    const response = await api.put(`uploadfiles/updateCelebrity/${id}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log("🚀 ~ updateCelebrityApi response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("🚀 ~ updateCelebrityApi error:", error);
+    throw error;
+  }
+};
+
+export const deleteCelebritiesApi = async (celebritiesIds: string[]) => {
+  try {
+    const token = await localStorage.getItem("token");
+
+    if (!token) throw new Error("Authorization token not found");
 
     const response = await api.delete("uploadfiles/deleteCelebrities", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
       data: {
-        ids: celebritiesIds
-      }
+        ids: celebritiesIds,
+      },
     });
 
-    console.log("delete incnetrive response:", response.data);
-    return response;
+    console.log("🚀 ~ deleteCelebritiesApi response:", response.data);
+    return response.data;
   } catch (error) {
+    console.error("🚀 ~ deleteCelebritiesApi error:", error);
+    throw error;
+  }
+};
+
+export const exportSelectedCelebritiesApi = async (celebritiesIds: string[]) => {
+  try {
+    const token = await localStorage.getItem("token");
+
+    if (!token) throw new Error("Authorization token not found");
+
+    const response = await api.post("uploadfiles/export", { ids: celebritiesIds }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log("🚀 ~ exportSelectedCelebritiesApi response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("🚀 ~ exportSelectedCelebritiesApi error:", error);
     throw error;
   }
 };
