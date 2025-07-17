@@ -96,7 +96,7 @@ const AddCelebrityForm: React.FC<AddCelebrityFormProps> = ({
                 formData.append('celebrityProfession', values.celebrityProfession);
                 formData.append('celebrityStatus', values.celebrityStatus.toString());
                 if (selectedFile) {
-                    formData.append('celebrityImage', selectedFile);
+                    formData.append('file', selectedFile);
                 }
                 const response = await celebrityUploadApi(formData);
                 toast.success('Celebrity added successfully');

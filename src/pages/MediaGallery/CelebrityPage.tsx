@@ -30,6 +30,7 @@ const CelebrityPage = () => {
 
   const [celebrities, setCelebrities] = useState<CelebritiesValuesSchema[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  console.log("🚀 ~ CelebrityPage ~ selectedIds:", selectedIds)
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [loading, setLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
@@ -138,6 +139,9 @@ const CelebrityPage = () => {
       formRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 100);
   }, [toggleAccordionEdit]);
+
+
+
 
   const handlerUpdateCelebrity = useCallback(async (data: CelebritiesValuesSchema) => {
     if (!editData?._id) return;
@@ -446,6 +450,8 @@ const CelebrityPage = () => {
                   </div>
                   <p className="text-[#F47521] text-xs font-medium">{loadingDeleteAll ? 'Deleting...' : 'Delete All'}</p>
                 </button>
+
+
               </div>
             </div>
           )}
@@ -528,8 +534,8 @@ const CelebrityPage = () => {
                         <span className="text-gray-400 italic">No image</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 w-[150px] sm:w-[250px] break-words">{item.celebrityName}</td>
                     <td className="px-4 py-3">{item.celebrityGender}</td>
+                    <td className="px-4 py-3 w-[150px] sm:w-[250px] break-words">{item.celebrityName}</td>
                     <td className="px-4 py-3">{item.celebrityProfession}</td>
                     <td className="px-4 py-3">
                       <ToggleSwitchButton
@@ -624,7 +630,9 @@ const CelebrityPage = () => {
               />
             )
           ))}
-          <CustomPaginationItem type="arrow" direction="right" onClick={goToNext} disabled={currentPage === totalPages} />
+          <CustomPaginationItem type="arrow" direction="right" onClick={goToNext}
+          // disabled={currentPage === totalPages} 
+          />
         </div>
       </div>
     </>
