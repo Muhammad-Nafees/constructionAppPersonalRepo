@@ -41,8 +41,9 @@ export type CelebritiesValuesSchema = {
   celebrityName: string;
   celebrityGender: string;
   celebrityProfession: string;
-  celebrityImage: string;
-  celebrityStatus:boolean;
-  _id:string;
-  createdAt:string
+  celebrityImage?: string | { url: string; filename: string }; // <-- FIX
+
+  celebrityStatus: boolean;
+  _id?: string;
+  createdAt?: string
 };

@@ -37,7 +37,7 @@ const Incentives = () => {
   const [loadingDeleteAll, setLoadingDeleteAll] = useState(false);
   const [filter, setFilter] = useState("");
   const [editData, setEditData] = useState<AddIncentivesValues | null>(null);
-  const [isBulkActive, setIsBulkActive] = useState(false);
+  const [isBulkActive, setIsBulkActive] = useState<null | boolean>(false);
   const [statusMap, setStatusMap] = useState<Record<string, boolean>>({});
   const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
   const [genderFilter, setGenderFilter] = useState("");
@@ -55,12 +55,8 @@ const Incentives = () => {
   }, []);
 
   const toggleAccordionEdit = useCallback((key: string) => {
-    if (editData) {
-      setActiveAccordion(key);
-      return;
-    }
-    setActiveAccordion(prev => (prev === key ? null : key));
-  }, [editData]);
+    setActiveAccordion(prev => (prev === key ? prev : key)); // Always open unless already open
+  }, []);
 
   const fetchIncentives = useCallback(async (page = currentPage) => {
     setLoading(true);
@@ -176,6 +172,8 @@ const Incentives = () => {
     setStatusMap(prev => ({ ...prev, [id]: !current }));
     try {
       await updateIncentiveApi(id, { incentiveStatus: !current });
+
+      fetchIncentives();
       toast.success("Status updated");
     } catch {
       toast.error("Error updating status");
@@ -189,18 +187,21 @@ const Incentives = () => {
     try {
       await Promise.all(selectedIds.map(id => updateIncentiveApi(id, { incentiveStatus: newStatus })));
       toast.success("Bulk status updated");
-      fetchIncentives();
     } catch {
       toast.error("Error updating bulk status");
       setIsBulkActive(!newStatus);
     }
   }, [isBulkActive, selectedIds, fetchIncentives]);
 
+  console.log("bulkActive", isBulkActive)
+
   const exportSelectedIncentives = useCallback(async (ids: string[]) => {
+
     if (!ids || ids.length === 0) {
       toast.warning("Please select at least one incentive to export.");
       return;
-    }
+    };
+
     try {
       await exportSelectedIncentivesApi(ids);
       toast.success("CSV file downloaded successfully!");
@@ -233,7 +234,7 @@ const Incentives = () => {
       if (i === 1 || i === totalPages || (i >= currentPage - delta && i <= currentPage + delta)) {
         range.push(i);
       }
-    }
+    };
 
     for (let page of range) {
       if (lastPage) {
@@ -271,6 +272,31 @@ const Incentives = () => {
     }
   }, [currentPage, totalPages, fetchIncentives]);
 
+
+
+  useEffect(() => {
+    if (selectedIds.length === 0) {
+      setIsBulkActive(false);
+      return;
+    }
+
+    const selectedStatuses = filtered
+      .filter((item) => selectedIds.includes(item._id))
+      .map((item) => item.incentiveStatus);
+
+    const allTrue = selectedStatuses.every((status) => status === true);
+    const allFalse = selectedStatuses.every((status) => status === false);
+
+    if (allTrue) {
+      setIsBulkActive(true);
+    } else if (allFalse) {
+      setIsBulkActive(false);
+    } else {
+      setIsBulkActive(null); // mixed case
+    }
+  }, [selectedIds, filtered]);
+
+
   return (
     <>
       <PageMeta title="FameOflame" description="FameOflame admin panel" />
@@ -285,6 +311,7 @@ const Incentives = () => {
             activeAccordion={activeAccordion}
             setActiveAccordion={setActiveAccordion}
             toggleAccordion={toggleAccordion}
+            formRef={formRef}
           />
         </div>
 
@@ -317,7 +344,7 @@ const Incentives = () => {
                 values={genderFilter}
                 onSelect={setGenderFilter}
                 options={genderOptions}
-                placeholder="Select Gender"
+                placeholder="Gender"
                 buttonClassName="w-full sm:w-32 text-sm"
               />
               <FilterDropdown
@@ -325,7 +352,7 @@ const Incentives = () => {
                 values={moodFilter}
                 onSelect={setMoodFilter}
                 options={incentivesMoodOptions}
-                placeholder="Select Mood"
+                placeholder="Mood"
                 buttonClassName="w-full sm:w-32 text-sm"
               />
               <FilterDropdown
@@ -333,7 +360,7 @@ const Incentives = () => {
                 values={natureFilter}
                 onSelect={setNatureFilter}
                 options={incentivesNatureOptions}
-                placeholder="Select Nature"
+                placeholder="Nature"
                 buttonClassName="w-full sm:w-32 text-sm"
               />
               <FilterDropdown
@@ -341,7 +368,7 @@ const Incentives = () => {
                 values={statusFilter}
                 onSelect={setStatusFilter}
                 options={["Active", "Inactive"]}
-                placeholder="Select Status"
+                placeholder="Status"
                 buttonClassName="w-full sm:w-32 text-sm"
               />
 
@@ -363,7 +390,7 @@ const Incentives = () => {
                 <button onClick={handleSelectAll} className="bg-[#fde3d3] px-2 py-1 rounded text-[#F47521] text-xs font-medium">
                   {selectedIds.length === filtered.length ? 'Unselect All' : 'Select All'}
                 </button>
-                
+
                 <button
                   onClick={() => exportSelectedIncentives(selectedIds.map(String))}
                   className="bg-[#dcfcd3] px-2 py-1 rounded text-[#43B925] text-xs font-medium"
@@ -376,12 +403,15 @@ const Incentives = () => {
 
               <div className="flex items-center space-x-3">
                 <ToggleSwitchButton
-                  value={isBulkActive}
+                  value={isBulkActive === true}
                   onChange={handleBulkToggle}
-                  label="Active"
+                  label="Bulk Active"
                   className="w-10 h-5 flex items-center rounded-full cursor-pointer transition-colors duration-300 "
                   classNameKnob="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 "
                 />
+
+                {/* // disabled={isBulkActive === null} */}
+
                 <div className="w-px h-5 bg-[#E0D4C4]" />
                 <button
                   onClick={handleDeleteAll}
@@ -533,8 +563,8 @@ const Incentives = () => {
                       <ToggleSwitchButton
                         value={statusMap[item._id]}
                         onChange={() => handleStatusToggle(item._id)}
-                        className="w-10 h-5 flex items-center rounded-full cursor-pointer transition-colors duration-300"
-                        classNameKnob="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300"
+                        className="w-10 h-5 flex items-center rounded-full cursor-pointer transition-colors duration-300 "
+                        classNameKnob="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 "
                       />
                     </div>
                   </div>

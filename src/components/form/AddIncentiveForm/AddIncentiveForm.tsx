@@ -12,7 +12,7 @@ import { inceltivesValitionSchema } from '../../../validations';
 import { useDropzone } from 'react-dropzone';
 import ToggleSwitchButton from '../../reusableComponents/ToggleSwitchButton';
 import { genderOptions, incentivesMoodOptions, incentivesNatureOptions } from '../../../data';
-
+ 
 const MAX_CHAR_LIMIT = 350;
 
 interface AddIncentiveFormProps {
@@ -24,6 +24,7 @@ interface AddIncentiveFormProps {
     activeAccordion: string | null;
     toggleAccordion: (accordion: string) => void;
     fetchIncentives: () => Promise<void>;
+    formRef: React.RefObject<HTMLDivElement | null>
 };
 
 
@@ -36,11 +37,12 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
     activeAccordion,
     toggleAccordion,
     fetchIncentives,
+    formRef
 }) => {
     const [loading, setLoading] = useState<boolean>(false);
     const [uploadedFile, setUploadedFile] = useState<File | null>(null);
     const [uploadProgress, setUploadProgress] = useState<number | null>(null);
-
+    const [bulkloading, setBulkLoading] = useState<boolean>(false);
     const { setAddIncentivesFormData } = useAuth();
 
     const handleSubmit = async (
@@ -87,36 +89,72 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
             }
             setUploadedFile(csvFile);
             setUploadProgress(0);
-            uploadCsvIncentivesApi(
-                csvFile,
+            // uploadCsvIncentivesApi(
+            //     csvFile,
+            //     (msg) => {
+            //         toast.success(msg);
+            //         fetchIncentives();
+            //     },
+            //     (progress) => {
+            //         setUploadProgress(progress);
+            //     }
+            // );
+        },
+        multiple: false,
+        accept: { "text/csv": [".csv"] },
+    });
+    const handleUploadCsv = async () => {
+        if (!uploadedFile) {
+            toast.error("Please upload a CSV file first.");
+            return;
+        }
+
+        try {
+            setBulkLoading(true);
+            setUploadProgress(0);
+            setAddIncentivesFormData(null);
+
+            await uploadCsvIncentivesApi(
+                uploadedFile,
                 (msg) => {
                     toast.success(msg);
+                    setUploadedFile(null);
+                    setUploadProgress(null);
                     fetchIncentives();
                 },
                 (progress) => {
                     setUploadProgress(progress);
                 }
             );
-        },
-        multiple: false,
-        accept: { "text/csv": [".csv"] },
-    });
+        } catch (error) {
+            const axiosError = error as AxiosError<{ message: string }>;
+            console.error("Upload Error:", axiosError);
+
+            const status = axiosError?.response?.status;
+            const errorMessages: Record<number, string> = {
+                400: "Invalid file format. Please upload a valid CSV file.",
+                500: "Server error while uploading CSV.",
+            };
+
+            toast.error(
+                status && errorMessages[status]
+                    ? errorMessages[status]
+                    : "Failed to upload CSV. Please try again."
+            );
+        } finally {
+            setBulkLoading(false);
+        }
+    };
+
 
 
     const exportCsvincentiveHandler = async (): Promise<void> => {
         try {
-            const response: any = await exportCsvIncentivesApi();
+            await exportCsvIncentivesApi(); // Just call it
 
-            if (!response || response.data?.size === 0) {
-                toast.warning("Exported file is empty.");
-                return;
-            }
-
-            toast.success("Bulk Incentives Successfully Exported");
+            toast.success("Bulk Incentives Successfully Exported ✅");
         } catch (error) {
             const axiosError = error as AxiosError;
-            console.error("Export Error:", axiosError);
-
             const status = axiosError?.response?.status;
 
             const errorMessages: Record<number, string> = {
@@ -131,6 +169,7 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
             );
         }
     };
+
 
 
 
@@ -271,6 +310,10 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
                                             onClick={() => {
                                                 resetForm();
                                                 if (editingData) setEditData(null);
+                                                toggleAccordion("addnew");
+                                                setTimeout(() => {
+                                                    formRef.current?.scrollIntoView({ behavior: "smooth" });
+                                                }, 100);
                                             }}
                                             className="w-28 sm:w-32 bg-gray-300 text-gray-700 text-sm sm:text-base"
                                             size="sm"
@@ -284,13 +327,19 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
                                             size="sm"
                                             disabled={isSubmitting || loading || editLoading}
                                         >
-                                            {loading || editLoading ? (
+                                            {(loading || editLoading) ? (
                                                 <>
                                                     <Spinner />
-                                                    {editingData ? 'Updating...' : 'Saving...'}
+                                                    <span>{editingData ? "Updating..." : "Saving..."}</span>
                                                 </>
-                                            ) : editingData ? 'Update' : 'Save'}
+                                            ) : (
+                                                <>
+                                                    {/* <Spinner /> */}
+                                                    <span>{editingData ? "Update" : "Save"}</span>
+                                                </>
+                                            )}
                                         </Button>
+
                                     </div>
                                 </div>
                             </div>
@@ -298,6 +347,8 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
 
                         <div className={`overflow-hidden transition-all duration-500 ease-in-out ${activeAccordion === "bulkimport" ? "max-h-[1000px] border border-dashed border-red-300" : "max-h-0"}`}>
                             <div className="p-4 bg-[#FFF9F4]">
+
+
                                 <div className="flex flex-col sm:flex-row w-full gap-4 border border-orange-500 rounded">
                                     <div className="w-full sm:w-1/2 bg-[#A84317] text-white p-4 sm:p-6 space-y-2">
                                         <h2 className="text-white text-base sm:text-lg mb-2">Read the instructions carefully to create a File for BULK UPLOAD incentives.</h2>
@@ -319,20 +370,31 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
                                             <li>That's it! You can now edit the incentives in Bulk or individually using the Web App.</li>
                                         </ol>
                                     </div>
+
                                     <div className="w-full sm:w-1/2 p-4 sm:p-6">
                                         <div {...getRootProps()} className="border-2 border-dashed border-orange-400 rounded cursor-pointer p-4 sm:p-6 text-center">
                                             <input {...getInputProps()} />
                                             <div className="flex flex-col items-center space-y-2">
-                                                <img src="/images/uploadIcon.svg" alt="upload" className="w-8 h-8 sm:w-10 sm:h-10" />
-                                                <p className="text-orange-600 font-semibold text-sm sm:text-base">Drag & Drop or Choose File to Upload</p>
-                                                <p className="text-gray-500 text-xs sm:text-sm">
-                                                    File accepted: <strong>.csv</strong> only <br />
-                                                    Example: incentives.csv <br />
-                                                    {/* Max Size: 2MB */}
-                                                </p>
-                                                <span className="text-orange-500 underline text-sm">Browse</span>
+                                                {
+                                                    uploadedFile ?
+
+                                                        <p className="text-orange-600 font-semibold text-sm sm:text-base">File: {uploadedFile.name} Uploaded</p>
+
+                                                        :
+                                                        <>
+                                                            <img src="/images/uploadIcon.svg" alt="upload" className="w-8 h-8 sm:w-10 sm:h-10" />
+                                                            <p className="text-orange-600 font-semibold text-sm sm:text-base">Drag & Drop or Choose File to Upload</p>
+                                                            <p className="text-gray-500 text-xs sm:text-sm">
+                                                                File accepted: <strong>.csv</strong> only <br />
+                                                                Example: incentives.csv <br />
+                                                            </p>
+                                                            <span className="text-orange-500 underline text-sm">Browse</span>
+                                                        </>
+                                                }
                                             </div>
                                         </div>
+
+
                                         {uploadedFile && (
                                             <div className="mt-4 bg-white p-3 rounded border border-gray-300 shadow-sm">
                                                 <div className="flex items-center justify-between">
@@ -368,6 +430,44 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
                                         )}
                                     </div>
                                 </div>
+
+
+                                {/* <div className="flex flex-col sm:flex-row justify-between space-x-0 sm:space-x-6 px-4 items-center pb-8 mt-4"> */}
+
+                                <div className="flex gap-2 mt-4 sm:mt-0 flex-end justify-end py-10">
+                                    <Button
+                                        type="button"
+                                        onClick={() => {
+                                            resetForm();
+                                            if (editingData) setEditData(null);
+                                            toggleAccordion("bulkimport");
+                                            setTimeout(() => {
+                                                formRef.current?.scrollIntoView({ behavior: "smooth" });
+                                            }, 100);
+                                        }}
+                                        className="w-28 sm:w-32 bg-gray-300 text-gray-700 text-sm sm:text-base"
+                                        size="sm"
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        onClick={handleUploadCsv}
+                                        className="w-28 sm:w-32 bg-gradient-to-r from-orange-600 to-orange-400 text-white flex items-center justify-center text-sm sm:text-base"
+                                        size="sm"
+                                        disabled={bulkloading}
+                                    >
+                                        {bulkloading ? (
+                                            <>
+                                                <Spinner />
+                                                {'Saving...'}
+                                            </>
+                                        ) : 'Save'}
+                                    </Button>
+                                </div>
+                                {/* </div> */}
+
+
                             </div>
                         </div>
                     </div>

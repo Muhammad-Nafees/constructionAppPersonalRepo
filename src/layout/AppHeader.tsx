@@ -5,11 +5,13 @@ import { useSidebar } from "../context/SidebarContext";
 // import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 // import NotificationDropdown from "../components/header/NotificationDropdown";
 import UserDropdown from "../components/header/UserDropdown";
+import { useAuth } from "../context/AuthContext";
 
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
 
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
+  const { user } = useAuth();
 
   const handleToggle = () => {
     if (window.innerWidth >= 1024) {
@@ -94,7 +96,7 @@ const AppHeader: React.FC = () => {
               )}
             </button>
 
-            <span className="text-[#FFFFFF]">Hi, Welcome to Dashboard.</span>
+            <span className="text-[#FFFFFF]">{`Hi ${user?.name} , Welcome to App Dashboard.`}</span>
             <Link to="/" className="lg:hidden">
 
               <img

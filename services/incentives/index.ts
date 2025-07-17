@@ -163,7 +163,7 @@ export const exportCsvIncentivesApi = async () => {
     const url = window.URL.createObjectURL(new Blob([response.data], { type: 'text/csv' }));
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", "incentives.csv"); // 🎯 file name
+    link.setAttribute("download", "incentives.csv");  
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -190,7 +190,7 @@ export const exportSelectedIncentivesApi = async (ids: string[]) => {
     document.body.appendChild(link);
     link.click();
     link.remove();
-
+    return response.data;
   } catch (error) {
     console.error("CSV export failed:", error);
     throw error;
