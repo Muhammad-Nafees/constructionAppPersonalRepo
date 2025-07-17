@@ -617,7 +617,6 @@ const CelebrityPage = () => {
           <CustomPaginationItem type="arrow" direction="left" onClick={goToPrevious}
           // disabled={currentPage === 1} 
           />
-          
           {paginationRange.map((item, index) => (
             item === "..." ? (
               <span key={`dots-${index}`} className="px-2 text-gray-500">...</span>
