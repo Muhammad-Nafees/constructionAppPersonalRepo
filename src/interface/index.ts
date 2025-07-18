@@ -37,13 +37,14 @@ export type AddIncentivesValues = {
 };
 
 
-export type CelebritiesValuesSchema = {
+export interface CelebritiesValuesSchema {
+  _id?: string;
+  celebrityImage?: { url: string; filename: string; _id?: string } | null;
   celebrityName: string;
   celebrityGender: string;
   celebrityProfession: string;
-  celebrityImage?: string | { url: string; filename: string }; // <-- FIX
-
   celebrityStatus: boolean;
-  _id?: string;
-  createdAt?: string
-};
+  createdAt?: string;
+  updatedAt?: string;
+  isBulkUploaded?: boolean;
+}

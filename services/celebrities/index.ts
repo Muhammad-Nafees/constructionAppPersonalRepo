@@ -45,6 +45,7 @@ export const multipleCelebrityUploadApi = async (
   formData: FormData,
   onUploadProgress?: (progress: number) => void
 ) => {
+  console.log("🚀 ~ formData:", formData)
   try {
     const token = await localStorage.getItem("token");
 
@@ -70,6 +71,32 @@ export const multipleCelebrityUploadApi = async (
     throw error;
   }
 };
+
+
+
+export const exportCsvCelebritiesApi = async () => {
+  try {
+
+    const response = await api.get("uploadfiles/exportCelebrities", {
+      responseType: "blob",
+    });
+
+    const blob = new Blob([response.data], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'celebrities_export.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    return response.data;
+
+  } catch (error) {
+    console.error("CSV export failed:", error);
+    throw error;
+  }
+};
+
 
 export const updateCelebrityApi = async (id: string, formData: FormData) => {
   try {
@@ -115,22 +142,46 @@ export const deleteCelebritiesApi = async (celebritiesIds: string[]) => {
   }
 };
 
-export const exportSelectedCelebritiesApi = async (celebritiesIds: string[]) => {
+
+
+
+export const deleteAllCelebritiesApi = async () => {
   try {
     const token = await localStorage.getItem("token");
 
     if (!token) throw new Error("Authorization token not found");
 
-    const response = await api.post("uploadfiles/export", { ids: celebritiesIds }, {
+    const response = await api.delete("uploadfiles/deleteAllCelebrities", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
-
-    console.log("🚀 ~ exportSelectedCelebritiesApi response:", response.data);
+    console.log("🚀 ~ deleteCelebritiesApi response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("🚀 ~ exportSelectedCelebritiesApi error:", error);
+    console.error("🚀 ~ deleteAllCelebrities error:", error);
     throw error;
   }
 };
+
+
+
+// export const exportSelectedCelebritiesApi = async (celebritiesIds: string[]) => {
+//   try {
+//     const token = await localStorage.getItem("token");
+
+//     if (!token) throw new Error("Authorization token not found");
+
+//     const response = await api.post("uploadfiles/export", { ids: celebritiesIds }, {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//       },
+//     });
+
+//     console.log("🚀 ~ exportSelectedCelebritiesApi response:", response.data);
+//     return response.data;
+//   } catch (error) {
+//     console.error("🚀 ~ exportSelectedCelebritiesApi error:", error);
+//     throw error;
+//   }
+// };
