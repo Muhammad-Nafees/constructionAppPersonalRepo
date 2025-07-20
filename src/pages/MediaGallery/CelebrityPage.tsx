@@ -24,6 +24,7 @@ import FilterDropdown from "../../components/input/FilterDropDown";
 import { genderOptions, professionOptions } from "../../data";
 import CustomPaginationItem from "../../components/reusableComponents/CustomPaginationIcon";
 import AddCelebrityForm from "../../components/form/addCelebrity-form/AddCelebrityForm";
+import CustomDropdown from "../../components/reusableComponents/CustomDropdown";
 
 const CelebrityPage = () => {
   const { addIncentivesFormData } = useAuth();
@@ -49,7 +50,10 @@ const CelebrityPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [currentlyEditingId, setCurrentlyEditingId] = useState<string | null>(null);
   // const [editData, setEditData] = useState<CelebritiesValuesSchema | null>(null);
-   const filtered = useMemo(() => {
+
+
+
+  const filtered = useMemo(() => {
     return celebrities.filter(item => {
       console.log("🚀 ~ filtered ~ item:", item)
       console.log("🚀 ~ filtered ~ celebrities:", celebrities)
@@ -153,7 +157,7 @@ const CelebrityPage = () => {
   const handleEditClick = useCallback((item: CelebritiesValuesSchema) => {
     setEditData(item);
     setCurrentlyEditingId(item._id!);
-  
+
     if (activeAccordion === "addnew") {
       toggleAccordionEdit("addnew");
       setTimeout(() => {
@@ -162,7 +166,7 @@ const CelebrityPage = () => {
     }
     // If another accordion is open, allow inline edit in table only — no scroll or accordion change
   }, [activeAccordion, toggleAccordionEdit]);
-  
+
 
   const handlerUpdateCelebrity = useCallback(async (data: CelebritiesValuesSchema) => {
     if (!editData?._id) return;
@@ -251,7 +255,9 @@ const CelebrityPage = () => {
       setStatusMap(prev => ({ ...prev, [id]: current }));
     }
   }, [statusMap, fetchCelebrities]);
+  
 
+  
   const handleBulkToggle = useCallback(async () => {
     const newStatus = !isBulkActive;
     setIsBulkActive(newStatus);
@@ -406,7 +412,7 @@ const CelebrityPage = () => {
                 values={genderFilter}
                 onSelect={setGenderFilter}
                 options={genderOptions}
-                placeholder="Select Gender"
+                placeholder="Gender"
                 buttonClassName="w-full sm:w-32 text-sm"
               />
               <FilterDropdown
@@ -414,7 +420,7 @@ const CelebrityPage = () => {
                 values={professionFilter}
                 onSelect={setProfessionFilter}
                 options={professionOptions}
-                placeholder="Select Profession"
+                placeholder="Profession"
                 buttonClassName="w-full sm:w-32 text-sm"
               />
               <FilterDropdown
@@ -422,7 +428,7 @@ const CelebrityPage = () => {
                 values={statusFilter}
                 onSelect={setStatusFilter}
                 options={["Active", "Inactive"]}
-                placeholder="Select Status"
+                placeholder="Status"
                 buttonClassName="w-full sm:w-32 text-sm"
               />
               <button className="w-10 h-10 flex items-center justify-center">
@@ -649,151 +655,152 @@ const CelebrityPage = () => {
             )}
           </div>
         </div> */}
-<div className="relative border border-[#E0D4C4] min-h-[200px] h-[400px] overflow-y-auto">
-  <table className="w-full text-left border-collapse hidden sm:table">
-    <thead className="bg-[#FDF6EE] border-b border-[#E0D4C4] sticky top-0 z-10">
-      <tr className="text-[#BB501C] text-sm font-semibold">
-        <th className="px-4 py-3 w-20 sm:w-28">
-          <CustomCheckbox className="w-4 h-4" checked={selectedIds.length === filtered.length} onChange={handleSelectAll} />
-        </th>
-        <th className="px-4 py-3 w-12">Actions</th>
-        <th className="px-4 py-3 w-40 sm:w-64">Celebrity Image</th>
-        <th className="px-4 py-3 w-24 sm:w-40">Celebrity Name</th>
-        <th className="px-4 py-3 w-32 sm:w-60">Gender</th>
-        <th className="px-4 py-3 w-24 sm:w-40">Profession</th>
-        <th className="px-4 py-3 w-24 sm:w-40">Status</th>
-      </tr>
-    </thead>
+        <div className="relative border border-[#E0D4C4] min-h-[200px] h-[400px] overflow-y-auto">
+          <table className="w-full text-left border-collapse hidden sm:table">
+            <thead className="bg-[#FDF6EE] border-b border-[#E0D4C4] sticky top-0 z-10">
+              <tr className="text-[#BB501C] text-sm font-semibold">
+                <th className="px-4 py-3 w-20 sm:w-28">
+                  <CustomCheckbox className="w-4 h-4" checked={selectedIds.length === filtered.length} onChange={handleSelectAll} />
+                </th>
+                <th className="px-4 py-3 w-12">Actions</th>
+                <th className="px-4 py-3 w-40 sm:w-64">Celebrity Image</th>
+                <th className="px-4 py-3 w-24 sm:w-40">Celebrity Name</th>
+                <th className="px-4 py-3 w-32 sm:w-60">Gender</th>
+                <th className="px-4 py-3 w-24 sm:w-40">Profession</th>
+                <th className="px-4 py-3 w-24 sm:w-40">Status</th>
+              </tr>
+            </thead>
 
-    <tbody>
-      {loading ? (
-        <tr>
-          <td colSpan={7}>
-            <div className="flex justify-center items-center py-6 h-[400px]">
-              <div className="w-10 h-10 bg-gradient-to-r from-orange-600 to-orange-400 rounded-full flex justify-center items-center">
-                <div className="w-5 h-5 border-2 border-white border-t-transparent animate-spin rounded-full" />
-              </div>
-            </div>
-          </td>
-        </tr>
-      ) : filtered.length === 0 ? (
-        <tr>
-          <td colSpan={7}>
-            <div className="flex flex-col items-center justify-center h-[400px] space-y-2">
-              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 13h6m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z" />
-              </svg>
-              <p className="text-base text-gray-500">No Celebrities Found</p>
-            </div>
-          </td>
-        </tr>
-      ) : (
-        filtered.map((item) => (
-          <tr key={item._id} className="border-b border-[#E0D4C4] text-sm text-gray-700">
-            <td className="px-4 py-3">
-              <CustomCheckbox className="w-4 h-4" checked={selectedIds.includes(item._id!)} onChange={() => setSelectedIds(prev => prev.includes(item._id!) ? prev.filter(i => i !== item._id!) : [...prev, item._id!])} />
-            </td>
-
-            <td className="px-4 py-3">
-              <div className="flex gap-4 items-center">
-                <button onClick={() => handleDelete(item._id)} className="w-5 h-5 flex items-center justify-center">
-                  {deleteLoadingId === item._id ? (
-                    <svg className="animate-spin w-5 h-5 text-[#EB6622]" viewBox="0 0 24 24" fill="none">
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25" />
-                      <path fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" className="opacity-75" />
-                    </svg>
-                  ) : <DeleteIcon />}
-                </button>
-
-                {currentlyEditingId === item._id ? (
-                  <button 
-                  // onClick={() => handleUpdate(item._id!)}
-                  >
-                    {/* <TickIcon /> */}
-                    ✅
-                  </button>
-                ) : (
-                  <button onClick={() => handleEditClick(item)}>
-                    <EditIcon />
-                  </button>
-                )}
-              </div>
-            </td>
-
-            <td className="px-4 py-3">
-              {item.celebrityImage?.url ? (
-                <img src={item.celebrityImage.url} alt={item.celebrityName} className="w-16 h-16 object-cover rounded" />
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={7}>
+                    <div className="flex justify-center items-center py-6 h-[400px]">
+                      <div className="w-10 h-10 bg-gradient-to-r from-orange-600 to-orange-400 rounded-full flex justify-center items-center">
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent animate-spin rounded-full" />
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              ) : filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={7}>
+                    <div className="flex flex-col items-center justify-center h-[400px] space-y-2">
+                      <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 13h6m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <p className="text-base text-gray-500">No Celebrities Found</p>
+                    </div>
+                  </td>
+                </tr>
               ) : (
-                <span className="text-gray-400 italic">No image</span>
-              )}
-            </td>
+                filtered.map((item) => (
+                  <tr key={item._id} className="border-b border-[#E0D4C4] text-sm text-gray-700">
+                    <td className="px-4 py-3">
+                      <CustomCheckbox className="w-4 h-4" checked={selectedIds.includes(item._id!)} onChange={() => setSelectedIds(prev => prev.includes(item._id!) ? prev.filter(i => i !== item._id!) : [...prev, item._id!])} />
+                    </td>
 
-            <td className="px-4 py-3 w-[150px] sm:w-[250px] break-words">
-              {currentlyEditingId === item._id ? (
-                <input
-                  type="text"
-                  className="border border-gray-300 rounded px-2 py-1 w-full"
-                  value={editData?.celebrityName}
-                  onChange={(e) =>
-                    setEditData((prev) => ({ ...prev!, celebrityName: e.target.value }))
-                  }
-                />
-              ) : (
-                item.celebrityName
-              )}
-            </td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-4 items-center">
+                        <button onClick={() => handleDelete(item._id)} className="w-5 h-5 flex items-center justify-center">
+                          {deleteLoadingId === item._id ? (
+                            <svg className="animate-spin w-5 h-5 text-[#EB6622]" viewBox="0 0 24 24" fill="none">
+                              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25" />
+                              <path fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" className="opacity-75" />
+                            </svg>
+                          ) : <DeleteIcon />}
+                        </button>
 
-            <td className="px-4 py-3">
-              {currentlyEditingId === item._id ? (
-                <select
-                  className="border border-gray-300 rounded px-2 py-1 w-full"
-                  value={editData?.celebrityGender}
-                  onChange={(e) =>
-                    setEditData((prev) => ({ ...prev!, celebrityGender: e.target.value }))
-                  }
-                >
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
-              ) : (
-                item.celebrityGender
-              )}
-            </td>
+                        {currentlyEditingId === item._id ? (
+                          <button
+                          // onClick={() => handleUpdate(item._id!)}
+                          >
+                            {/* <TickIcon /> */}
+                            ✅
+                          </button>
+                        ) : (
+                          <button onClick={() => handleEditClick(item)}>
+                            <EditIcon />
+                          </button>
+                        )}
+                      </div>
+                    </td>
 
-            <td className="px-4 py-3">
-              {currentlyEditingId === item._id ? (
-                <select
-                  className="border border-gray-300 rounded px-2 py-1 w-full"
-                  value={editData?.celebrityProfession}
-                  onChange={(e) =>
-                    setEditData((prev) => ({ ...prev!, celebrityProfession: e.target.value }))
-                  }
-                >
-                  <option value="Actor">Actor</option>
-                  <option value="Singer">Singer</option>
-                  <option value="Athlete">Athlete</option>
-                  {/* add more options */}
-                </select>
-              ) : (
-                item.celebrityProfession
-              )}
-            </td>
+                    <td className="px-4 py-3">
+                      {item.celebrityImage?.url ? (
+                        <img src={item.celebrityImage.url} alt={item.celebrityName} className="w-16 h-16 object-cover rounded" />
+                      ) : (
+                        <span className="text-gray-400 italic">No image</span>
+                      )}
+                    </td>
 
-            <td className="px-4 py-3">
-              <ToggleSwitchButton
-                value={statusMap[item._id!]}
-                onChange={() => handleStatusToggle(item._id!)}
-                className="w-10 h-5 flex items-center rounded-full cursor-pointer transition-colors duration-300 "
-                  classNameKnob="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 "
-              />
-            </td>
-          </tr>
-        ))
-      )}
-    </tbody>
-  </table>
-</div>
+                    <td className="px-4 py-3 w-[150px] sm:w-[250px] break-words">
+                      {currentlyEditingId === item._id ? (
+                        <input
+                          type="text"
+                          className="border border-gray-300 rounded px-2 py-1 w-full"
+                          value={editData?.celebrityName}
+                          onChange={(e) =>
+                            setEditData((prev) => ({ ...prev!, celebrityName: e.target.value }))
+                          }
+                        />
+                      ) : (
+                        item.celebrityName
+                      )}
+                    </td>
+
+                    <td className="px-4 py-3">
+                      {currentlyEditingId === item._id ? (
+                        <CustomDropdown
+                          label=""
+                          options={genderOptions}
+                          values={editData?.celebrityGender}
+                          // values={editData?.celebrityGender} // yahan 'values' ki jagah shayad 'value' hona chahiye
+                          onSelect={(gender) =>
+                            setEditData((prev) => ({ ...prev!, celebrityGender: gender }))
+                          }
+                          className="w-full border-none focus:border-orange-500 focus:ring-0"
+                          placeholder="Select Gender"
+                          name="celebrityGender"
+                        />
+                      ) : (
+                        item.celebrityGender
+                      )}
+                    </td>
+
+
+              <td className="px-4 py-3">
+  {currentlyEditingId === item._id ? (
+    <CustomDropdown
+      label=""
+      options={professionOptions}
+      values={editData?.celebrityProfession} // ya 'value' if your component uses that
+      onSelect={(profession) =>
+        setEditData((prev) => ({ ...prev!, celebrityProfession: profession }))
+      }
+      className="w-full "
+      placeholder="Profession"
+      name="celebrityProfession"
+    />
+  ) : (
+    item.celebrityProfession
+  )}
+</td>
+
+                    <td className="px-4 py-3">
+                      <ToggleSwitchButton
+                        value={statusMap[item._id!]}
+                        onChange={() => handleStatusToggle(item._id!)}
+                        className="w-10 h-5 flex items-center rounded-full cursor-pointer transition-colors duration-300 "
+                        classNameKnob="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 "
+                      />
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
 
 
 

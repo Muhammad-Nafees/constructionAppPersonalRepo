@@ -103,7 +103,8 @@ const AddCelebrityForm: React.FC<AddCelebrityFormProps> = ({
                 formData.append('celebrityStatus', values.celebrityStatus.toString());
                 if (selectedFile) {
                     formData.append('file', selectedFile);
-                }
+                };
+
                 const response = await celebrityUploadApi(formData);
                 toast.success('Celebrity added successfully');
                 setAddIncentivesFormData(response.data);
@@ -155,6 +156,7 @@ const AddCelebrityForm: React.FC<AddCelebrityFormProps> = ({
         };
 
         setLoading(true);
+
         try {
             const formData = new FormData();
 
@@ -164,8 +166,8 @@ const AddCelebrityForm: React.FC<AddCelebrityFormProps> = ({
                 console.log("🚀 ~ handleBulkUpload ~ baseName:", baseName)
                 return {
                     celebrityName: baseName,
-                    celebrityGender: "Male",
-                    professionNationality: "Influencers",
+                    celebrityGender: "",
+                    professionNationality: "",
                     celebrityStatus: values.celebrityStatus, // same status for all
                 };
             });
