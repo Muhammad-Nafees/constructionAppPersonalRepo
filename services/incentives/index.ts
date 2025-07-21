@@ -58,12 +58,11 @@ export const deleteAllIncentivesApi = async () => {
     if (!token) throw new Error("Authorization token not found");
     console.log("🚀 ~ deleteAllIncentives ~ token:", token)
 
-    const response = await api.get("incentives/deleteAllIncentives", {
+    const response = await api.delete("incentives/deleteAllIncentives", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
-
     console.log("🚀 ~ deleteAllIncentives response:", response.data);
     return response.data;
   } catch (error) {
@@ -173,6 +172,7 @@ export const exportCsvIncentivesApi = async () => {
     throw error;
   }
 };
+
 
 
 export const exportSelectedIncentivesApi = async (ids: string[]) => {

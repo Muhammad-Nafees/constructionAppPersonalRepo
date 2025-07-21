@@ -98,23 +98,69 @@ export const exportCsvCelebritiesApi = async () => {
 };
 
 
-export const updateCelebrityApi = async (id: string, formData: FormData) => {
+// export const updateCelebrityApi = async (id: string, formData: FormData) => {
+//   try {
+//     const token = await localStorage.getItem("token");
+
+//     if (!token) throw new Error("Authorization token not found");
+
+//     const response = await api.put(`uploadfiles/updateCelebrity/${id}`, formData, {
+//       headers: {
+//         "Content-Type": "multipart/form-data",
+//         Authorization: `Bearer ${token}`,
+//       },
+//     });
+
+//     console.log("🚀 ~ updateCelebrityApi response:", response.data);
+//     return response.data;
+//   } catch (error) {
+//     console.error("🚀 ~ updateCelebrityApi error:", error);
+//     throw error;
+//   }
+// };
+
+
+
+export const updateCelebrityApi = async (id: string, data: any) => {
   try {
     const token = await localStorage.getItem("token");
 
     if (!token) throw new Error("Authorization token not found");
 
-    const response = await api.put(`uploadfiles/updateCelebrity/${id}`, formData, {
+    const response = await api.put(`uploadfiles/updateCelebrity/${id}`, data, {
       headers: {
-        "Content-Type": "multipart/form-data",
+        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
     });
 
-    console.log("🚀 ~ updateCelebrityApi response:", response.data);
+    console.log("✅ updateCelebrityApi response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("🚀 ~ updateCelebrityApi error:", error);
+    console.error("updateCelebrityApi error:", error);
+    throw error;
+  }
+};
+
+export const exportDownloadCelebrityCSVApi = async (ids: string[]) => {
+  try {
+    // const token = localStorage.getItem("token");
+    const response = await api.post(
+      "uploadfiles/exportSelectedCelebrities",
+      { ids },
+      { responseType: "blob" }
+    );
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    // Create download link
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `celebrities.csv`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    return response.data;
+  } catch (error) {
     throw error;
   }
 };

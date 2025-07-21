@@ -4,6 +4,7 @@ import { CelebritiesValuesSchema } from "../../interface";
 import {
   deleteAllCelebritiesApi,
   deleteCelebritiesApi,
+  exportDownloadCelebrityCSVApi,
   // exportSelectedCelebritiesApi,
   getCelebritiesApi,
   updateCelebrityApi,
@@ -25,6 +26,7 @@ import { genderOptions, professionOptions } from "../../data";
 import CustomPaginationItem from "../../components/reusableComponents/CustomPaginationIcon";
 import AddCelebrityForm from "../../components/form/addCelebrity-form/AddCelebrityForm";
 import CustomDropdown from "../../components/reusableComponents/CustomDropdown";
+import TickIcon from "../../components/svg/TickIcon";
 
 const CelebrityPage = () => {
   const { addIncentivesFormData } = useAuth();
@@ -154,38 +156,70 @@ const CelebrityPage = () => {
   //   }, 100);
   // }, [toggleAccordionEdit]);
 
-  const handleEditClick = useCallback((item: CelebritiesValuesSchema) => {
+  // const handleEditClick = useCallback((item: CelebritiesValuesSchema) => {
+  //   setEditData(item);
+  //   setCurrentlyEditingId(item._id!);
+
+  //   if (activeAccordion === "addnew") {
+  //     toggleAccordionEdit("addnew");
+  //     setTimeout(() => {
+  //       formRef.current?.scrollIntoView({ behavior: "smooth" });
+  //     }, 100);
+  //   }
+  //   // If another accordion is open, allow inline edit in table only — no scroll or accordion change
+  // }, [activeAccordion, toggleAccordionEdit]);
+
+  const handleEditClick = (item: any) => {
+    setCurrentlyEditingId(item._id);
     setEditData(item);
-    setCurrentlyEditingId(item._id!);
+    setActiveAccordion(null); // Close accordion when editing inline
+  };
 
-    if (activeAccordion === "addnew") {
-      toggleAccordionEdit("addnew");
-      setTimeout(() => {
-        formRef.current?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
-    }
-    // If another accordion is open, allow inline edit in table only — no scroll or accordion change
-  }, [activeAccordion, toggleAccordionEdit]);
 
+  // const handlerUpdateCelebrity = useCallback(async (data: CelebritiesValuesSchema) => {
+  //   if (!editData?._id) return;
+  //   setEditLoading(true);
+  //   try {
+  //     const formData = new FormData();
+  //     formData.append(
+  //       "entries",
+  //       JSON.stringify({
+  //         celebrityName: data.celebrityName,
+  //         celebrityGender: data.celebrityGender,
+  //         celebrityProfession: data.celebrityProfession,
+  //         celebrityStatus: data.celebrityStatus,
+  //       })
+  //     );
+
+  //     await updateCelebrityApi(editData._id, formData);
+  //     toast.success("Celebrity updated successfully!");
+  //     setEditData(null);
+  //     fetchCelebrities();
+  //   } catch (err) {
+  //     const error = err as AxiosError;
+  //     console.error("Update Error:", error);
+  //     toast.error("Error updating celebrity");
+  //   } finally {
+  //     setEditLoading(false);
+  //   }
+  // }, [editData, fetchCelebrities]);
 
   const handlerUpdateCelebrity = useCallback(async (data: CelebritiesValuesSchema) => {
     if (!editData?._id) return;
     setEditLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append(
-        "entries",
-        JSON.stringify({
-          celebrityName: data.celebrityName,
-          celebrityGender: data.celebrityGender,
-          celebrityProfession: data.celebrityProfession,
-          celebrityStatus: data.celebrityStatus,
-        })
-      );
 
-      await updateCelebrityApi(editData._id, formData);
+    try {
+      const updatePayload = {
+        celebrityName: data.celebrityName,
+        celebrityGender: data.celebrityGender,
+        celebrityProfession: data.celebrityProfession,
+        celebrityStatus: data.celebrityStatus,
+      };
+
+      await updateCelebrityApi(editData._id, updatePayload);
       toast.success("Celebrity updated successfully!");
       setEditData(null);
+      setCurrentlyEditingId(null);
       fetchCelebrities();
     } catch (err) {
       const error = err as AxiosError;
@@ -195,7 +229,6 @@ const CelebrityPage = () => {
       setEditLoading(false);
     }
   }, [editData, fetchCelebrities]);
-
 
 
   const handleDelete = useCallback(async (id?: string) => {
@@ -220,10 +253,12 @@ const CelebrityPage = () => {
     try {
       await deleteAllCelebritiesApi();
       toast.success("All celebrities deleted");
+      setSelectedIds([]);
       fetchCelebrities();
     } catch (err) {
       const error = err as AxiosError;
       console.error("Delete All Error:", error);
+      setSelectedIds([]);
       toast.error("Failed to delete all celebrities");
     } finally {
       setLoadingDeleteAll(false);
@@ -232,81 +267,158 @@ const CelebrityPage = () => {
 
 
 
-  const handleStatusToggle = useCallback(async (id: string) => {
+  // const handleStatusToggle = useCallback(async (id: string) => {
+  //   console.log("🚀 ~ handleStatusToggle ~ id:", id);
+  //   const current = statusMap[id];
+  //   setStatusMap(prev => ({ ...prev, [id]: !current }));
+  //   try {
+  //     const formData = new FormData();
+  //     formData.append(
+  //       "entries",
+  //       JSON.stringify({
+  //         celebrityStatus: !current,
+  //       })
+  //     );
+
+  //     await updateCelebrityApi(id, !current);
+
+  //     toast.success("Status updated");
+  //     fetchCelebrities();
+  //   } catch (err) {
+  //     const error = err as AxiosError;
+  //     console.error("Status Update Error:", error);
+  //     toast.error("Error updating status");
+  //     setStatusMap(prev => ({ ...prev, [id]: current }));
+  //   }
+  // }, [statusMap, fetchCelebrities]);
+
+  // const handleStatusToggle = useCallback(async (id: string) => {
+  //   const current = statusMap[id];
+  //   const newStatus = !current;
+
+  //   setStatusMap(prev => ({ ...prev, [id]: newStatus }));
+
+  //   try {
+  //     const payload = {
+  //       celebrityStatus: newStatus,
+  //     };
+
+  //     await updateCelebrityApi(id, payload);
+
+  //     toast.success("Status updated");
+  //     fetchCelebrities();
+  //   } catch (err) {
+  //     const error = err as AxiosError;
+  //     console.error("Status Update Error:", error);
+  //     toast.error("Error updating status");
+
+  //     // Revert back if error
+  //     setStatusMap(prev => ({ ...prev, [id]: current }));
+  //   }
+  // }, [statusMap, fetchCelebrities]);
+
+  const handleStatusToggle = useCallback((id: string) => {
+    const item = celebrities.find(c => c._id === id);
+
+    // Check if Gender or Profession is "Not Specified"
+    if (
+      item?.celebrityGender === "Not Specified" ||
+      item?.celebrityProfession === "Not Specified"
+      // item?.celebrityProfession === "Politician"
+    ) {
+      toast.warning("Please complete the required fields before changing status.");
+      return;
+    };
+
     const current = statusMap[id];
-    setStatusMap(prev => ({ ...prev, [id]: !current }));
+    const newStatus = !current;
+
+    setStatusMap(prev => ({ ...prev, [id]: newStatus }));
+
+    updateCelebrityApi(id, { celebrityStatus: newStatus })
+      .then(() => {
+        toast.success("Status updated");
+        fetchCelebrities();
+      })
+      .catch((err) => {
+        toast.error("Error updating status");
+        setStatusMap(prev => ({ ...prev, [id]: current })); // revert on error
+      });
+  }, [statusMap, celebrities, fetchCelebrities]);
+
+  const exportSelectedCelebrities = useCallback(async (ids: string[]) => {
+    console.log("🚀 ~ exportSelectedCelebrities ~ ids:", ids)
+    if (!ids || ids.length === 0) {
+      toast.warning("Please select at least one celebrity to export.");
+      return;
+    };
+
     try {
-      const formData = new FormData();
-      formData.append(
-        "entries",
-        JSON.stringify({
-          celebrityStatus: !current,
-        })
-      );
-
-      await updateCelebrityApi(id, formData);
-
-      toast.success("Status updated");
-      fetchCelebrities();
+      const response = await exportDownloadCelebrityCSVApi(ids);
+      if (!response || response.size === 0) {
+        toast.warning("Exported file is empty.");
+        return;
+      }
+      setSelectedIds([]);
+      toast.success("Celebrities CSV downloaded successfully!");
     } catch (err) {
       const error = err as AxiosError;
-      console.error("Status Update Error:", error);
-      toast.error("Error updating status");
-      setStatusMap(prev => ({ ...prev, [id]: current }));
+      console.error("Export Error:", error);
+      toast.error("Something went wrong");
     }
-  }, [statusMap, fetchCelebrities]);
-  
+  }, []);
 
-  
   const handleBulkToggle = useCallback(async () => {
+    if (selectedIds.length === 0) {
+      toast.warning("Please select at least one celebrity.");
+      return;
+    };
+
     const newStatus = !isBulkActive;
+
+    const validCelebrities = celebrities.filter(c =>
+      selectedIds.includes(c._id!) &&
+      c.celebrityGender !== "Not Specified" &&
+      c.celebrityProfession !== "Not Specified"
+    );
+
+    const invalidCount = selectedIds.length - validCelebrities.length;
+
+    if (validCelebrities.length === 0) {
+      toast.warning("All selected celebrities have incomplete fields.");
+      return;
+    };
+
     setIsBulkActive(newStatus);
+
     try {
       await Promise.all(
-        selectedIds.map(id => {
-          const formData = new FormData();
-          formData.append(
-            "entries",
-            JSON.stringify({
-              celebrityStatus: newStatus,
-            })
-          );
-          return updateCelebrityApi(id, formData);
+        validCelebrities.map(c => {
+          const payload = { celebrityStatus: newStatus };
+          return updateCelebrityApi(c._id!, payload);
         })
       );
-      toast.success("Bulk status updated");
+
+      toast.success(`Bulk status updated. ${invalidCount > 0 ? `${invalidCount} skipped.` : ''}`);
+
       setStatusMap(prev => {
-        const newMap = { ...prev };
-        selectedIds.forEach(id => (newMap[id] = newStatus));
-        return newMap;
+        const updatedMap = { ...prev };
+        validCelebrities.forEach(c => {
+          updatedMap[c._id!] = newStatus;
+        });
+        return updatedMap;
       });
+
+      setSelectedIds([]);
       fetchCelebrities();
     } catch (err) {
       const error = err as AxiosError;
       console.error("Bulk Status Update Error:", error);
       toast.error("Error updating bulk status");
-      setIsBulkActive(!newStatus);
+      setIsBulkActive(!newStatus); // revert on error
     }
-  }, [isBulkActive, selectedIds, fetchCelebrities]);
+  }, [isBulkActive, selectedIds, celebrities, fetchCelebrities]);
 
-  // const exportSelectedCelebrities = useCallback(async (ids: string[]) => {
-  //   if (!ids || ids.length === 0) {
-  //     toast.warning("Please select at least one celebrity to export.");
-  //     return;
-  //   }
-  //   try {
-  //     const response = await exportSelectedCelebritiesApi(ids);
-  //     if (!response || response.size === 0) {
-  //       toast.warning("Exported file is empty.");
-  //       return;
-  //     }
-  //     toast.success("CSV file downloaded successfully!");
-  //   } catch (err) {
-  //     const error = err as AxiosError;
-  //     console.error("Export Error:", error);
-  //     toast.error("Something went wrong");
-  //   }
-  // }, []);
 
   const clearAllFilters = useCallback(() => {
     setFilter("");
@@ -366,21 +478,50 @@ const CelebrityPage = () => {
     }
   }, [currentPage, totalPages, fetchCelebrities]);
 
+
+
+
+  useEffect(() => {
+    if (selectedIds.length === 0) {
+      setIsBulkActive(false);
+      return;
+    }
+
+    const selectedStatuses = filtered
+      .filter((item) => selectedIds.includes(item._id!))
+      .map((item) => item.celebrityStatus);
+
+    const allTrue = selectedStatuses.every((status) => status === true);
+    const allFalse = selectedStatuses.every((status) => status === false);
+
+    if (allTrue) {
+      setIsBulkActive(true);
+    } else if (allFalse) {
+      setIsBulkActive(false);
+    } else {
+      setIsBulkActive(null as any); // mixed case
+    }
+  }, [selectedIds, filtered]);
+
   return (
     <>
       <PageMeta title="FameOflame" description="FameOflame admin panel" />
       <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div ref={formRef}>
-          <AddCelebrityForm
-            editingData={editData}
-            onEditSubmit={handlerUpdateCelebrity}
-            editLoading={editLoading}
-            setEditData={setEditData}
-            fetchCelebrities={fetchCelebrities}
-            activeAccordion={activeAccordion}
-            setActiveAccordion={setActiveAccordion}
-            toggleAccordion={toggleAccordion}
-          />
+          {/* {!currentlyEditingId && ( */}
+            <AddCelebrityForm
+              editingData={editData}
+              onEditSubmit={handlerUpdateCelebrity}
+              editLoading={editLoading}
+              setEditData={setEditData}
+              fetchCelebrities={fetchCelebrities}
+              activeAccordion={activeAccordion}
+              setActiveAccordion={setActiveAccordion}
+              toggleAccordion={toggleAccordion}
+               currentlyEditingId={currentlyEditingId}
+            />
+          {/* )} */}
+
         </div>
 
         <div className="bg-[#FFF6EB] px-4 sm:px-6 py-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
@@ -449,7 +590,7 @@ const CelebrityPage = () => {
                   {selectedIds.length === filtered.length ? 'Unselect All' : 'Select All'}
                 </button>
                 <button
-                  // onClick={() => exportSelectedCelebrities(selectedIds)}
+                  onClick={() => exportSelectedCelebrities(selectedIds)}
                   className="bg-[#dcfcd3] px-2 py-1 rounded text-[#43B925] text-xs font-medium"
                 >
                   Export {selectedIds.length}
@@ -459,6 +600,7 @@ const CelebrityPage = () => {
                 <ToggleSwitchButton
                   value={isBulkActive}
                   onChange={handleBulkToggle}
+                  // disabled={selectedIds.length === 0}
                   label="Active"
                   className="w-10 h-5 flex items-center rounded-full cursor-pointer transition-colors duration-300 "
                   classNameKnob="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 "
@@ -486,175 +628,6 @@ const CelebrityPage = () => {
           )}
         </div>
 
-        {/* <div className="relative border border-[#E0D4C4] min-h-[200px] h-[400px] overflow-y-auto">
-          <table className="w-full text-left border-collapse hidden sm:table">
-            <thead className="bg-[#FDF6EE] border-b border-[#E0D4C4] sticky top-0 z-10">
-              <tr className="text-[#BB501C] text-sm font-semibold">
-                <th className="px-4 py-3 w-20 sm:w-28">
-                  <CustomCheckbox className="w-4 h-4" checked={selectedIds.length === filtered.length} onChange={handleSelectAll} />
-                </th>
-                <th className="px-4 py-3 w-12">Actions</th>
-                <th className="px-4 py-3 w-40 sm:w-64">
-                  <div className="flex items-center space-x-4">
-                    <span>Celebrity Image</span>
-                    <div className="flex">
-                      <button onClick={() => setSortOrder("asc")}> <AccendingArrow /> </button>
-                      <button onClick={() => setSortOrder("desc")}> <DescendingArrow /> </button>
-                    </div>
-                  </div>
-                </th>
-                <th className="px-4 py-3 w-24 sm:w-40">Celebrity Name</th>
-                <th className="px-4 py-3 w-32 sm:w-60">Gender</th>
-                <th className="px-4 py-3 w-24 sm:w-40">Profession</th>
-                <th className="px-4 py-3 w-24 sm:w-40">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={7}>
-                    <div className="flex justify-center items-center py-6 h-[400px]">
-                      <div className="w-10 h-10 bg-gradient-to-r from-orange-600 to-orange-400 rounded-full flex justify-center items-center">
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent animate-spin rounded-full" />
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              ) : filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={7}>
-                    <div className="flex flex-col items-center justify-center h-[400px] space-y-2">
-                      <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 13h6m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z" />
-                      </svg>
-                      <p className="text-base text-gray-500">No Celebrities Found</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                filtered.map((item) => (
-                  <tr key={item._id} className="border-b border-[#E0D4C4] text-sm text-gray-700">
-                    <td className="px-4 py-3">
-                      <CustomCheckbox className="w-4 h-4" checked={selectedIds.includes(item._id!)} onChange={() => setSelectedIds(prev => prev.includes(item._id!) ? prev.filter(i => i !== item._id!) : [...prev, item._id!])} />
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-4 items-center">
-                        <button onClick={() => handleDelete(item._id)} className="w-5 h-5 flex items-center justify-center">
-                          {deleteLoadingId === item._id ? (
-                            <svg className="animate-spin w-5 h-5 text-[#EB6622]" viewBox="0 0 24 24" fill="none">
-                              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25" />
-                              <path fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" className="opacity-75" />
-                            </svg>
-                          ) : <DeleteIcon />}
-                        </button>
-                        <button
-
-                          onClick={() => { 
-                            if (activeAccordion === "addnew" || activeAccordion === null) {
-                              handleEditClick(item)
-                            }
-
-                          }}
-                        >
-                          <EditIcon />
-                        </button>
-                      </div>
-                    </td>
-
-
-                    <td className="px-4 py-3">
-                      {item.celebrityImage?.url ? (
-                        <img
-                          src={item.celebrityImage.url}
-                          alt={item.celebrityName}
-                          className="w-16 h-16 object-cover rounded"
-                        />
-                      ) : (
-                        <span className="text-gray-400 italic">No image</span>
-                      )}
-                    </td>
-
-                    <td className="px-4 py-3 w-[150px] sm:w-[250px] break-words">{item.celebrityName}</td>
-                    <td className="px-4 py-3">{item.celebrityGender}</td>
-                    <td className="px-4 py-3">{item.celebrityProfession}</td>
-                    <td className="px-4 py-3">
-                      <ToggleSwitchButton
-                        value={statusMap[item._id!]}
-                        onChange={() => handleStatusToggle(item._id!)}
-                        className="w-10 h-5 flex items-center rounded-full cursor-pointer transition-colors duration-300 "
-                        classNameKnob="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 "
-                      />
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-          <div className="sm:hidden space-y-4 p-4">
-            {loading ? (
-              <div className="flex justify-center items-center py-6">
-                <div className="w-10 h-10 bg-gradient-to-r from-orange-600 to-orange-400 rounded-full flex justify-center items-center">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent animate-spin rounded-full" />
-                </div>
-              </div>
-            ) : filtered.length === 0 ? (
-              <div className="flex justify-center py-6 text-base">No Celebrities Found</div>
-            ) : (
-              filtered.map((item) => (
-                <div key={item._id} className="border border-[#E0D4C4] rounded-lg p-4 bg-white">
-                  <div className="flex justify-between items-center mb-2">
-                    <CustomCheckbox
-                      className="w-4 h-4"
-                      checked={selectedIds.includes(item._id!)}
-                      onChange={() => setSelectedIds(prev => prev.includes(item._id!) ? prev.filter(i => i !== item._id!) : [...prev, item._id!])}
-                    />
-                    <div className="flex gap-2">
-                      <button onClick={() => handleDelete(item._id)} className="w-5 h-5 flex items-center justify-center">
-                        {deleteLoadingId === item._id ? (
-                          <svg className="animate-spin w-5 h-5 text-[#EB6622]" viewBox="0 0 24 24" fill="none">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25" />
-                            <path fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" className="opacity-75" />
-                          </svg>
-                        ) : <DeleteIcon />}
-                      </button>
-                      <button onClick={() => handleEditClick(item)}>
-                        <EditIcon />
-                      </button>
-                    </div>
-                  </div>
-
-
-
-                  <div className="space-y-2 text-sm text-gray-700">
-                    <div>
-                      {item.celebrityImage?.url ? (
-                        <img
-                          src={item.celebrityImage.url}
-                          alt={item.celebrityName}
-                          className="w-16 h-16 object-cover rounded"
-                        />
-                      ) : (
-                        <span className="text-gray-400 italic">No image</span>
-                      )}
-                    </div>
-                    <p><span className="font-semibold">Name:</span> {item.celebrityName}</p>
-                    <p><span className="font-semibold">Gender:</span> {item.celebrityGender}</p>
-                    <p><span className="font-semibold">Profession:</span> {item.celebrityProfession}</p>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold">Status:</span>
-                      <ToggleSwitchButton
-                        value={statusMap[item._id!]}
-                        onChange={() => handleStatusToggle(item._id!)}
-                        className="w-10 h-5 flex items-center rounded-full cursor-pointer transition-colors duration-300"
-                        classNameKnob="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div> */}
         <div className="relative border border-[#E0D4C4] min-h-[200px] h-[400px] overflow-y-auto">
           <table className="w-full text-left border-collapse hidden sm:table">
             <thead className="bg-[#FDF6EE] border-b border-[#E0D4C4] sticky top-0 z-10">
@@ -663,10 +636,10 @@ const CelebrityPage = () => {
                   <CustomCheckbox className="w-4 h-4" checked={selectedIds.length === filtered.length} onChange={handleSelectAll} />
                 </th>
                 <th className="px-4 py-3 w-12">Actions</th>
-                <th className="px-4 py-3 w-40 sm:w-64">Celebrity Image</th>
+                <th className="px-4 py-3 w-40 sm:w-40">Celebrity Image</th>
                 <th className="px-4 py-3 w-24 sm:w-40">Celebrity Name</th>
-                <th className="px-4 py-3 w-32 sm:w-60">Gender</th>
-                <th className="px-4 py-3 w-24 sm:w-40">Profession</th>
+                <th className="px-4 py-3 w-32 sm:w-40">Gender</th>
+                <th className="px-4 py-3 w-24 sm:w-60">Profession</th>
                 <th className="px-4 py-3 w-24 sm:w-40">Status</th>
               </tr>
             </thead>
@@ -713,16 +686,18 @@ const CelebrityPage = () => {
 
                         {currentlyEditingId === item._id ? (
                           <button
-                          // onClick={() => handleUpdate(item._id!)}
+                            onClick={() => handlerUpdateCelebrity(editData!)}
+                            disabled={editLoading}
+                            className="text-green-600 hover:text-green-800"
                           >
-                            {/* <TickIcon /> */}
-                            ✅
+                            <TickIcon />
                           </button>
                         ) : (
                           <button onClick={() => handleEditClick(item)}>
                             <EditIcon />
                           </button>
                         )}
+
                       </div>
                     </td>
 
@@ -769,23 +744,23 @@ const CelebrityPage = () => {
                     </td>
 
 
-              <td className="px-4 py-3">
-  {currentlyEditingId === item._id ? (
-    <CustomDropdown
-      label=""
-      options={professionOptions}
-      values={editData?.celebrityProfession} // ya 'value' if your component uses that
-      onSelect={(profession) =>
-        setEditData((prev) => ({ ...prev!, celebrityProfession: profession }))
-      }
-      className="w-full "
-      placeholder="Profession"
-      name="celebrityProfession"
-    />
-  ) : (
-    item.celebrityProfession
-  )}
-</td>
+                    <td className="px-4 py-3">
+                      {currentlyEditingId === item._id ? (
+                        <CustomDropdown
+                          label=""
+                          options={professionOptions}
+                          values={editData?.celebrityProfession} // ya 'value' if your component uses that
+                          onSelect={(profession) =>
+                            setEditData((prev) => ({ ...prev!, celebrityProfession: profession }))
+                          }
+                          className="w-full "
+                          placeholder="Profession"
+                          name="celebrityProfession"
+                        />
+                      ) : (
+                        item.celebrityProfession
+                      )}
+                    </td>
 
                     <td className="px-4 py-3">
                       <ToggleSwitchButton
@@ -794,6 +769,13 @@ const CelebrityPage = () => {
                         className="w-10 h-5 flex items-center rounded-full cursor-pointer transition-colors duration-300 "
                         classNameKnob="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 "
                       />
+                      {/* <ToggleSwitchButton
+                        value={statusMap[item._id!]}
+                        onChange={() => handleStatusToggle(item._id!)}
+                        className="w-10 h-5 flex items-center rounded-full cursor-pointer transition-colors duration-300"
+                        classNameKnob="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300"
+                      /> */}
+
                     </td>
                   </tr>
                 ))
@@ -842,3 +824,7 @@ export default CelebrityPage;
 //   );
 // }
 // export default CelebrityPage;
+{/* <div className="flex">
+<button onClick={() => setSortOrder("asc")}> <AccendingArrow /> </button>
+<button onClick={() => setSortOrder("desc")}> <DescendingArrow /> </button>
+</div> */}

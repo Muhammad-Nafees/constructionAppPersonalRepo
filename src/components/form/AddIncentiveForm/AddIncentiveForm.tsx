@@ -80,6 +80,8 @@ const AddIncentiveForm: React.FC<AddIncentiveFormProps> = ({
         }
     };
 
+
+    
     const { getRootProps, getInputProps } = useDropzone({
         onDrop: (acceptedFiles) => {
             const csvFile = acceptedFiles.find((file) => file.name.endsWith(".csv"));

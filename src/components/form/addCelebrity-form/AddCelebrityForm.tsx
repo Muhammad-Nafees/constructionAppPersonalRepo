@@ -7,7 +7,7 @@ import Spinner from '../../ui/spinner/Spinner';
 import CustomDropdown from '../../reusableComponents/CustomDropdown';
 import CustomInput from '../../input/CustomInputField';
 import { useAuth } from '../../../context/AuthContext';
-import { celebrityUploadApi, exportCsvCelebritiesApi, exportSelectedCelebritiesApi, multipleCelebrityUploadApi } from '../../../../services/celebrities';
+import { celebrityUploadApi, exportCsvCelebritiesApi, multipleCelebrityUploadApi } from '../../../../services/celebrities';
 import { CelebritiesValuesSchema } from '../../../interface';
 import { celebrityValitionSchema } from '../../../validations';
 import { useDropzone } from 'react-dropzone';
@@ -23,6 +23,7 @@ interface AddCelebrityFormProps {
     activeAccordion: string | null;
     toggleAccordion: (accordion: string) => void;
     fetchCelebrities: () => Promise<void>;
+    currentlyEditingId?: string | null;
 }
 
 const AddCelebrityForm: React.FC<AddCelebrityFormProps> = ({
@@ -33,6 +34,7 @@ const AddCelebrityForm: React.FC<AddCelebrityFormProps> = ({
     activeAccordion,
     toggleAccordion,
     fetchCelebrities,
+    currentlyEditingId
 }) => {
     const [loading, setLoading] = useState<boolean>(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -249,10 +251,15 @@ const AddCelebrityForm: React.FC<AddCelebrityFormProps> = ({
                                     type="button"
                                     className="w-28 sm:w-32 text-white bg-gradient-to-r from-orange-400 to-red-600 py-2 text-sm sm:text-base"
                                     onClick={() => {
+                                        if (currentlyEditingId) {
+                                            toast.warn("You're currently editing a row. Please save or cancel that first.");
+                                            return;
+                                        }
                                         resetForm();
-                                        if (editingData) setEditData(null);
+                                        setEditData(null);
                                         toggleAccordion("addnew");
                                     }}
+
                                 >
                                     Add New
                                 </Button>
@@ -396,7 +403,7 @@ const AddCelebrityForm: React.FC<AddCelebrityFormProps> = ({
                                             onClick={submitForm}
                                             className="w-28 sm:w-32 bg-gradient-to-r from-orange-600 to-orange-400 text-white flex items-center justify-center text-sm sm:text-base"
                                             size="sm"
-                                            disabled={isSubmitting || loading || editLoading}
+                                            disabled={isSubmitting || loading || uploadProgress !== null || (editingData ? false : !selectedFile)}
                                         >
                                             {loading || editLoading ? (
                                                 <>
@@ -500,14 +507,14 @@ const AddCelebrityForm: React.FC<AddCelebrityFormProps> = ({
                                 </div>
 
 
-                                <div className="flex flex-col sm:flex-row justify-between space-x-0 sm:space-x-6 px-4 items-center py-6 mt-4">
-                                    <ToggleSwitchButton
+                                <div className="flex flex-col sm:flex-row flex-end justify-end space-x-0 sm:space-x-6 px-4 items-center py-6 mt-4">
+                                    {/* <ToggleSwitchButton
                                         value={values.celebrityStatus}
                                         onChange={(val) => setFieldValue('celebrityStatus', val)}
                                         label={values.celebrityStatus ? 'Active' : "Inactive"}
                                         className="w-10 h-5 flex items-center rounded-full cursor-pointer transition-colors duration-300 "
                                         classNameKnob="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 "
-                                    />
+                                    /> */}
                                     <div className="flex gap-2 mt-4 sm:mt-0">
                                         <Button
                                             type="button"
@@ -524,20 +531,22 @@ const AddCelebrityForm: React.FC<AddCelebrityFormProps> = ({
                                         >
                                             Cancel
                                         </Button>
+
                                         <Button
-                                            type="button"
+                                            type="submit"
                                             onClick={() => handleBulkUpload(values)}
                                             className="w-28 sm:w-32 bg-gradient-to-r from-orange-600 to-orange-400 text-white flex items-center justify-center text-sm sm:text-base"
                                             size="sm"
-                                            disabled={isSubmitting || loading}
+                                            disabled={loading || bulkFiles.length === 0 || uploadProgress !== null}
                                         >
                                             {loading ? (
                                                 <>
                                                     <Spinner />
-                                                    Uploading...
+                                                    {editingData ? 'Updating...' : 'Saving...'}
                                                 </>
-                                            ) : 'Upload'}
+                                            ) : editingData ? 'Update' : 'Save'}
                                         </Button>
+
                                     </div>
                                 </div>
 

@@ -159,6 +159,7 @@ const Incentives = () => {
     try {
       await deleteAllIncentivesApi();
       toast.success("All incentives deleted");
+      // setSelectedIds([]);
       fetchIncentives();
     } catch {
       toast.error("Failed to delete all incentives");
@@ -172,7 +173,7 @@ const Incentives = () => {
     setStatusMap(prev => ({ ...prev, [id]: !current }));
     try {
       await updateIncentiveApi(id, { incentiveStatus: !current });
-
+      setSelectedIds([]);
       fetchIncentives();
       toast.success("Status updated");
     } catch {
@@ -181,12 +182,16 @@ const Incentives = () => {
     }
   }, [statusMap]);
 
+
+
   const handleBulkToggle = useCallback(async () => {
     const newStatus = !isBulkActive;
     setIsBulkActive(newStatus);
     try {
       await Promise.all(selectedIds.map(id => updateIncentiveApi(id, { incentiveStatus: newStatus })));
       toast.success("Bulk status updated");
+      setSelectedIds([]);
+      fetchIncentives();
     } catch {
       toast.error("Error updating bulk status");
       setIsBulkActive(!newStatus);
@@ -204,7 +209,8 @@ const Incentives = () => {
 
     try {
       await exportSelectedIncentivesApi(ids);
-      toast.success("CSV file downloaded successfully!");
+      toast.success("Incentives CSV downloaded successfully!");
+      setSelectedIds([]);
       fetchIncentives();
     } catch (error) {
       console.error("Export Error:", error);
@@ -278,7 +284,7 @@ const Incentives = () => {
     if (selectedIds.length === 0) {
       setIsBulkActive(false);
       return;
-    }
+    };
 
     const selectedStatuses = filtered
       .filter((item) => selectedIds.includes(item._id))
@@ -401,6 +407,7 @@ const Incentives = () => {
               </div>
 
 
+
               <div className="flex items-center space-x-3">
                 <ToggleSwitchButton
                   value={isBulkActive === true}
@@ -519,6 +526,8 @@ const Incentives = () => {
               )}
             </tbody>
           </table>
+
+
           {/* Mobile Card View */}
           <div className="sm:hidden space-y-4 p-4">
             {loading ? (
