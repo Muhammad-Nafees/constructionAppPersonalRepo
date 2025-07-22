@@ -97,7 +97,6 @@ const MusicPage = () => {
       setLoading(false);
     }
   }, [currentPage]);
-
   
   useEffect(() => {
     fetchMusic();
