@@ -47,4 +47,12 @@ export interface CelebritiesValuesSchema {
   createdAt?: string;
   updatedAt?: string;
   isBulkUploaded?: boolean;
+};
+
+export interface MusicValuesSchema {
+  _id?: string;
+  musicName: string;
+  musicStatus: boolean;
+  musicFile: { url: string; filename: string } | null;
+  createdAt?: string;
 }

@@ -27,6 +27,7 @@ import CustomPaginationItem from "../../components/reusableComponents/CustomPagi
 import AddCelebrityForm from "../../components/form/addCelebrity-form/AddCelebrityForm";
 import CustomDropdown from "../../components/reusableComponents/CustomDropdown";
 import TickIcon from "../../components/svg/TickIcon";
+import CrossIcon from "../../components/svg/CrossIcon";
 
 const CelebrityPage = () => {
   const { addIncentivesFormData } = useAuth();
@@ -77,13 +78,13 @@ const CelebrityPage = () => {
     setActiveAccordion(prev => (prev === key ? null : key));
   }, []);
 
-  const toggleAccordionEdit = useCallback((key: string) => {
-    if (editData) {
-      setActiveAccordion(key);
-      return;
-    }
-    setActiveAccordion(prev => (prev === key ? null : key));
-  }, [editData]);
+  // const toggleAccordionEdit = useCallback((key: string) => {
+  //   if (editData) {
+  //     setActiveAccordion(key);
+  //     return;
+  //   }
+  //   setActiveAccordion(prev => (prev === key ? null : key));
+  // }, [editData]);
 
   const fetchCelebrities = useCallback(async (page = currentPage) => {
     setLoading(true);
@@ -139,35 +140,6 @@ const CelebrityPage = () => {
   const handleSelectAll = useCallback(() => {
     setSelectedIds(prev => prev.length === filtered.length ? [] : filtered.map(item => item._id!));
   }, [filtered]);
-
-  // const handleEditClick = useCallback((item: CelebritiesValuesSchema) => {
-  //   setEditData(item);
-  //   toggleAccordionEdit("addnew");
-  //   setTimeout(() => {
-  //     formRef.current?.scrollIntoView({ behavior: "smooth" });
-  //   }, 100);
-  // }, [toggleAccordionEdit]);
-  // const handleEditClick = useCallback((item: CelebritiesValuesSchema) => {
-  //   setEditData(item);
-  //   setCurrentlyEditingId(item._id!); // Set which item is being edited
-  //   toggleAccordionEdit("addnew");
-  //   setTimeout(() => {
-  //     formRef.current?.scrollIntoView({ behavior: "smooth" });
-  //   }, 100);
-  // }, [toggleAccordionEdit]);
-
-  // const handleEditClick = useCallback((item: CelebritiesValuesSchema) => {
-  //   setEditData(item);
-  //   setCurrentlyEditingId(item._id!);
-
-  //   if (activeAccordion === "addnew") {
-  //     toggleAccordionEdit("addnew");
-  //     setTimeout(() => {
-  //       formRef.current?.scrollIntoView({ behavior: "smooth" });
-  //     }, 100);
-  //   }
-  //   // If another accordion is open, allow inline edit in table only — no scroll or accordion change
-  // }, [activeAccordion, toggleAccordionEdit]);
 
   const handleEditClick = (item: any) => {
     setCurrentlyEditingId(item._id);
@@ -340,7 +312,7 @@ const CelebrityPage = () => {
         toast.success("Status updated");
         fetchCelebrities();
       })
-      .catch((err) => {
+      .catch(() => {
         toast.error("Error updating status");
         setStatusMap(prev => ({ ...prev, [id]: current })); // revert on error
       });
@@ -509,17 +481,12 @@ const CelebrityPage = () => {
       <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div ref={formRef}>
           {/* {!currentlyEditingId && ( */}
-            <AddCelebrityForm
-              editingData={editData}
-              onEditSubmit={handlerUpdateCelebrity}
-              editLoading={editLoading}
-              setEditData={setEditData}
-              fetchCelebrities={fetchCelebrities}
-              activeAccordion={activeAccordion}
-              setActiveAccordion={setActiveAccordion}
-              toggleAccordion={toggleAccordion}
-               currentlyEditingId={currentlyEditingId}
-            />
+          <AddCelebrityForm
+            fetchCelebrities={fetchCelebrities}
+            activeAccordion={activeAccordion}
+            setActiveAccordion={setActiveAccordion}
+            toggleAccordion={toggleAccordion}
+          />
           {/* )} */}
 
         </div>
@@ -596,6 +563,8 @@ const CelebrityPage = () => {
                   Export {selectedIds.length}
                 </button>
               </div>
+
+
               <div className="flex items-center space-x-3">
                 <ToggleSwitchButton
                   value={isBulkActive}
@@ -636,7 +605,15 @@ const CelebrityPage = () => {
                   <CustomCheckbox className="w-4 h-4" checked={selectedIds.length === filtered.length} onChange={handleSelectAll} />
                 </th>
                 <th className="px-4 py-3 w-12">Actions</th>
-                <th className="px-4 py-3 w-40 sm:w-40">Celebrity Image</th>
+                <th className="px-4 py-3 w-40 sm:w-40">
+                  <div className="flex items-center space-x-4">
+                    <span>Celebrity Image</span>
+                    <div className="flex">
+                      <button onClick={() => setSortOrder("asc")}> <AccendingArrow /> </button>
+                      <button onClick={() => setSortOrder("desc")}> <DescendingArrow /> </button>
+                    </div>
+                  </div>
+                </th>
                 <th className="px-4 py-3 w-24 sm:w-40">Celebrity Name</th>
                 <th className="px-4 py-3 w-32 sm:w-40">Gender</th>
                 <th className="px-4 py-3 w-24 sm:w-60">Profession</th>
@@ -685,13 +662,27 @@ const CelebrityPage = () => {
                         </button>
 
                         {currentlyEditingId === item._id ? (
-                          <button
-                            onClick={() => handlerUpdateCelebrity(editData!)}
-                            disabled={editLoading}
-                            className="text-green-600 hover:text-green-800"
-                          >
-                            <TickIcon />
-                          </button>
+                          <>
+                            <button
+                              onClick={() => handlerUpdateCelebrity(editData!)}
+                              disabled={editLoading}
+                              className="text-green-600 hover:text-green-800"
+                            >
+                              <TickIcon />
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                setCurrentlyEditingId(null);
+                                setEditData(null);
+                              }}
+                              disabled={editLoading}
+                              className="text-green-600 hover:text-green-800"
+                            >
+                              <CrossIcon />
+                            </button>
+                          </>
+
                         ) : (
                           <button onClick={() => handleEditClick(item)}>
                             <EditIcon />
@@ -814,6 +805,8 @@ const CelebrityPage = () => {
 };
 
 export default CelebrityPage;
+
+
 
 // const CelebrityPage = () => {
 //   return (

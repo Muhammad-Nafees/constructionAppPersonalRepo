@@ -23,3 +23,10 @@ export const celebrityValitionSchema = Yup.object().shape({
     celebrityProfession: Yup.string().required("Profession/Nationality is required"),
     celebrityImage: Yup.string().required("Image is required"),
 });
+
+
+export const musicValidationSchema = Yup.object({
+    musicName: Yup.string().required('Music name is required'),
+    musicStatus: Yup.boolean().required('MusicStatus is required'),
+    musicFile: Yup.mixed().nullable(),
+});

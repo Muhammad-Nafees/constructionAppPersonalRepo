@@ -159,7 +159,7 @@ const Incentives = () => {
     try {
       await deleteAllIncentivesApi();
       toast.success("All incentives deleted");
-      // setSelectedIds([]);
+      setSelectedIds([]);
       fetchIncentives();
     } catch {
       toast.error("Failed to delete all incentives");
@@ -412,7 +412,7 @@ const Incentives = () => {
                 <ToggleSwitchButton
                   value={isBulkActive === true}
                   onChange={handleBulkToggle}
-                  label="Bulk Active"
+                  label={isBulkActive === true ? "Active" : isBulkActive === false ? "Inactive" : "Toggle"}
                   className="w-10 h-5 flex items-center rounded-full cursor-pointer transition-colors duration-300 "
                   classNameKnob="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 "
                 />

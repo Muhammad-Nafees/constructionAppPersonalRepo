@@ -32,7 +32,7 @@ export const celebrityUploadApi = async (formData: FormData) => {
         Authorization: `Bearer ${token}`,
       },
     });
-
+    
     console.log("🚀 ~ celebrityUploadApi response:", response.data);
     return response.data;
   } catch (error) {
