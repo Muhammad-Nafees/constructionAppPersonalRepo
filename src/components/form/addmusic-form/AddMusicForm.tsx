@@ -3,9 +3,8 @@ import { useState } from 'react';
 import { AxiosError } from 'axios';
 import { toast } from 'react-toastify';
 import { useDropzone } from 'react-dropzone';
-import { useAuth } from '../../../context/AuthContext';
 import { MusicValuesSchema } from '../../../interface';
-import { uploadMusicApi } from '../../../../services/music';
+import { exportAllMusicCsvApi, uploadMusicApi } from '../../../../services/music';
 import { musicValidationSchema } from '../../../validations';
 import Button from '../../../components/ui/button/Button';
 import ToggleSwitchButton from '../../../components/reusableComponents/ToggleSwitchButton';
@@ -25,7 +24,6 @@ const AddMusicForm: React.FC<AddMusicFormProps> = ({
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const { setAddIncentivesFormData } = useAuth();
 
   const singleDropzone = useDropzone({
     onDrop: (acceptedFiles) => {
@@ -49,7 +47,7 @@ const AddMusicForm: React.FC<AddMusicFormProps> = ({
     if (!selectedFile) {
       toast.error("Please select a music file.");
       return;
-    }
+    };
 
     setLoading(true);
     try {
@@ -59,8 +57,8 @@ const AddMusicForm: React.FC<AddMusicFormProps> = ({
       formData.append('music', selectedFile);
 
       const response = await uploadMusicApi(formData);
+      console.log("🚀 ~ response:", response)
       toast.success('Music added successfully');
-      setAddIncentivesFormData(response.data);
       resetForm();
       setSelectedFile(null);
       fetchMusic();
@@ -73,13 +71,31 @@ const AddMusicForm: React.FC<AddMusicFormProps> = ({
   };
 
 
+  const exportAllMusichandler = async () => {
+
+    try {
+      const response = await exportAllMusicCsvApi();
+      console.log("🚀 ~ exportAllMusichandler ~ response:", response)
+      // if (!response || response?.data?.size === 0) {
+      //   toast.warning("Exported file is empty.");
+      //   return;
+      // }
+      toast.success("Music exported successfully");
+    } catch (error) {
+      console.error("Error exporting all music:", error);
+      toast.error("Failed to export music");
+    }
+  };
+
+
+
   return (
     <Formik
       enableReinitialize
       initialValues={{
-        musicName: '',
+        // musicName: '',
         musicStatus: false,
-        musicFile: null,
+        // musicFile: null,
       }}
       validationSchema={musicValidationSchema}
       onSubmit={handleSubmit}
@@ -90,6 +106,13 @@ const AddMusicForm: React.FC<AddMusicFormProps> = ({
             <div className="bg-[#400F09] py-3 sm:py-4 w-full flex flex-col sm:flex-row justify-between px-4 items-center gap-3">
               <h1 className="text-lg sm:text-xl font-medium text-white">Music Menu</h1>
               <div className="flex gap-4 items-center">
+                <Button
+                  onClick={exportAllMusichandler}
+                  type="button"
+                  className="w-28 sm:w-32 text-white bg-[#B54D40] py-2 text-sm sm:text-base"
+                >
+                  Export All
+                </Button>
                 <Button
                   type="button"
                   className="w-28 sm:w-32 text-white bg-gradient-to-r from-orange-400 to-red-600 py-2 text-sm sm:text-base"

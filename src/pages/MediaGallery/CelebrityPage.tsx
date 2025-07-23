@@ -5,7 +5,6 @@ import {
   deleteAllCelebritiesApi,
   deleteCelebritiesApi,
   exportDownloadCelebrityCSVApi,
-  // exportSelectedCelebritiesApi,
   getCelebritiesApi,
   updateCelebrityApi,
 } from "../../../services/celebrities";
@@ -35,8 +34,7 @@ const CelebrityPage = () => {
 
   const [celebrities, setCelebrities] = useState<CelebritiesValuesSchema[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  console.log("🚀 ~ CelebrityPage ~ selectedIds:", selectedIds)
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [loading, setLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [loadingDeleteAll, setLoadingDeleteAll] = useState(false);
@@ -52,8 +50,7 @@ const CelebrityPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [currentlyEditingId, setCurrentlyEditingId] = useState<string | null>(null);
-  // const [editData, setEditData] = useState<CelebritiesValuesSchema | null>(null);
-
+ 
 
 
   const filtered = useMemo(() => {
@@ -77,14 +74,6 @@ const CelebrityPage = () => {
   const toggleAccordion = useCallback((key: string) => {
     setActiveAccordion(prev => (prev === key ? null : key));
   }, []);
-
-  // const toggleAccordionEdit = useCallback((key: string) => {
-  //   if (editData) {
-  //     setActiveAccordion(key);
-  //     return;
-  //   }
-  //   setActiveAccordion(prev => (prev === key ? null : key));
-  // }, [editData]);
 
   const fetchCelebrities = useCallback(async (page = currentPage) => {
     setLoading(true);
@@ -148,33 +137,6 @@ const CelebrityPage = () => {
   };
 
 
-  // const handlerUpdateCelebrity = useCallback(async (data: CelebritiesValuesSchema) => {
-  //   if (!editData?._id) return;
-  //   setEditLoading(true);
-  //   try {
-  //     const formData = new FormData();
-  //     formData.append(
-  //       "entries",
-  //       JSON.stringify({
-  //         celebrityName: data.celebrityName,
-  //         celebrityGender: data.celebrityGender,
-  //         celebrityProfession: data.celebrityProfession,
-  //         celebrityStatus: data.celebrityStatus,
-  //       })
-  //     );
-
-  //     await updateCelebrityApi(editData._id, formData);
-  //     toast.success("Celebrity updated successfully!");
-  //     setEditData(null);
-  //     fetchCelebrities();
-  //   } catch (err) {
-  //     const error = err as AxiosError;
-  //     console.error("Update Error:", error);
-  //     toast.error("Error updating celebrity");
-  //   } finally {
-  //     setEditLoading(false);
-  //   }
-  // }, [editData, fetchCelebrities]);
 
   const handlerUpdateCelebrity = useCallback(async (data: CelebritiesValuesSchema) => {
     if (!editData?._id) return;
@@ -238,57 +200,6 @@ const CelebrityPage = () => {
   }, [fetchCelebrities]);
 
 
-
-  // const handleStatusToggle = useCallback(async (id: string) => {
-  //   console.log("🚀 ~ handleStatusToggle ~ id:", id);
-  //   const current = statusMap[id];
-  //   setStatusMap(prev => ({ ...prev, [id]: !current }));
-  //   try {
-  //     const formData = new FormData();
-  //     formData.append(
-  //       "entries",
-  //       JSON.stringify({
-  //         celebrityStatus: !current,
-  //       })
-  //     );
-
-  //     await updateCelebrityApi(id, !current);
-
-  //     toast.success("Status updated");
-  //     fetchCelebrities();
-  //   } catch (err) {
-  //     const error = err as AxiosError;
-  //     console.error("Status Update Error:", error);
-  //     toast.error("Error updating status");
-  //     setStatusMap(prev => ({ ...prev, [id]: current }));
-  //   }
-  // }, [statusMap, fetchCelebrities]);
-
-  // const handleStatusToggle = useCallback(async (id: string) => {
-  //   const current = statusMap[id];
-  //   const newStatus = !current;
-
-  //   setStatusMap(prev => ({ ...prev, [id]: newStatus }));
-
-  //   try {
-  //     const payload = {
-  //       celebrityStatus: newStatus,
-  //     };
-
-  //     await updateCelebrityApi(id, payload);
-
-  //     toast.success("Status updated");
-  //     fetchCelebrities();
-  //   } catch (err) {
-  //     const error = err as AxiosError;
-  //     console.error("Status Update Error:", error);
-  //     toast.error("Error updating status");
-
-  //     // Revert back if error
-  //     setStatusMap(prev => ({ ...prev, [id]: current }));
-  //   }
-  // }, [statusMap, fetchCelebrities]);
-
   const handleStatusToggle = useCallback((id: string) => {
     const item = celebrities.find(c => c._id === id);
 
@@ -310,13 +221,13 @@ const CelebrityPage = () => {
     updateCelebrityApi(id, { celebrityStatus: newStatus })
       .then(() => {
         toast.success("Status updated");
-        fetchCelebrities();
+        // fetchCelebrities();
       })
       .catch(() => {
         toast.error("Error updating status");
         setStatusMap(prev => ({ ...prev, [id]: current })); // revert on error
       });
-  }, [statusMap, celebrities, fetchCelebrities]);
+  }, [statusMap, celebrities]);
 
   const exportSelectedCelebrities = useCallback(async (ids: string[]) => {
     console.log("🚀 ~ exportSelectedCelebrities ~ ids:", ids)
@@ -720,9 +631,8 @@ const CelebrityPage = () => {
                         <CustomDropdown
                           label=""
                           options={genderOptions}
-                          values={editData?.celebrityGender}
-                          // values={editData?.celebrityGender} // yahan 'values' ki jagah shayad 'value' hona chahiye
-                          onSelect={(gender) =>
+                          values={editData?.celebrityGender ?? ""}
+                           onSelect={(gender) =>
                             setEditData((prev) => ({ ...prev!, celebrityGender: gender }))
                           }
                           className="w-full border-none focus:border-orange-500 focus:ring-0"
@@ -740,7 +650,7 @@ const CelebrityPage = () => {
                         <CustomDropdown
                           label=""
                           options={professionOptions}
-                          values={editData?.celebrityProfession} // ya 'value' if your component uses that
+                          values={editData?.celebrityProfession ?? ""}
                           onSelect={(profession) =>
                             setEditData((prev) => ({ ...prev!, celebrityProfession: profession }))
                           }

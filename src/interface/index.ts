@@ -51,8 +51,8 @@ export interface CelebritiesValuesSchema {
 
 export interface MusicValuesSchema {
   _id?: string;
-  musicName: string;
+  musicName?: string;
   musicStatus: boolean;
-  musicFile: { url: string; filename: string } | null;
+  musicFile?: { url: string; filename: string } | null;
   createdAt?: string;
 }

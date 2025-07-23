@@ -11,37 +11,37 @@ import debounce from "lodash/debounce";
 import { toast } from "react-toastify";
 import FilterDropdown from "../../components/input/FilterDropDown";
 import CustomPaginationItem from "../../components/reusableComponents/CustomPaginationIcon";
-import TickIcon from "../../components/svg/TickIcon";
-import CrossIcon from "../../components/svg/CrossIcon";
 import AddMusicForm from "../../components/form/addmusic-form/AddMusicForm";
 import CustomCheckbox from "../../components/reusableComponents/CustomCheckBox";
-import EditIcon from "../../components/svg/EditIcon";
-import { deleteAllMusicApi, deleteSelectedMusicApi, getAllMusicApi } from "../../../services/music";
-
+import { deleteAllMusicApi, deleteSelectedMusicApi, exportSelectedMusicApi, getAllMusicApi, updateMusicStatus } from "../../../services/music";
+import { Play, Pause } from 'lucide-react';
+import AccendingArrow from "../../components/svg/AccendingArrow";
+import DescendingArrow from "../../components/svg/DescendingArrow";
 
 const MusicPage = () => {
   const { addIncentivesFormData } = useAuth();
   const formRef = useRef<HTMLDivElement | null>(null);
 
   const [musicList, setMusicList] = useState<MusicValuesSchema[]>([]);
-  console.log("🚀 ~ MusicPage ~ musicList:", musicList)
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [editLoading, setEditLoading] = useState(false);
   const [loadingDeleteAll, setLoadingDeleteAll] = useState(false);
   const [filter, setFilter] = useState("");
-  const [editData, setEditData] = useState<MusicValuesSchema | null>(null);
-  const [isBulkActive, setIsBulkActive] = useState<boolean | null>(false);
+  const [isBulkActive, setIsBulkActive] = useState<boolean | any>(false);
   const [statusMap, setStatusMap] = useState<Record<string, boolean>>({});
   const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState("");
   const [deleteLoadingId, setDeleteLoadingId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
   const [totalPages, setTotalPages] = useState(1);
-  const [currentlyEditingId, setCurrentlyEditingId] = useState<string | null>(null);
+  const [currentlyPlayingId, setCurrentlyPlayingId] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+
 
   const filtered = useMemo(() => {
-    console.log("🚀 ~ filtered ~ musicList:", musicList)
     return musicList?.filter(item => {
       const text = filter?.toLowerCase()?.replace(/\s+/g, "");
       const matchesText = item?.musicName?.toLowerCase().replace(/\s+/g, "")?.includes(text);
@@ -67,7 +67,7 @@ const MusicPage = () => {
   //   });
   // }, [musicList, filter, statusFilter]);
 
- 
+
   const debouncedSearch = useMemo(() => debounce(setFilter, 300), []);
 
   const toggleAccordion = useCallback((key: string) => {
@@ -78,15 +78,21 @@ const MusicPage = () => {
     setLoading(true);
     try {
       const res = await getAllMusicApi(page, 50);
-      console.log("🚀 ~ fetchMusic ~ res:", res)
-      const transformedDocs = res?.docs.map((doc: any) => ({
+
+      const sorted = [...(res?.docs || [])].sort((a, b) => {
+        const timeA = new Date(a.createdAt).getTime();
+        const timeB = new Date(b.createdAt).getTime();
+        return sortOrder === "asc" ? timeA - timeB : timeB - timeA;
+      });
+
+      const transformedDocs = sorted.map((doc: any) => ({
         _id: doc._id,
         musicFile: doc.musicFile || null,
         musicName: doc.musicName,
         musicStatus: doc.musicStatus,
         createdAt: doc.createdAt,
-      })) || [];
-      console.log("🚀 ~ transformedDocs ~ transformedDocs:", transformedDocs)
+      }));
+
       setMusicList(transformedDocs);
       setTotalPages(res.totalPages || 1);
     } catch (err) {
@@ -96,8 +102,8 @@ const MusicPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage]);
-  
+  }, [currentPage, sortOrder]);
+
   useEffect(() => {
     fetchMusic();
   }, [addIncentivesFormData, currentPage, fetchMusic]);
@@ -121,38 +127,19 @@ const MusicPage = () => {
     setSelectedIds(prev => prev.length === filtered.length ? [] : filtered.map(item => item._id!));
   }, [filtered]);
 
-  // const handleEditClick = (item: MusicValuesSchema) => {
-  //   setCurrentlyEditingId(item._id);
-  //   setEditData(item);
-  //   setActiveAccordion(null);
-  // };
 
-  // const handlerUpdateMusic = useCallback(async (data: MusicValuesSchema) => {
-  //   if (!editData?._id) return;
-  //   setEditLoading(true);
-  //   try {
-  //     const updatePayload = {
-  //       musicName: data.musicName,
-  //       musicStatus: data.musicStatus,
-  //     };
-  //     await updateMusicApi(editData._id, updatePayload);
-  //     toast.success("Music updated successfully!");
-  //     setEditData(null);
-  //     setCurrentlyEditingId(null);
-  //     fetchMusic();
-  //   } catch (err) {
-  //     const error = err as AxiosError;
-  //     console.error("Update Error:", error);
-  //     toast.error("Error updating music");
-  //   } finally {
-  //     setEditLoading(false);
-  //   }
-  // }, [editData, fetchMusic]);
 
   const handleDelete = useCallback(async (id?: string) => {
+    console.log("🚀 ~ handleDelete ~ id:", id);
     setDeleteLoadingId(id ? id : null);
+
     try {
       await deleteSelectedMusicApi(id ? [id] : selectedIds);
+
+      if (audioRef.current) {
+        audioRef.current.pause();
+        setCurrentlyPlayingId(null);
+      }
       toast.success("Music deleted successfully!");
       setSelectedIds([]);
       fetchMusic();
@@ -164,11 +151,16 @@ const MusicPage = () => {
       setDeleteLoadingId(null);
     }
   }, [selectedIds, fetchMusic]);
-
   const handleDeleteAll = useCallback(async () => {
     setLoadingDeleteAll(true);
     try {
       await deleteAllMusicApi();
+
+      if (audioRef.current) {
+        audioRef.current.pause();
+        setCurrentlyPlayingId(null);
+      }
+
       toast.success("All music deleted");
       setSelectedIds([]);
       fetchMusic();
@@ -182,72 +174,76 @@ const MusicPage = () => {
     }
   }, [fetchMusic]);
 
-  // const handleStatusToggle = useCallback((id: string) => {
-  //   const current = statusMap[id];
-  //   const newStatus = !current;
-  //   setStatusMap(prev => ({ ...prev, [id]: newStatus }));
-  //   updateMusicApi(id, { musicStatus: newStatus })
-  //     .then(() => {
-  //       toast.success("Status updated");
-  //       fetchMusic();
-  //     })
-  //     .catch((err) => {
-  //       toast.error("Error updating status");
-  //       setStatusMap(prev => ({ ...prev, [id]: current }));
-  //     });
-  // }, [statusMap, fetchMusic]);
+  const handleStatusToggle = useCallback((id: string) => {
+    const current = statusMap[id];
+    const newStatus = !current;
+    setStatusMap(prev => ({ ...prev, [id]: newStatus }));
+    updateMusicStatus(id, { musicStatus: newStatus })
+      .then(() => {
+        setSelectedIds([]);
+        toast.success("Status updated");
+      })
+      .catch(() => {
+        toast.error("Error updating status");
+        setStatusMap(prev => ({ ...prev, [id]: current }));
+      });
+  }, [statusMap]);
 
-  // const exportSelectedMusic = useCallback(async (ids: string[]) => {
-  //   if (!ids || ids.length === 0) {
-  //     toast.warning("Please select at least one music file to export.");
-  //     return;
-  //   }
-  //   try {
-  //     const response = await exportDownloadMusicCSVApi(ids);
-  //     if (!response || response.size === 0) {
-  //       toast.warning("Exported file is empty.");
-  //       return;
-  //     }
-  //     setSelectedIds([]);
-  //     toast.success("Music CSV downloaded successfully!");
-  //   } catch (err) {
-  //     const error = err as AxiosError;
-  //     console.error("Export Error:", error);
-  //     toast.error("Something went wrong");
-  //   }
-  // }, []);
+  const exportSelectedMusic = useCallback(async (ids: string[]) => {
+    if (!ids || ids.length === 0) {
+      toast.warning("Please select at least one music file to export.");
+      return;
+    }
+    try {
+      const response =
+        await exportSelectedMusicApi(ids);
+      if (!response || response.size === 0) {
+        toast.warning("Exported file is empty.");
+        return;
+      }
+      setSelectedIds([]);
+      toast.success("Music CSV downloaded successfully!");
+    } catch (err) {
+      const error = err as AxiosError;
+      console.error("Export Error:", error);
+      toast.error("Something went wrong");
+    }
+  }, []);
 
-  // const handleBulkToggle = useCallback(async () => {
-  //   if (selectedIds.length === 0) {
-  //     toast.warning("Please select at least one music file.");
-  //     return;
-  //   }
-  //   const newStatus = !isBulkActive;
-  //   setIsBulkActive(newStatus);
-  //   try {
-  //     await Promise.all(
-  //       selectedIds.map(id => {
-  //         const payload = { musicStatus: newStatus };
-  //         return updateMusicApi(id, payload);
-  //       })
-  //     );
-  //     toast.success("Bulk status updated");
-  //     setStatusMap(prev => {
-  //       const updatedMap = { ...prev };
-  //       selectedIds.forEach(id => {
-  //         updatedMap[id] = newStatus;
-  //       });
-  //       return updatedMap;
-  //     });
-  //     setSelectedIds([]);
-  //     fetchMusic();
-  //   } catch (err) {
-  //     const error = err as AxiosError;
-  //     console.error("Bulk Status Update Error:", error);
-  //     toast.error("Error updating bulk status");
-  //     setIsBulkActive(!newStatus);
-  //   }
-  // }, [isBulkActive, selectedIds, fetchMusic]);
+  const handleBulkToggle = useCallback(async () => {
+    if (selectedIds.length === 0) {
+      toast.warning("Please select at least one music file.");
+      return;
+    };
+
+    const newStatus = !isBulkActive;
+    setIsBulkActive(newStatus);
+    try {
+      await Promise.all(
+        selectedIds.map(id => {
+          const payload = { musicStatus: newStatus };
+          return updateMusicStatus(id, payload);
+        })
+      );
+      toast.success("Bulk status updated");
+      setStatusMap(prev => {
+        const updatedMap = { ...prev };
+        selectedIds.forEach(id => {
+          updatedMap[id] = newStatus;
+        });
+        return updatedMap;
+      });
+      setSelectedIds([]);
+      fetchMusic();
+    } catch (err) {
+      const error = err as AxiosError;
+      console.error("Bulk Status Update Error:", error);
+      toast.error("Error updating bulk status");
+      setIsBulkActive(!newStatus);
+    }
+  }, [isBulkActive, selectedIds, fetchMusic]);
+
+
 
   const clearAllFilters = useCallback(() => {
     setFilter("");
@@ -267,7 +263,7 @@ const MusicPage = () => {
       if (i === 1 || i === totalPages || (i >= currentPage - delta && i <= currentPage + delta)) {
         range.push(i);
       }
-    }
+    };
 
     for (let page of range) {
       if (lastPage) {
@@ -324,10 +320,61 @@ const MusicPage = () => {
     }
   }, [selectedIds, filtered]);
 
+  const handlePlayPause = (item: any) => {
+    if (!item.musicFile) {
+      console.warn("No music file available.");
+      return;
+    }
+
+    if (currentlyPlayingId === item._id) {
+      // Pause current
+      audioRef.current?.pause();
+      setCurrentlyPlayingId(null);
+    } else {
+      // New audio
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+
+      const audio = new Audio(item.musicFile);
+      audioRef.current = audio;
+      audio.play();
+      setCurrentlyPlayingId(item._id);
+
+      audio.onended = () => setCurrentlyPlayingId(null);
+    }
+  };
+
+  //   try {
+  //     setDeleteLoadingId(id);
+
+  //     // Stop audio if it's currently playing
+  //     if (currentlyPlayingId === id) {
+  //       audioRef.current?.pause();
+  //       audioRef.current = null;
+  //       setCurrentlyPlayingId(null);
+  //     }
+
+  //     await deleteMusicApi(id); // <-- your API call
+  //     toast.success("Music deleted successfully");
+
+  //     fetchMusic(); // refresh list
+  //   } catch (err) {
+  //     toast.error("Failed to delete music");
+  //   } finally {
+  //     setDeleteLoadingId(null);
+  //   }
+  // };
+
+
+
   return (
     <>
       <PageMeta title="Music Management" description="Music admin panel" />
       <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+
+
+
         <div ref={formRef}>
           <AddMusicForm
             fetchMusic={fetchMusic}
@@ -387,7 +434,7 @@ const MusicPage = () => {
                   {selectedIds.length === filtered.length ? 'Unselect All' : 'Select All'}
                 </button>
                 <button
-                  // onClick={() => exportSelectedMusic(selectedIds)}
+                  onClick={() => exportSelectedMusic(selectedIds)}
                   className="bg-[#dcfcd3] px-2 py-1 rounded text-[#43B925] text-xs font-medium"
                 >
                   Export {selectedIds.length}
@@ -396,7 +443,7 @@ const MusicPage = () => {
               <div className="flex items-center space-x-3">
                 <ToggleSwitchButton
                   value={isBulkActive}
-                  // onChange={handleBulkToggle}
+                  onChange={handleBulkToggle}
                   label="Active"
                   className="w-10 h-5 flex items-center rounded-full cursor-pointer transition-colors duration-300 "
                   classNameKnob="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 "
@@ -430,7 +477,21 @@ const MusicPage = () => {
                   <CustomCheckbox className="w-4 h-4" checked={selectedIds.length === filtered.length} onChange={handleSelectAll} />
                 </th>
                 <th className="px-4 py-3 w-12">Actions</th>
-                <th className="px-4 py-3 w-24 sm:w-40">Music Name</th>
+                <th className="px-4 py-3 w-40 sm:w-64">
+                  <div className="flex items-center space-x-4">
+                    <span>Music Name</span>
+                    <div className="flex">
+                      <button
+                        onClick={() => setSortOrder("asc")}
+                      > <AccendingArrow /> </button>
+                      <button
+                        onClick={() => setSortOrder("desc")}
+                      > <DescendingArrow /> </button>
+                    </div>
+                  </div>
+                </th>
+
+
                 <th className="px-4 py-3 w-24 sm:w-40">Status</th>
               </tr>
             </thead>
@@ -459,10 +520,11 @@ const MusicPage = () => {
               ) : (
                 filtered.map((item) => (
                   <tr key={item._id} className="border-b border-[#E0D4C4] text-sm text-gray-700">
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 ">
                       <CustomCheckbox className="w-4 h-4" checked={selectedIds.includes(item._id!)} onChange={() => setSelectedIds(prev => prev.includes(item._id!) ? prev.filter(i => i !== item._id!) : [...prev, item._id!])} />
                     </td>
-                    <td className="px-4 py-3">
+
+                    <td className="px-4 py-3 w-[100px]">
                       <div className="flex gap-4 items-center">
                         <button onClick={() => handleDelete(item._id)} className="w-5 h-5 flex items-center justify-center">
                           {deleteLoadingId === item._id ? (
@@ -472,55 +534,34 @@ const MusicPage = () => {
                             </svg>
                           ) : <DeleteIcon />}
                         </button>
-                        {currentlyEditingId === item._id ? (
-                          <>
-                            <button
-                              // onClick={() => handlerUpdateMusic(editData!)}
-                              disabled={editLoading}
-                              className="text-green-600 hover:text-green-800"
-                            >
-                              <TickIcon />
-                            </button>
-                            <button
-                              onClick={() => {
-                                setCurrentlyEditingId(null);
-                                setEditData(null);
-                              }}
-                              disabled={editLoading}
-                              className="text-green-600 hover:text-green-800"
-                            >
-                              <CrossIcon />
-                            </button>
-                          </>
-                        ) : (
-                          <button
-                          // onClick={() => handleEditClick(item)}
-                          >
-                            <EditIcon />
-                          </button>
-                        )}
                       </div>
                     </td>
-                    <td className="px-4 py-3 w-[150px] sm:w-[250px] break-words">
-                      {/* {currentlyEditingId === item._id ? (
-                        <CustomInput
-                          label=""
-                          name="musicName"
-                          value={editData?.musicName}
-                          onChange={(e) => setEditData((prev) => ({ ...prev!, musicName: e.target.value }))}
-                          placeholder="Enter Music Name"
-                          className="border border-gray-300 rounded px-2 py-1 w-full"
-                        />
-                      ) : (
-                      )} */}
-                      {item.musicName}
+
+                    <td className="px-4 py-3 w-[150px] sm:w-[280px] break-words flex items-center gap-2">
+                      <button
+                        onClick={() => handlePlayPause(item)}
+                        className="text-orange-500 hover:text-orange-700"
+                      >
+                        {currentlyPlayingId === item._id ?
+                          <div className="flex items-center justify-center w-8 h-8 bg-orange-100 rounded-full">
+                            <Pause size={18} />
+                          </div>
+
+                          :
+                          <div className="flex items-center justify-center w-8 h-8 bg-orange-100 rounded-full">
+                            <Play size={18} />
+                          </div>
+                        }
+                      </button>
+                      <span>{item.musicName}</span>
                     </td>
+
                     <td className="px-4 py-3">
                       <ToggleSwitchButton
                         value={statusMap[item._id!]}
-                        // onChange={() => handleStatusToggle(item._id!)}
-                        className="w-10 h-5 flex items-center rounded-full cursor-pointer transition-colors duration-300"
-                        classNameKnob="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300"
+                        onChange={() => handleStatusToggle(item._id!)}
+                        className="w-10 h-5 flex items-center rounded-full cursor-pointer transition-colors duration-300 "
+                        classNameKnob="w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 "
                       />
                     </td>
                   </tr>

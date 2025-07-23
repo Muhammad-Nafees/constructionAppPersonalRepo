@@ -76,3 +76,82 @@ export const deleteAllMusicApi = async () => {
         throw error;
     }
 };
+
+
+export const exportAllMusicCsvApi = async () => {
+    try {
+        const token = await localStorage.getItem("token");
+
+        if (!token) throw new Error("Authorization token not found");
+
+        const response = await api.post("music/exportAllMusic", {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            responseType: 'blob',
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'musics.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch (error) {
+        console.error("Error exporting music CSV:", error);
+        throw error;
+    }
+};
+
+
+export const updateMusicStatus = async (id: any, status: any) => {
+    try {
+        const token = await localStorage.getItem("token");
+        if (!token) throw new Error("Authorization token not found");
+
+
+        const response = await api.put(
+            `music/updateMusic/${id}`,
+            status,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        console.log("updateMusicStatus response:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error exporting selected music:", error);
+        throw error;
+    }
+};
+
+
+export const exportSelectedMusicApi = async (ids: string[]) => {
+    try {
+        const response = await api.post(
+            "music/exportSelectedMusic",
+            { ids },
+            { responseType: "blob" }
+        );
+
+        const blob = new Blob([response.data], { type: "text/csv" });
+        const url = window.URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "music.csv");
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        return response.data;
+    } catch (error) {
+        console.error("CSV export failed:", error);
+        throw error;
+    }
+};
+
+
+// 688111d0cc9c6856f519681e

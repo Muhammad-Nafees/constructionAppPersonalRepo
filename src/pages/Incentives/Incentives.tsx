@@ -174,7 +174,7 @@ const Incentives = () => {
     try {
       await updateIncentiveApi(id, { incentiveStatus: !current });
       setSelectedIds([]);
-      fetchIncentives();
+      // fetchIncentives();
       toast.success("Status updated");
     } catch {
       toast.error("Error updating status");
