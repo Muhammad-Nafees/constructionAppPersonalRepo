@@ -1,5 +1,5 @@
 import { ErrorMessage } from 'formik';
- 
+
 type CustomInputProps = {
     label?: string;
     value: string;
@@ -10,6 +10,7 @@ type CustomInputProps = {
     touched?: boolean | undefined;
     name: string;
     errorClassName?: string;
+    type?: string;
 };
 
 const CustomInput = ({
@@ -21,12 +22,13 @@ const CustomInput = ({
     error,
     touched,
     name,
-    errorClassName = "h-4"
+    errorClassName = "h-4",
+    type
 }: CustomInputProps) => {
     // const [isFocused, setIsFocused] = useState(false);
 
     return (
-        <div className={`relative w-full ${className} mt-5`}>
+        <div className={`relative w-full ${className}`}>
             {label && (
                 <label className="block text-md font-medium text-[#000000] mb-2">
                     {label}
@@ -35,7 +37,7 @@ const CustomInput = ({
 
             <div className="p-[2px] bg-gradient-to-r from-orange-600 to-orange-400 w-full">
                 <input
-                    type="text"
+                    type={type || "text"}
                     name={name}
                     value={value}
                     onChange={onChange}

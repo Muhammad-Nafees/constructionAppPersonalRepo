@@ -56,3 +56,14 @@ export interface MusicValuesSchema {
   musicFile?: { url: string; filename: string } | null;
   createdAt?: string;
 }
+
+export interface SettingsValuesSchema {
+  name:string,
+  email: string,
+  phoneNumber: string,
+  role: string,
+  password: string,
+  confirmPassword: string,
+  userStatus: boolean,
+  _id?:any
+}

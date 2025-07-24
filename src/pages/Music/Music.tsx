@@ -334,7 +334,7 @@ const MusicPage = () => {
       // New audio
       if (audioRef.current) {
         audioRef.current.pause();
-      }
+      };
 
       const audio = new Audio(item.musicFile);
       audioRef.current = audio;
@@ -344,6 +344,8 @@ const MusicPage = () => {
       audio.onended = () => setCurrentlyPlayingId(null);
     }
   };
+
+  
 
   //   try {
   //     setDeleteLoadingId(id);

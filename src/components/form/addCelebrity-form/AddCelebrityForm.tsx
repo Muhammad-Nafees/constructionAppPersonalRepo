@@ -33,6 +33,8 @@ const AddCelebrityForm: React.FC<AddCelebrityFormProps> = ({
     const [uploadProgress, setUploadProgress] = useState<number | null>(null);
     const { setAddIncentivesFormData } = useAuth();
 
+
+
     const singleDropzone = useDropzone({
         onDrop: (acceptedFiles) => {
             const file = acceptedFiles[0];
@@ -61,6 +63,8 @@ const AddCelebrityForm: React.FC<AddCelebrityFormProps> = ({
         accept: { 'image/*': ['.jpg', '.jpeg', '.png', '.gif', '.webp'] },
     });
 
+
+
     const handleSubmit = async (
         values: CelebritiesValuesSchema,
         { resetForm }: FormikHelpers<CelebritiesValuesSchema>
@@ -80,7 +84,7 @@ const AddCelebrityForm: React.FC<AddCelebrityFormProps> = ({
             if (selectedFile) {
                 formData.append('file', selectedFile);
             };
-            
+
             const response = await celebrityUploadApi(formData);
             toast.success('Celebrity added successfully');
             setAddIncentivesFormData(response.data);
@@ -94,6 +98,8 @@ const AddCelebrityForm: React.FC<AddCelebrityFormProps> = ({
             setLoading(false);
         }
     };
+
+
 
     const exportCsvCelebrityHandler = useCallback(async () => {
         try {
@@ -240,7 +246,7 @@ const AddCelebrityForm: React.FC<AddCelebrityFormProps> = ({
                                             <div className="mt-4 bg-white p-3 rounded border border-gray-300 shadow-sm">
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-3">
-                                                    <img src="/images/csvIcon.png" alt="csv" className="w-6 h-6" />
+                                                        <img src="/images/csvIcon.png" alt="csv" className="w-6 h-6" />
                                                         <div>
                                                             <p className="text-sm font-medium text-gray-800">{selectedFile.name}</p>
                                                             <p className="text-xs text-gray-500">{(selectedFile.size / 1024 / 1024).toFixed(1)}mb</p>
@@ -258,7 +264,7 @@ const AddCelebrityForm: React.FC<AddCelebrityFormProps> = ({
                                                 </div>
                                             </div>
                                         )}
-                                       
+
                                     </div>
                                     <div className="w-full sm:w-1/2 flex flex-col gap-2 sm:gap-3">
                                         <CustomInput
