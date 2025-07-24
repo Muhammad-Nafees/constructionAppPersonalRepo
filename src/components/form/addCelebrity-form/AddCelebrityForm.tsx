@@ -68,7 +68,7 @@ const AddCelebrityForm: React.FC<AddCelebrityFormProps> = ({
         if (!selectedFile) {
             toast.error("Please select an image.");
             return;
-        }
+        };
 
         setLoading(true);
         try {
@@ -79,8 +79,8 @@ const AddCelebrityForm: React.FC<AddCelebrityFormProps> = ({
             formData.append('celebrityStatus', values.celebrityStatus.toString());
             if (selectedFile) {
                 formData.append('file', selectedFile);
-            }
-
+            };
+            
             const response = await celebrityUploadApi(formData);
             toast.success('Celebrity added successfully');
             setAddIncentivesFormData(response.data);
@@ -123,7 +123,7 @@ const AddCelebrityForm: React.FC<AddCelebrityFormProps> = ({
         if (bulkFiles.length === 0) {
             toast.error("Please select at least one image for bulk upload.");
             return;
-        }
+        };
 
         setLoading(true);
         try {
@@ -133,12 +133,13 @@ const AddCelebrityForm: React.FC<AddCelebrityFormProps> = ({
                 celebrityGender: '',
                 celebrityProfession: '',
                 celebrityStatus: values.celebrityStatus,
+
             }));
 
-            formData.append('entries', JSON.stringify(entries));
             bulkFiles.forEach(file => {
                 formData.append('files', file);
             });
+            formData.append('entries', JSON.stringify(entries));
 
             await multipleCelebrityUploadApi(formData, (progress) => {
                 setUploadProgress(progress);
@@ -239,7 +240,7 @@ const AddCelebrityForm: React.FC<AddCelebrityFormProps> = ({
                                             <div className="mt-4 bg-white p-3 rounded border border-gray-300 shadow-sm">
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-3">
-                                                        <img src="/images/imageIcon.png" alt="image" className="w-6 h-6" />
+                                                    <img src="/images/csvIcon.png" alt="csv" className="w-6 h-6" />
                                                         <div>
                                                             <p className="text-sm font-medium text-gray-800">{selectedFile.name}</p>
                                                             <p className="text-xs text-gray-500">{(selectedFile.size / 1024 / 1024).toFixed(1)}mb</p>
@@ -257,11 +258,7 @@ const AddCelebrityForm: React.FC<AddCelebrityFormProps> = ({
                                                 </div>
                                             </div>
                                         )}
-                                        {/* {errors.celebrityImage && touched.celebrityImage && (
-                                            <div className="text-sm text-red-500 mt-1">
-                                                <ErrorMessage name="celebrityImage" />
-                                            </div>
-                                        )} */}
+                                       
                                     </div>
                                     <div className="w-full sm:w-1/2 flex flex-col gap-2 sm:gap-3">
                                         <CustomInput
