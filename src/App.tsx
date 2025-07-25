@@ -23,7 +23,7 @@ import Music from "./pages/Music/Music";
 import PrivateRoute from "./routes/ProtectedRoutes";
 import PublicRoute from "./routes/PublicRoutes";
 import { ToastContainer } from "react-toastify";
-import BasicTables from "./pages/Tables/BasicTables";
+// import BasicTables from "./pages/Tables/BasicTables";
 import Settings from "./pages/Users/Settings";
 import CelebrityPage from "./pages/MediaGallery/CelebrityPage";
 
@@ -70,7 +70,7 @@ export default function App() {
             <Route path="/setting" element={<Settings />} />
             <Route path="/profile" element={<UserProfiles />} />
             {/* Tables */}
-            <Route path="/basic-tables" element={<BasicTables />} />
+            {/* <Route path="/basic-tables" element={<BasicTables />} /> */}
             {/* Ui Elements */}
             <Route path="/alerts" element={<Alerts />} />
             <Route path="/avatars" element={<Avatars />} />

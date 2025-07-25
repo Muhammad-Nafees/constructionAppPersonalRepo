@@ -8,6 +8,8 @@ export interface IUserData {
   email: string;
   _id: string;
   role: string
+  phoneNumber?: string;
+  userStatus?: boolean;
 };
 
 
@@ -58,12 +60,12 @@ export interface MusicValuesSchema {
 }
 
 export interface SettingsValuesSchema {
-  name:string,
+  name: string,
   email: string,
   phoneNumber: string,
   role: string,
   password: string,
   confirmPassword: string,
   userStatus: boolean,
-  _id?:any
+  _id?: any
 }

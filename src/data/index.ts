@@ -1,4 +1,6 @@
 export const genderOptions = ['Male', 'Female', 'Unisex'];
+export const superAdminRoleOption = ['admin'];
+export const subAdminRoleOption = ['admin'];
 export const incentivesMoodOptions = [
     'Slightly Bad (Less Bad Incentive)',
     'More Bad (Still a Bad Incentive)',

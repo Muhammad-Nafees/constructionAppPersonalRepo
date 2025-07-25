@@ -32,7 +32,7 @@ export const musicValidationSchema = Yup.object({
 });
 
 export const settingValitionSchema = Yup.object().shape({
-    fullName: Yup.string().required("Full name is required"),
+    name: Yup.string().required("Full name is required"),
     email: Yup.string().email("Invalid email").required("Email is required"),
     phoneNumber: Yup.string().required("Phone number is required"),
     role: Yup.string().required("Role is required"),
@@ -42,3 +42,4 @@ export const settingValitionSchema = Yup.object().shape({
         .required("Confirm password is required"),
     userStatus: Yup.boolean().required("User status is required"),
 });
+ 
