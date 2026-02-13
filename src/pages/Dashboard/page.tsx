@@ -13,9 +13,20 @@ const Dashboard = () => {
   // Years data
   const years = ["2024", "2025", "2026", "2027", "2028"];
 
+  // ORIGINAL CONTENT - Aap ka purana wala content
+  const statsCards = [
+    { value: "2,847", label: "Total Users", change: "↑ Loading..." },
+    { value: "1,243", label: "Explorers", change: "↑ Loading..." },
+    { value: "856", label: "Creators", change: "↑ Loading..." },
+    { value: "94", label: "Total Nests", change: "↑ Loading..." },
+    { value: "284", label: "Total Posts", change: "↑ Loading..." },
+    { value: "165", label: "Total Reels", change: "↑ Loading..." },
+    { value: "0%", label: "User Growth Rate", change: "↑ Calculating..." },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      {/* Header Section */}
+      {/* Header Section - ORIGINAL */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
         <div className="flex items-center gap-2 mt-2">
@@ -24,7 +35,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Filters Section */}
+      {/* Filters Section - ORIGINAL */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
         <div className="flex items-center gap-2 mb-4">
           <svg className="w-5 h-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -75,34 +86,34 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Stats Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        {/* Month Expenses Card */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+      {/* Stats Cards - NEW DESIGN with ORIGINAL CONTENT */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6">
+        {/* Month Expenses Card - ORIGINAL */}
+        <div className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-xl hover:-translate-y-1 hover:border-[#F47521]/20 transition-all duration-300">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-500">Month Expenses</h3>
             <span className="text-xs px-2 py-1 bg-orange-50 text-[#F47521] rounded-full">
               {selectedMonth} {selectedYear}
             </span>
           </div>
-          <p className="text-3xl font-bold text-gray-900">Rs 0</p>
+          <p className="text-3xl font-bold text-gray-900 group-hover:text-[#F47521] transition-colors duration-300">Rs 0</p>
           <p className="text-xs text-gray-400 mt-2">No expenses this month</p>
         </div>
 
-        {/* Total Allocated Card */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+        {/* Total Allocated Card - ORIGINAL */}
+        <div className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-xl hover:-translate-y-1 hover:border-[#F47521]/20 transition-all duration-300">
           <h3 className="text-sm font-medium text-gray-500 mb-2">Total Allocated</h3>
-          <p className="text-3xl font-bold text-gray-900">Rs 0</p>
+          <p className="text-3xl font-bold text-gray-900 group-hover:text-[#F47521] transition-colors duration-300">Rs 0</p>
           <div className="flex items-center gap-2 mt-2">
             <span className="text-xs text-gray-500">Remaining:</span>
             <span className="text-xs font-semibold text-red-500">Rs 0</span>
           </div>
         </div>
 
-        {/* Total Sites Card */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+        {/* Total Sites Card - ORIGINAL */}
+        <div className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-xl hover:-translate-y-1 hover:border-[#F47521]/20 transition-all duration-300">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-blue-50 rounded-lg">
+            <div className="p-2 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-colors">
               <svg className="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" 
                   strokeLinecap="round" strokeLinejoin="round"/>
@@ -110,13 +121,13 @@ const Dashboard = () => {
             </div>
             <h3 className="text-sm font-medium text-gray-500">Total Sites</h3>
           </div>
-          <p className="text-3xl font-bold text-gray-900">0</p>
+          <p className="text-3xl font-bold text-gray-900 group-hover:text-[#F47521] transition-colors duration-300">0</p>
         </div>
 
-        {/* Site Admins Card */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+        {/* Site Admins Card - ORIGINAL */}
+        <div className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-xl hover:-translate-y-1 hover:border-[#F47521]/20 transition-all duration-300">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-purple-50 rounded-lg">
+            <div className="p-2 bg-purple-50 rounded-lg group-hover:bg-purple-100 transition-colors">
               <svg className="w-5 h-5 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" 
                   strokeLinecap="round" strokeLinejoin="round"/>
@@ -126,14 +137,14 @@ const Dashboard = () => {
             </div>
             <h3 className="text-sm font-medium text-gray-500">Site Admins</h3>
           </div>
-          <p className="text-3xl font-bold text-gray-900">0</p>
+          <p className="text-3xl font-bold text-gray-900 group-hover:text-[#F47521] transition-colors duration-300">0</p>
         </div>
       </div>
 
-      {/* Expenses by Item Section */}
+      {/* Bottom Section - Two Columns (ORIGINAL CONTENT) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Expenses by Item */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        {/* Expenses by Item - ORIGINAL */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-all duration-300">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-lg font-semibold text-gray-900">Expenses by Item</h3>
@@ -147,7 +158,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Empty State */}
           <div className="flex flex-col items-center justify-center py-12 px-4">
             <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
               <svg className="w-10 h-10 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -162,8 +172,8 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Items Distribution */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        {/* Items Distribution - ORIGINAL */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-all duration-300">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-lg font-semibold text-gray-900">Items Distribution</h3>
@@ -179,10 +189,8 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Empty State - Pie Chart Placeholder */}
           <div className="flex flex-col items-center justify-center py-12 px-4">
             <div className="relative w-32 h-32 mb-6">
-              {/* Empty Circle */}
               <svg className="w-32 h-32" viewBox="0 0 100 100">
                 <circle
                   cx="50"
@@ -215,7 +223,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Recent Activity Section (Optional - Add if needed) */}
+      {/* Recent Activity Section - ORIGINAL */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
