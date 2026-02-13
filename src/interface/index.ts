@@ -1,10 +1,13 @@
 export interface IAllCompanies{
     
+      _id?: string,
       companyName:string,
       emailAddress:string,
-      password:string,
-      totalCapital:number
-    
+      password?:string,
+      sites:number,
+      admins:number,
+      totalCapital:number,
+      totalExpenses:number
 };
 
 // interface/index.ts
