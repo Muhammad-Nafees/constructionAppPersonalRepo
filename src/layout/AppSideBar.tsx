@@ -266,7 +266,7 @@ const AppSidebar = () => {
   };
   const showText = isExpanded || isHovered || isMobileOpen;
 
-  const renderMenuSection = (title: string, items: NavItem[], menuType: "main" | "others") => {
+  const renderMenuSection = ( items: NavItem[], menuType: "main" | "others") => {
     if (items.length === 0) return null;
 
     // const showText = isExpanded || isHovered || isMobileOpen;
@@ -333,7 +333,7 @@ const AppSidebar = () => {
 
       {/* Navigation Section */}
       <div className="flex flex-col flex-1 px-3">
-        {renderMenuSection("Main", NAV_ITEMS, "main")}
+        {renderMenuSection(  NAV_ITEMS, "main")}
       </div>
     </aside>
   );
