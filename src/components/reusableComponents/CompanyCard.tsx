@@ -6,8 +6,8 @@ interface CompanyCardProps {
   onEdit?: (company: IAllCompanies) => void;
   onDelete?: (companyId: string) => void;
 }
-
-const CompanyCard = ({ company, onEdit, onDelete }: CompanyCardProps) => {
+// onDelete
+const CompanyCard = ({ company, onEdit,  }: CompanyCardProps) => {
   console.log("🚀 ~ CompanyCard ~ company:", company)
   const [showOptions, setShowOptions] = useState(false);
 
@@ -30,7 +30,7 @@ const CompanyCard = ({ company, onEdit, onDelete }: CompanyCardProps) => {
             </svg>
           </button>
           <button
-            onClick={() => onDelete?.(company._id || company.companyName)}
+            // onClick={() => onDelete?.(company._id || company.companyName)}
             className="p-2 bg-white rounded-full shadow-md hover:bg-red-50 text-red-600 transition-colors"
             title="Delete Company"
           >
@@ -58,12 +58,12 @@ const CompanyCard = ({ company, onEdit, onDelete }: CompanyCardProps) => {
         <div className="flex justify-between items-center">
           <div className="flex-1 text-center">
             <p className="text-xs text-gray-500 font-medium">Sites</p>
-            <p className="text-2xl font-bold text-gray-800">{company?.sites || 3}</p>
+            <p className="text-2xl font-bold text-gray-800">{3}</p>
           </div>
           <div className="w-px h-10 bg-gray-200"></div>
           <div className="flex-1 text-center">
             <p className="text-xs text-gray-500 font-medium">Admins</p>
-            <p className="text-2xl font-bold text-gray-800">{company?.admins || 2}</p>
+            <p className="text-2xl font-bold text-gray-800">{2}</p>
           </div>
         </div>
 

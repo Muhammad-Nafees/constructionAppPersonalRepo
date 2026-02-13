@@ -7,8 +7,8 @@ interface SiteCardProps {
   onDelete?: (siteId: string) => void;
   onViewDetails?: (site: IAllSites) => void;
 }
-
-const SiteCard = ({ site, onEdit, onDelete, onViewDetails }: SiteCardProps) => {
+// onViewDetails
+const SiteCard = ({ site, onEdit, onDelete,  }: SiteCardProps) => {
   const [showOptions, setShowOptions] = useState(false);
 
   // Get status color
