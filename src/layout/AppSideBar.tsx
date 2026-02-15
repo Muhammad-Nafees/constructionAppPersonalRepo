@@ -24,42 +24,81 @@ type SubmenuState = {
   index: number;
 } | null;
 
-// Head Office Accordion Items (Original 6 tabs)
+// Head Office Items (Updated with new pages)
 const HEAD_OFFICE_ITEMS: NavItem[] = [
   {
     icon: <DashboardIcon />,
-    name: "Dashboard",
-    path: "/"
-  },
-  {
-    icon: <CompaniesIcon />,
-    name: "Companies",
-    path: "/companies"
+    name: "Bank Statements",
+    path: "/head-office/bank-statements"
   },
   {
     icon: <SitesIcon />,
+    name: "Site Details",
+    path: "/head-office/site-details"
+  },
+  {
+    icon: <CompaniesIcon />,
+    name: "Receipts",
+    path: "/head-office/receipts"
+  },
+  {
+    icon: <SiteAdminIcon />,
+    name: "Expenses",
+    path: "/head-office/expenses"
+  },
+  {
+    icon: <SettingsIcon />,
+    name: "Home Expenses",
+    path: "/head-office/home-expenses"
+  },
+];
+
+// Petty Cash / Sites Items
+const PETTY_CASH_ITEMS: NavItem[] = [
+  {
+    icon: <DashboardIcon />,
+    name: "Dashboard",
+    path: "/sites/dashboard"
+  },
+  {
+    icon: <SitesIcon />,
+    name: "Expenses",
+    path: "/sites/expenses"
+  },
+  {
+    icon: <CompaniesIcon />,
+    name: "Reports",
+    path: "/sites/reports"
+  },
+  {
+    icon: <SiteAdminIcon />,
     name: "Sites",
-    path: "/sites"
+    path: "/sites/list"
   },
   {
     icon: <SiteAdminIcon />,
     name: "Site Admins",
-    path: "/siteAdmins"
-  },
-  {
-    icon: <SiteAdminIcon />,
-    name: "Audit Logs",
-    path: "/auditLogs"
+    path: "/sites/admins"
   },
   {
     icon: <SettingsIcon />,
-    name: "Settings",
-    path: "/settings"
+    name: "Audit Logs",
+    path: "/sites/audit-logs"
   },
 ];
 
 // Others Items (unchanged)
 const OTHERS_ITEMS: NavItem[] = [
+  {
+    icon: <></>,
+    name: "Companies",
+    path: "/companies"
+  },
+  {
+    icon: <></>,
+    name: "Settings",
+    path: "/settings"
+  },
   {
     icon: <></>,
     name: "Charts",
@@ -95,13 +134,16 @@ const AppSidebar = () => {
 
   // State management
   const [openSubmenu, setOpenSubmenu] = useState<SubmenuState>(null);
-  const [isHeadOfficeOpen, setIsHeadOfficeOpen] = useState(true); // Head Office accordion state
+  const [isHeadOfficeOpen, setIsHeadOfficeOpen] = useState(true);
+  const [isPettyCashOpen, setIsPettyCashOpen] = useState(true);
   const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>({});
 
   // Refs
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const headOfficeRef = useRef<HTMLDivElement>(null);
+  const pettyCashRef = useRef<HTMLDivElement>(null);
   const [headOfficeHeight, setHeadOfficeHeight] = useState(0);
+  const [pettyCashHeight, setPettyCashHeight] = useState(0);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
 
@@ -115,6 +157,18 @@ const AppSidebar = () => {
 
     // Check in head office items
     HEAD_OFFICE_ITEMS.forEach((item, index) => {
+      if (item.subItems) {
+        item.subItems.forEach((subItem) => {
+          if (isActive(subItem.path)) {
+            setOpenSubmenu({ type: "main", index });
+            matched = true;
+          }
+        });
+      }
+    });
+
+    // Check in petty cash items
+    PETTY_CASH_ITEMS.forEach((item, index) => {
       if (item.subItems) {
         item.subItems.forEach((subItem) => {
           if (isActive(subItem.path)) {
@@ -139,13 +193,12 @@ const AppSidebar = () => {
       });
     }
 
-    // No matching submenu found
     if (!matched) {
       setOpenSubmenu(null);
     }
   }, [location.pathname, isActive]);
 
-  // Update submenu height when open state changes
+  // Update submenu height
   useEffect(() => {
     if (openSubmenu) {
       const key = `${openSubmenu.type}-${openSubmenu.index}`;
@@ -158,12 +211,15 @@ const AppSidebar = () => {
     }
   }, [openSubmenu]);
 
-  // Update head office height
+  // Update accordion heights
   useEffect(() => {
     if (headOfficeRef.current) {
       setHeadOfficeHeight(headOfficeRef.current.scrollHeight);
     }
-  }, [HEAD_OFFICE_ITEMS]);
+    if (pettyCashRef.current) {
+      setPettyCashHeight(pettyCashRef.current.scrollHeight);
+    }
+  }, [HEAD_OFFICE_ITEMS, PETTY_CASH_ITEMS]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -176,6 +232,25 @@ const AppSidebar = () => {
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
+// Add this function after AccordionSection and before return
+const renderMenuSection = (items: NavItem[], menuType: "main" | "others") => {
+  if (items.length === 0) return null;
+
+  return (
+    <div className="mb-6">
+      <ul className="flex flex-col">
+        {items.map((item, index) => (
+          <div key={item.name}>
+            {item.path
+              ? renderNavLink(item)
+              : renderSubmenu(item, index, menuType)
+            }
+          </div>
+        ))}
+      </ul>
+    </div>
+  );
+};
 
   const renderNavLink = (item: NavItem) => {
     if (!item.path) return null;
@@ -197,7 +272,6 @@ const AppSidebar = () => {
           `}
         >
           <div className={`flex items-center ${!showText ? "justify-center w-full" : "gap-3"}`}>
-            {/* Icon with color change on hover/active */}
             <span className={`
               flex-shrink-0 transition-colors duration-200
               ${isActive(item.path) 
@@ -208,7 +282,6 @@ const AppSidebar = () => {
               {item.icon}
             </span>
 
-            {/* Text - Show full when expanded, first letter when collapsed */}
             {showText ? (
               <span className="whitespace-nowrap">{item.name}</span>
             ) : (
@@ -268,29 +341,82 @@ const AppSidebar = () => {
 
   const showText = isExpanded || isHovered || isMobileOpen;
 
-  const renderMenuSection = (items: NavItem[], menuType: "main" | "others") => {
-    if (items.length === 0) return null;
+  // Accordion Component
+  const AccordionSection = ({ 
+    title, 
+    icon, 
+    items, 
+    isOpen, 
+    onToggle,
+    ref 
+  }: { 
+    title: string;
+    icon: React.ReactNode;
+    items: NavItem[];
+    isOpen: boolean;
+    onToggle: () => void;
+    ref: React.RefObject<HTMLDivElement | null>;
+  }) => (
+    <div className="space-y-2">
+      <button
+        onClick={onToggle}
+        className={`
+          w-full flex items-center justify-between px-3 py-2.5 rounded-lg
+          font-medium text-sm text-gray-700 hover:bg-[rgba(244,117,33,0.1)] 
+          hover:text-[#F47521] transition-colors
+          ${!showText ? "justify-center" : ""}
+        `}
+      >
+        <div className={`flex items-center ${!showText ? "justify-center" : "gap-3"}`}>
+          <span className={`w-5 h-5 transition-colors ${!showText ? "" : "text-gray-500"}`}>
+            {icon}
+          </span>
+          {showText && <span>{title}</span>}
+        </div>
+        {showText && (
+          <svg
+            className={`w-4 h-4 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M6 9L12 15L18 9" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        )}
+      </button>
 
-    return (
-      <div className="mb-6">
-        <ul className="flex flex-col">
-          {items.map((item, index) => (
-            <div key={item.name}>
-              {item.path
-                ? renderNavLink(item)
-                : renderSubmenu(item, index, menuType)
-              }
-            </div>
+      <div
+        className="overflow-hidden transition-all duration-300"
+        style={{ height: isOpen && showText ? `${ref.current?.scrollHeight || 0}px` : "0px" }}
+      >
+        <div ref={ref} className="pl-2 space-y-0.5">
+          {items.map((item) => (
+            <Link
+              key={item.name}
+              to={item.path || "#"}
+              className={`
+                flex items-center w-full gap-3 px-3 py-2 text-sm rounded-lg
+                transition-all duration-200
+                ${isActive(item.path || "")
+                  ? "text-[#465fff] bg-[#ECF3FF]"
+                  : "text-gray-600 hover:bg-[rgba(244,117,33,0.1)] hover:text-[#F47521]"
+                }
+              `}
+            >
+              <span className={`
+                flex-shrink-0
+                ${isActive(item.path || "") ? "text-[#465fff]" : "text-gray-500"}
+              `}>
+                {item.icon}
+              </span>
+              <span className="whitespace-nowrap">{item.name}</span>
+            </Link>
           ))}
-        </ul>
+        </div>
       </div>
-    );
-  };
-
-  // Toggle Head Office accordion
-  const toggleHeadOffice = () => {
-    setIsHeadOfficeOpen(!isHeadOfficeOpen);
-  };
+    </div>
+  );
 
   return (
     <aside
@@ -335,79 +461,39 @@ const AppSidebar = () => {
         )}
 
         {/* Head Office Accordion */}
-        <div className="space-y-2">
-          {/* Accordion Header */}
-          <button
-            onClick={toggleHeadOffice}
-            className={`
-              w-full flex items-center justify-between px-3 py-2.5 rounded-lg
-              font-medium text-sm text-gray-700 hover:bg-[rgba(244,117,33,0.1)] 
-              hover:text-[#F47521] transition-colors
-              ${!showText ? "justify-center" : ""}
-            `}
-          >
-            <div className={`flex items-center ${!showText ? "justify-center" : "gap-3"}`}>
-              <svg
-                className={`w-5 h-5 transition-colors ${!showText ? "" : "text-gray-500"}`}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M3 10L12 5L21 10L12 15L3 10Z" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M5 13V18L12 22L19 18V13" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              {showText && <span>Head Office</span>}
-            </div>
-            {showText && (
-              <svg
-                className={`w-4 h-4 transition-transform duration-300 ${isHeadOfficeOpen ? "rotate-180" : ""}`}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M6 9L12 15L18 9" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            )}
-          </button>
+        <AccordionSection
+          title="Head Office"
+          icon={
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M3 10L12 5L21 10L12 15L3 10Z" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M5 13V18L12 22L19 18V13" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          }
+          items={HEAD_OFFICE_ITEMS}
+          isOpen={isHeadOfficeOpen}
+          onToggle={() => setIsHeadOfficeOpen(!isHeadOfficeOpen)}
+          ref={headOfficeRef}
+        />
 
-          {/* Accordion Content */}
-          <div
-            className="overflow-hidden transition-all duration-300"
-            style={{
-              height: isHeadOfficeOpen && showText ? `${headOfficeHeight}px` : "0px"
-            }}
-          >
-            <div ref={headOfficeRef} className="pl-2 space-y-0.5">
-              {HEAD_OFFICE_ITEMS.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.path || "#"}
-                  className={`
-                    flex items-center w-full gap-3 px-3 py-2 text-sm rounded-lg
-                    transition-all duration-200
-                    ${isActive(item.path || "")
-                      ? "text-[#465fff] bg-[#ECF3FF]"
-                      : "text-gray-600 hover:bg-[rgba(244,117,33,0.1)] hover:text-[#F47521]"
-                    }
-                  `}
-                >
-                  <span className={`
-                    flex-shrink-0
-                    ${isActive(item.path || "") ? "text-[#465fff]" : "text-gray-500"}
-                  `}>
-                    {item.icon}
-                  </span>
-                  <span className="whitespace-nowrap">{item.name}</span>
-                </Link>
-              ))}
-            </div>
-          </div>
+        {/* Petty Cash / Sites Accordion */}
+        <AccordionSection
+          title="Petty Cash / Sites"
+          icon={
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+                strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          }
+          items={PETTY_CASH_ITEMS}
+          isOpen={isPettyCashOpen}
+          onToggle={() => setIsPettyCashOpen(!isPettyCashOpen)}
+          ref={pettyCashRef}
+        />
+
+        {/* Other Items */}
+        <div className="pt-4 border-t border-gray-200">
+          {renderMenuSection(OTHERS_ITEMS, "others")}
         </div>
-
-        {/* Other Items (Charts, UI Elements, etc.) */}
-        {renderMenuSection(OTHERS_ITEMS, "others")}
       </div>
     </aside>
   );
