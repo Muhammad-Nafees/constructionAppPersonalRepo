@@ -14,15 +14,15 @@ const Dashboard = () => {
   const years = ["2024", "2025", "2026", "2027", "2028"];
 
   // ORIGINAL CONTENT - Aap ka purana wala content
-  const statsCards = [
-    { value: "2,847", label: "Total Users", change: "↑ Loading..." },
-    { value: "1,243", label: "Explorers", change: "↑ Loading..." },
-    { value: "856", label: "Creators", change: "↑ Loading..." },
-    { value: "94", label: "Total Nests", change: "↑ Loading..." },
-    { value: "284", label: "Total Posts", change: "↑ Loading..." },
-    { value: "165", label: "Total Reels", change: "↑ Loading..." },
-    { value: "0%", label: "User Growth Rate", change: "↑ Calculating..." },
-  ];
+  // const statsCards = [
+  //   { value: "2,847", label: "Total Users", change: "↑ Loading..." },
+  //   { value: "1,243", label: "Explorers", change: "↑ Loading..." },
+  //   { value: "856", label: "Creators", change: "↑ Loading..." },
+  //   { value: "94", label: "Total Nests", change: "↑ Loading..." },
+  //   { value: "284", label: "Total Posts", change: "↑ Loading..." },
+  //   { value: "165", label: "Total Reels", change: "↑ Loading..." },
+  //   { value: "0%", label: "User Growth Rate", change: "↑ Calculating..." },
+  // ];
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">

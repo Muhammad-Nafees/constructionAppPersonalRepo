@@ -91,12 +91,12 @@ const PETTY_CASH_ITEMS: NavItem[] = [
 const OTHERS_ITEMS: NavItem[] = [
   {
     icon: <></>,
-    name: "Companies",
+    name: "",
     path: "/companies"
   },
   {
     icon: <></>,
-    name: "Settings",
+    name: "",
     path: "/settings"
   },
   {
@@ -508,9 +508,9 @@ const renderMenuSection = (items: NavItem[], menuType: "main" | "others") => {
         />
 
         {/* Other Items */}
-        {/* <div className="pt-4 border-t border-gray-200">
+        <div className="pt-4 border-t border-gray-200">
           {renderMenuSection(OTHERS_ITEMS, "others")}
-        </div> */}
+        </div>
       </div>
     </aside>
   );
