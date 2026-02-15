@@ -282,6 +282,23 @@ const renderMenuSection = (items: NavItem[], menuType: "main" | "others") => {
               {item.icon}
             </span>
 
+{headOfficeHeight > 0 && (
+  <span
+    className="absolute left-0 top-0 h-full w-1 bg-[#465fff] rounded-tr-lg rounded-br-lg transition-opacity duration-300"
+    style={{ opacity: isActive(item.path) ? 1 : 0 }}
+  />
+)
+}
+
+{
+  pettyCashHeight > 0 && (
+    <span
+      className="absolute left-0 top-0 h-full w-1 bg-[#465fff] rounded-tr-lg rounded-br-lg transition-opacity duration-300"
+      style={{ opacity: isActive(item.path) ? 1 : 0 }}
+    />
+  )
+}
+
             {showText ? (
               <span className="whitespace-nowrap">{item.name}</span>
             ) : (
@@ -491,9 +508,9 @@ const renderMenuSection = (items: NavItem[], menuType: "main" | "others") => {
         />
 
         {/* Other Items */}
-        <div className="pt-4 border-t border-gray-200">
+        {/* <div className="pt-4 border-t border-gray-200">
           {renderMenuSection(OTHERS_ITEMS, "others")}
-        </div>
+        </div> */}
       </div>
     </aside>
   );

@@ -35,9 +35,9 @@ const AddExpenseModal = ({ categories, onClose, onSave }: Props) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div 
-        className="fixed inset-0 bg-black/40 backdrop-blur-md" 
-       />
+      <div
+        className="fixed inset-0 bg-black/40 backdrop-blur-md"
+      />
       <div className="absolute inset-0  bg-opacity-50" onClick={onClose} />
       <div className="relative bg-white rounded-xl max-w-md w-full p-6">
         <h3 className="text-xl font-bold mb-4">Add Expense</h3>
